@@ -35,6 +35,10 @@ export class ReimbursementMemphisService implements OnModuleInit {
         message.ack();
       });
 
+      this.consumer.on('error', (error: Error) => {
+        this.logger.error(error);
+      });
+
       this.producer = await this.memphisService.producer({
         stationName: 'chat',
         producerName: 'chatProducer',
@@ -43,7 +47,7 @@ export class ReimbursementMemphisService implements OnModuleInit {
       this.producer.produce({
         message: Buffer.from('Wassap'),
       });
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(error);
       this.memphisService.close();
     }
