@@ -1,0 +1,10 @@
+Dockerfile
+node_modules
+npm-debug.log
+README.md
+dist
+.git
+.env.*
+.github
+.teller.yml
+.dockerignore

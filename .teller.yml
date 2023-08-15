@@ -1,0 +1,5 @@
+project: erp_v2_nestjs_api
+providers:
+  dotenv:
+    env_sync:
+      path: ~/Documents/my_envs/.env.erp_v2_nestjs_api.development
