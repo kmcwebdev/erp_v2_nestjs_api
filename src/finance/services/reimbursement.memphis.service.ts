@@ -22,9 +22,9 @@ export class ReimbursementMemphisService implements OnModuleInit {
       });
 
       this.consumer = await this.memphisService.consumer({
-        stationName: 'chat',
-        consumerName: 'chatConsumer',
-        consumerGroup: 'chatConsumers',
+        stationName: 'finance.reimbursement.bulk-approve',
+        consumerName: 'finance.reimbursement.bulk-approve.consumer',
+        consumerGroup: 'finance.reimbursement.bulk-approve.consumer',
       });
 
       this.consumer.on('message', async (message: Message) => {
@@ -40,8 +40,8 @@ export class ReimbursementMemphisService implements OnModuleInit {
       });
 
       this.producer = await this.memphisService.producer({
-        stationName: 'chat',
-        producerName: 'chatProducer',
+        stationName: 'finance.reimbursement.bulk-approve',
+        producerName: 'finance.reimbursement.bulk-approve.producer',
       });
 
       this.producer.produce({
