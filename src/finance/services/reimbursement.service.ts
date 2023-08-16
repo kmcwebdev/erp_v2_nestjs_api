@@ -13,7 +13,7 @@ export class ReimbursementService {
       .execute();
   }
 
-  async getExpenseTypes(requestTypeId: number) {
+  async getExpenseTypes(requestTypeId: string) {
     return await this.pgsql
       .selectFrom('finance_reimbursement_request_expense_types')
       .innerJoin(

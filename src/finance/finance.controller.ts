@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
 const ExpenseTypeSchema = z.object({
-  request_type_id: z.preprocess((val) => Number(val), z.number().min(1)),
+  request_type_id: z.string().min(1),
 });
 
 // class is required for using DTO as a type
