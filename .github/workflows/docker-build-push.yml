@@ -75,5 +75,5 @@ jobs:
           type: container
           keep: 3
           names: |
-            mytreehouse_nestjs_api_main
-            mytreehouse_nestjs_api_development
+            erp_v2_nestjs_api_main
+            erp_v2_nestjs_api_development
