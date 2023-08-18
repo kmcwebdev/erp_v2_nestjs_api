@@ -88,6 +88,33 @@ export const configSchema = z.object({
     .min(1, {
       message: 'MEMPHIS_PASSWORD must be at least 1 character',
     }),
+  PROPELAUTH_AUTH_URL: z
+    .string({
+      description: 'PropelAuth auth URL',
+      required_error: 'PROPELAUTH_AUTH_URL is required',
+      invalid_type_error: 'PROPELAUTH_AUTH_URL must be a string',
+    })
+    .url({
+      message: 'PROPELAUTH_AUTH_URL must be a valid URL',
+    }),
+  PROPELAUTH_API_KEY: z
+    .string({
+      description: 'PropelAuth API key',
+      required_error: 'PROPELAUTH_API_KEY is required',
+      invalid_type_error: 'PROPELAUTH_API_KEY must be a string',
+    })
+    .min(1, {
+      message: 'PROPELAUTH_API_KEY must be at least 1 character',
+    }),
+  PROPELAUTH_EXTERNAL_ORG_ID: z
+    .string({
+      description: 'PropelAuth external org ID',
+      required_error: 'PROPELAUTH_EXTERNAL_ORG_ID is required',
+      invalid_type_error: 'PROPELAUTH_EXTERNAL_ORG_ID must be a string',
+    })
+    .uuid({
+      message: 'PROPELAUTH_EXTERNAL_ORG_ID must be a valid UUID',
+    }),
 });
 
 export type Config = z.infer<typeof configSchema>;
