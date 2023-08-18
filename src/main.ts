@@ -5,7 +5,10 @@ import * as hpp from 'hpp';
 import * as helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    snapshot: true,
+    abortOnError: false,
+  });
 
   app.setGlobalPrefix('api');
 
@@ -28,4 +31,5 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
+
 bootstrap();

@@ -1,33 +1,80 @@
-FROM node:18-alpine3.16 AS development
+# Dockerfile
 
-WORKDIR /usr/src/app
+#
+# 🧑‍💻 Development
+#
+FROM node:18-alpine as dev
+# add the missing shared libraries from alpine base image
+RUN apk add --no-cache libc6-compat
+# Create app folder
+WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+# Set to dev environment
+ENV NODE_ENV dev
 
-RUN npm i --location=global pnpm@latest
+# Create non-root user for Docker
+RUN addgroup --system --gid 1001 node
+RUN adduser --system --uid 1001 node
 
-RUN pnpm install
+# Copy source code into app folder
+COPY --chown=node:node . .
 
-COPY . . 
+# Install dependencies
+RUN yarn --frozen-lockfile
 
-RUN pnpm run build
+# Set Docker as a non-root user
+USER node
 
-FROM node:18-alpine3.16 as production
+#
+# 🏡 Production Build
+#
+FROM node:18-alpine as build
 
-ARG NODE_ENV production
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
 
-WORKDIR /usr/src/app
+# Set to production environment
+ENV NODE_ENV production
 
-COPY package.json pnpm-lock.yaml ./
+# Re-create non-root user for Docker
+RUN addgroup --system --gid 1001 node
+RUN adduser --system --uid 1001 node
 
-RUN npm i --location=global pnpm@latest
+# In order to run `yarn build` we need access to the Nest CLI.
+# Nest CLI is a dev dependency.
+COPY --chown=node:node --from=dev /app/node_modules ./node_modules
+# Copy source code
+COPY --chown=node:node . .
 
-RUN pnpm install --prod
+# Generate the production build. The build script runs "nest build" to compile the application.
+RUN yarn build
 
-COPY . .
+# Install only the production dependencies and clean cache to optimize image size.
+RUN yarn --frozen-lockfile --production && yarn cache clean
 
-COPY --from=development /usr/src/app/dist ./dist
+# Set Docker as a non-root user
+USER node
 
-EXPOSE 3001
+#
+# 🚀 Production Server
+#
+FROM node:18-alpine as prod
 
-CMD ["node", "dist/src/main"]
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+
+# Set to production environment
+ENV NODE_ENV production
+
+# Re-create non-root user for Docker
+RUN addgroup --system --gid 1001 node
+RUN adduser --system --uid 1001 node
+
+# Copy only the necessary files
+COPY --chown=node:node --from=build /app/dist dist
+COPY --chown=node:node --from=build /app/node_modules node_modules
+
+# Set Docker as non-root user
+USER node
+
+CMD ["node", "dist/main.js"]

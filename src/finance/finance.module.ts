@@ -1,17 +1,23 @@
 import { Module } from '@nestjs/common';
-import { ReimbursementService } from './services/reimbursement.service';
+import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { FinanceController } from './finance.controller';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ReimbursementMemphisService } from './services/reimbursement.memphis.service';
+import { ReimbursementMemphisUserService } from './services/reimbursement.memphis.user.service';
 import { ReimbursementCronService } from './services/reimbursement.cron.service';
+import { PostgresModule } from 'src/common/database/postgres.module';
+import { MemphisModule } from 'memphis-dev';
+import { ReimbursementMemphisEmailService } from './services/reimbursement.memphis.email.service';
+import { ReimbursementMemphisRequestService } from './services/reimbursement.memphis.request.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot()],
+  imports: [PostgresModule, MemphisModule.register(), ScheduleModule.forRoot()],
   controllers: [FinanceController],
   providers: [
-    ReimbursementService,
+    ReimbursementApiService,
     ReimbursementCronService,
-    ReimbursementMemphisService,
+    ReimbursementMemphisUserService,
+    ReimbursementMemphisEmailService,
+    ReimbursementMemphisRequestService,
   ],
 })
 export class FinanceModule {}
