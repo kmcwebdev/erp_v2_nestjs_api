@@ -27,7 +27,7 @@
     "kysely-codegen": "kysely-codegen"
   },
   "dependencies": {
-    "@nestjs/common": "^10.0.0",
+    "@nestjs/common": "^10.1.3",
     "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/devtools-integration": "^0.1.5",
