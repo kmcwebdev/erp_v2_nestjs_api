@@ -76,5 +76,4 @@ jobs:
           type: container
           keep: 3
           names: |
-            erp_v2_nestjs_api_main
             erp_v2_nestjs_api_development
