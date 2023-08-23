@@ -115,6 +115,60 @@ export const configSchema = z.object({
     .uuid({
       message: 'PROPELAUTH_EXTERNAL_ORG_ID must be a valid UUID',
     }),
+  PROPELAUTH_SOLUTIONS_ORG_ID: z
+    .string({
+      description: 'PropelAuth kmc solutions org ID',
+      required_error: 'PROPELAUTH_SOLUTIONS_ORG_ID is required',
+      invalid_type_error: 'PROPELAUTH_SOLUTIONS_ORG_ID must be a string',
+    })
+    .uuid({
+      message: 'PROPELAUTH_SOLUTIONS_ORG_ID must be a valid UUID',
+    }),
+  PROPELAUTH_COMMUNITY_ORG_ID: z
+    .string({
+      description: 'PropelAuth kmc community org ID',
+      required_error: 'PROPELAUTH_COMMUNITY_ORG_ID is required',
+      invalid_type_error: 'PROPELAUTH_COMMUNITY_ORG_ID must be a string',
+    })
+    .uuid({
+      message: 'PROPELAUTH_COMMUNITY_ORG_ID must be a valid UUID',
+    }),
+  PROPELAUTH_VERIFIER_KEY: z
+    .string({
+      description: 'PropelAuth verifier key',
+      required_error: 'PROPELAUTH_VERIFIER_KEY is required',
+      invalid_type_error: 'PROPELAUTH_VERIFIER_KEY must be a string',
+    })
+    .min(1, {
+      message: 'PROPELAUTH_VERIFIER_KEY must be at least 1 character',
+    }),
+  ERP_HR_V1_API_KEY: z
+    .string({
+      description: 'ERP HR V1 API key',
+      required_error: 'ERP_HR_V1_API_KEY is required',
+      invalid_type_error: 'ERP_HR_V1_API_KEY must be a string',
+    })
+    .min(1, {
+      message: 'ERP_HR_V1_API_KEY must be at least 1 character',
+    }),
+  ERP_HR_V1_PROD_BASE_URL: z
+    .string({
+      description: 'ERP HR V1 base URL',
+      required_error: 'ERP_HR_V1_PROD_BASE_URL is required',
+      invalid_type_error: 'ERP_HR_V1_PROD_BASE_URL must be a string',
+    })
+    .url({
+      message: 'ERP_HR_V1_PROD_BASE_URL must be a valid URL',
+    }),
+  ERP_HR_V1_DEV_BASE_URL: z
+    .string({
+      description: 'ERP HR V1 base URL',
+      required_error: 'ERP_HR_V1_DEV_BASE_URL is required',
+      invalid_type_error: 'ERP_HR_V1_DEV_BASE_URL must be a string',
+    })
+    .url({
+      message: 'ERP_HR_V1_DEV_BASE_URL must be a valid URL',
+    }),
 });
 
 export type Config = z.infer<typeof configSchema>;

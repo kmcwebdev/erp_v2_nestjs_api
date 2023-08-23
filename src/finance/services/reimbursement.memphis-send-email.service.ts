@@ -3,8 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Producer } from 'memphis-dev';
 
 @Injectable()
-export class ReimbursementMemphisRequestService implements OnModuleInit {
-  private readonly logger = new Logger(ReimbursementMemphisRequestService.name);
+export class ReimbursementMemphisSendEmailService implements OnModuleInit {
+  private readonly logger = new Logger(
+    ReimbursementMemphisSendEmailService.name,
+  );
+
   consumer: Consumer;
   producer: Producer;
 
@@ -21,15 +24,15 @@ export class ReimbursementMemphisRequestService implements OnModuleInit {
         password: this.configService.get<string>('MEMPHIS_PASSWORD'),
       });
 
-      this.producer = await this.memphisService.producer({
-        stationName: 'finance.reimbursement.request',
-        producerName: 'finance.reimbursement.request.producer-name',
+      this.consumer = await this.memphisService.consumer({
+        stationName: 'erp.finance-reimbursement-send-email',
+        consumerName: 'erp.finance-reimbursement-send-email.consumer-name',
+        consumerGroup: 'erp.finance-reimbursement-send-email.consumer-group',
       });
 
-      this.consumer = await this.memphisService.consumer({
-        stationName: 'finance.reimbursement.request',
-        consumerName: 'finance.reimbursement.request.consumer-name',
-        consumerGroup: 'finance.reimbursement.request.consumer-group',
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.finance-reimbursement-send-email',
+        producerName: 'erp.finance-reimbursement-send-email.producer-name',
       });
     } catch (error: unknown) {
       this.logger.error(error);
