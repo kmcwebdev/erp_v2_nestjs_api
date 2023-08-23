@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/@types';
-import { CreateReimbursementRequestType } from 'src/common/dto/createReimbursementRequest.dto';
-import { ReimbursementMemphisUserService } from './reimbursement.memphis.user.service';
+import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
 
 @Injectable()
 export class ReimbursementApiService {
-  constructor(
-    @InjectKysely() private readonly pgsql: DB,
-    private readonly reimbursementMemphisUserService: ReimbursementMemphisUserService,
-  ) {}
+  constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async getRequestTypes() {
     return await this.pgsql
@@ -37,6 +33,8 @@ export class ReimbursementApiService {
       )
       .execute();
   }
+
+  async getReimbursementRequests() {}
 
   async createReimbursementRequest(data: CreateReimbursementRequestType) {
     const newReimbursementRequest = await this.pgsql
@@ -119,19 +117,6 @@ export class ReimbursementApiService {
 
         return queryNewReimbursementRequest;
       });
-
-    await this.pgsql
-      .updateTable('finance_reimbursement_requests')
-      .set({
-        amount: 5423,
-        attachment: 'https://cdn.filestack.com/record-copy-1',
-      })
-      .where(
-        'reimbursement_request_id',
-        '=',
-        newReimbursementRequest.reimbursement_request_id,
-      )
-      .execute();
 
     return newReimbursementRequest;
   }
