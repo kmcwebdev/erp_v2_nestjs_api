@@ -36,6 +36,9 @@ RUN apk add --no-cache libc6-compat
 # Set to production environment
 ENV NODE_ENV production
 
+# Set the database url (for kysely-codegen)
+ARG DATABASE_URL
+
 # Install pnpm
 RUN npm install -g pnpm
 
