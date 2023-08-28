@@ -7,13 +7,16 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ExpenseTypeDto } from 'src/finance/common/dto/expenseType.dto';
 import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/updateReimbursementRequest.dto';
 import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReimbursementRequest.dto';
-import { GetReimbursementRequestDTO } from 'src/finance/common/dto/getReimbursementRequest.dto';
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
+import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
+import { Request } from 'express';
+import { User } from '@propelauth/node';
 
 @Controller('finance')
 export class FinanceController {
@@ -34,8 +37,16 @@ export class FinanceController {
   }
 
   @Get('/reimbursements/requests')
-  getReimbursementRequests(@Query() query: GetReimbursementRequestDTO) {
-    return query;
+  getAllReimbursementRequest(
+    @Req() req: Request,
+    @Query() query: GetAllReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as User;
+
+    return this.financeReimbursementApiService.getAllReimbursementRequest(
+      user,
+      query,
+    );
   }
 
   @Post('/reimbursements/requests')

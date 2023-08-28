@@ -6,7 +6,7 @@ import { ReimbursementCronService } from './services/reimbursement.cron.service'
 import { ReimbursementMemphisSendEmailService } from './services/reimbursement.memphis-send-email.service';
 import { ReimbursementMemphisNewRequestService } from './services/reimbursement.memphis.new-request.service';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from 'src/auth/common/guard/auth.guard';
+import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
@@ -14,7 +14,7 @@ import { AuthGuard } from 'src/auth/common/guard/auth.guard';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: AuthGuard,
+      useClass: PropelauthGuard,
     },
     ReimbursementApiService,
     ReimbursementCronService,

@@ -10,7 +10,7 @@ import { propelauth } from 'src/common/lib/propelauth';
 import { IS_PUBLIC_KEY } from '../constant';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class PropelauthGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
