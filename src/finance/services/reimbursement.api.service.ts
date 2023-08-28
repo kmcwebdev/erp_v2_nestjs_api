@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/@types';
 import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
+import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
+import { User } from '@propelauth/node';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -34,7 +36,67 @@ export class ReimbursementApiService {
       .execute();
   }
 
-  async getReimbursementRequests() {}
+  async getAllReimbursementRequest(
+    user: User,
+    data: GetAllReimbursementRequestType,
+  ) {
+    const { userId } = user;
+
+    let query = this.pgsql
+      .selectFrom('finance_reimbursement_requests')
+      .innerJoin(
+        'finance_reimbursement_request_types',
+        'finance_reimbursement_request_types.reimbursement_request_type_id',
+        'finance_reimbursement_requests.reimbursement_request_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_expense_types',
+        'finance_reimbursement_expense_types.expense_type_id',
+        'finance_reimbursement_requests.expense_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_status',
+        'finance_reimbursement_request_status.request_status_id',
+        'finance_reimbursement_requests.request_status_id',
+      )
+      .innerJoin(
+        'users',
+        'users.user_id',
+        'finance_reimbursement_requests.requestor_id',
+      )
+      .select([
+        'finance_reimbursement_requests.reimbursement_request_id',
+        'finance_reimbursement_requests.reference_no',
+        'finance_reimbursement_request_types.request_type',
+        'finance_reimbursement_expense_types.expense_type',
+        'finance_reimbursement_request_status.request_status',
+        'finance_reimbursement_requests.amount',
+        'finance_reimbursement_requests.attachment',
+        'users.full_name',
+        'users.email',
+        'users.employee_id',
+        'finance_reimbursement_requests.date_approve',
+      ]);
+
+    if (data?.reimbursement_type_id) {
+      query = query.where(
+        'finance_reimbursement_requests.reimbursement_request_type_id',
+        '=',
+        data.reimbursement_type_id,
+      );
+    }
+
+    // TODO: Limit who can search request by requestor_id to admin only
+    if (data?.requestor_id) {
+      query = query.where(
+        'finance_reimbursement_requests.requestor_id',
+        '=',
+        data.request_status_id,
+      );
+    }
+
+    return await query.limit(10).execute();
+  }
 
   async createReimbursementRequest(data: CreateReimbursementRequestType) {
     const newReimbursementRequest = await this.pgsql
