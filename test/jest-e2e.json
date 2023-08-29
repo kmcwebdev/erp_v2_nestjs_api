@@ -12,6 +12,10 @@
   },
   "moduleNameMapper": {
     "@app/lib/(.*)": "<rootDir>/../libs/lib/src/$1",
-    "@app/lib": "<rootDir>/../libs/lib/src"
+    "@app/lib": "<rootDir>/../libs/lib/src",
+    "@app/propelauth/(.*)": "<rootDir>/../libs/propelauth/src/$1",
+    "@app/propelauth": "<rootDir>/../libs/propelauth/src",
+    "@app/kysely-pg/(.*)": "<rootDir>/../libs/kysely-pg/src/$1",
+    "@app/kysely-pg": "<rootDir>/../libs/kysely-pg/src"
   }
 }

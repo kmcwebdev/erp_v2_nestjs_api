@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { User } from '../common/interface/user.interface';
 import { InjectKysely } from 'nestjs-kysely';
-import { DB } from 'src/common/@types';
 import { ERPHRV1User } from '../common/interface/erpHrV1User.dto';
+import { DB } from 'src/common/types';
 
 @Injectable()
 export class UpdateUserMemphisService implements OnModuleInit {

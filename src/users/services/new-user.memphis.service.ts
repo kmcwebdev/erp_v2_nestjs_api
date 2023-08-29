@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { User } from '../common/interface/user.interface';
 import { InjectKysely } from 'nestjs-kysely';
-import { DB } from 'src/common/@types';
+import { DB } from 'src/common/types';
 import { propelauth } from 'src/common/lib/propelauth';
 
 @Injectable()

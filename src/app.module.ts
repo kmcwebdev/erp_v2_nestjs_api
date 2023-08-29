@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { configSchema } from './common/@schema/config.schema';
+import { configSchema } from './common/schema/config.schema';
 import { FinanceModule } from './finance/finance.module';
 import { LegalAndComplianceModule } from './legal-and-compliance/legal-and-compliance.module';
 import { APP_PIPE } from '@nestjs/core';
