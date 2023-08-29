@@ -7,13 +7,22 @@
     "webpack": true
   },
   "projects": {
-    "lib": {
+    "propelauth": {
       "type": "library",
-      "root": "libs/lib",
+      "root": "libs/propelauth",
       "entryFile": "index",
-      "sourceRoot": "libs/lib/src",
+      "sourceRoot": "libs/propelauth/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/lib/tsconfig.lib.json"
+        "tsConfigPath": "libs/propelauth/tsconfig.lib.json"
+      }
+    },
+    "kysely-pg": {
+      "type": "library",
+      "root": "libs/kysely-pg",
+      "entryFile": "index",
+      "sourceRoot": "libs/kysely-pg/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/kysely-pg/tsconfig.lib.json"
       }
     }
   }

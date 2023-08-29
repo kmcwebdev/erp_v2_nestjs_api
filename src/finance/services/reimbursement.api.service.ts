@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { DB } from 'src/common/@types';
+import { DB } from 'src/common/types';
 import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
 import { User } from '@propelauth/node';
