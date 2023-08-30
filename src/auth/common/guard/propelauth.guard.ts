@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -11,6 +12,8 @@ import { IS_PUBLIC_KEY } from '../constant';
 
 @Injectable()
 export class PropelauthGuard implements CanActivate {
+  private readonly logger = new Logger(PropelauthGuard.name);
+
   constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,7 +37,8 @@ export class PropelauthGuard implements CanActivate {
       const payload = await propelauth.validateAccessTokenAndGetUser(token);
 
       request.user = payload;
-    } catch {
+    } catch (error: any) {
+      this.logger.error(error?.messsage);
       throw new UnauthorizedException();
     }
     return true;
