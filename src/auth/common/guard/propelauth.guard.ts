@@ -38,7 +38,7 @@ export class PropelauthGuard implements CanActivate {
 
       request.user = payload;
     } catch (error: any) {
-      this.logger.error(error?.messsage);
+      this.logger.error(error);
       throw new UnauthorizedException();
     }
     return true;
