@@ -49,6 +49,7 @@ export class MemphisCdcService {
         const { source, before, after } = data.payload;
         const { table } = source;
 
+        // New user created
         if (table === USERS_TABLE && before === null) {
           const newUser = after as User;
 
@@ -57,19 +58,20 @@ export class MemphisCdcService {
           });
         }
 
-        if (table === USERS_TABLE && after === null) {
-          const deletedUser = before as User;
-
-          console.log('User deleted');
-          console.log(deletedUser);
-        }
-
+        // User updated
         if (table === USERS_TABLE && before !== null && after !== null) {
           const updatedUser = after as User;
 
           await this.updateUserMemphisService.producer.produce({
             message: Buffer.from(JSON.stringify(updatedUser)),
           });
+        }
+
+        // User deleted
+        if (table === USERS_TABLE && after === null) {
+          const deletedUser = before as User;
+
+          console.log(deletedUser);
         }
 
         if (table === FINANCE_REIMBURSEMENT_REQUESTS_TABLE && before === null) {

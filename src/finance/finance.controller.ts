@@ -16,6 +16,7 @@ import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReim
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
 import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
 import { User } from '@propelauth/node';
+import { type Request } from 'express';
 
 @Controller('finance')
 export class FinanceController {
