@@ -12,6 +12,10 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  app.enableCors({
+    origin: '*',
+  });
+
   app.use(
     hpp({
       whitelist: [],
