@@ -11,6 +11,7 @@ import { MemphisCdcModule } from './memphis-cdc/memphis-cdc.module';
 import { MemphisModule } from 'memphis-dev';
 import { PostgresModule } from './common/database/postgres.module';
 import { AuthModule } from './auth/auth.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -21,16 +22,17 @@ import { AuthModule } from './auth/auth.module';
       },
       envFilePath: ['.env', '.env.*'],
     }),
-    DevtoolsModule.register({
-      http: process.env.NODE_ENV !== 'production',
-    }),
-    PostgresModule,
+    EventEmitterModule.forRoot(),
     MemphisModule.register(),
     MemphisCdcModule,
+    PostgresModule,
     AuthModule,
     UsersModule,
     FinanceModule,
     LegalAndComplianceModule,
+    DevtoolsModule.register({
+      http: process.env.NODE_ENV !== 'production',
+    }),
   ],
   providers: [
     {
