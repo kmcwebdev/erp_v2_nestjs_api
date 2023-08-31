@@ -98,10 +98,21 @@ export class ReimbursementApiService {
     return await query.limit(10).execute();
   }
 
-  async createReimbursementRequest(data: CreateReimbursementRequestType) {
+  async createReimbursementRequest(
+    user: User,
+    data: CreateReimbursementRequestType,
+  ) {
+    const { userId } = user;
+
     const newReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
+        const queryUser = await trx
+          .selectFrom('users')
+          .select('user_id')
+          .where('users.propelauth_user_id', '=', userId)
+          .executeTakeFirstOrThrow();
+
         const newReferenceNo = await trx
           .insertInto('finance_reimbursement_reference_numbers')
           .values({
@@ -113,7 +124,7 @@ export class ReimbursementApiService {
         const newReimbursementRequest = await trx
           .insertInto('finance_reimbursement_requests')
           .values({
-            requestor_id: data.user_id,
+            requestor_id: queryUser.user_id,
             reimbursement_request_type_id: data.reimbursement_request_type_id,
             expense_type_id: data.expense_type_id,
             reference_no: `${newReferenceNo.prefix}${newReferenceNo.year}-${newReferenceNo.reference_no_id}`,

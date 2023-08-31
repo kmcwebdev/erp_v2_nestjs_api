@@ -50,8 +50,16 @@ export class FinanceController {
   }
 
   @Post('/reimbursements/requests')
-  createReimbursementRequests(@Body() body: CreateReimbursementRequestDTO) {
-    return this.financeReimbursementApiService.createReimbursementRequest(body);
+  createReimbursementRequests(
+    @Req() req: Request,
+    @Body() body: CreateReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as User;
+
+    return this.financeReimbursementApiService.createReimbursementRequest(
+      user,
+      body,
+    );
   }
 
   @Patch('/reimbursements/requests')

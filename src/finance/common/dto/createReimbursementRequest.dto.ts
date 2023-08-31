@@ -2,15 +2,6 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
 const CreateReimbursementReqeustSchema = z.object({
-  user_id: z
-    .string({
-      description: 'The user id of the user who is making the request',
-      required_error: 'User id is required',
-      invalid_type_error: 'User id must be a string',
-    })
-    .uuid({
-      message: 'User id must be a valid uuid',
-    }),
   reimbursement_request_type_id: z
     .string({
       description: 'The id of the reimbursement request type',
