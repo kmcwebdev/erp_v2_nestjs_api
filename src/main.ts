@@ -21,6 +21,7 @@ async function bootstrap() {
       whitelist: [],
     }),
   );
+
   app.use(helmet.contentSecurityPolicy());
   app.use(helmet.dnsPrefetchControl());
   app.use(helmet.frameguard());

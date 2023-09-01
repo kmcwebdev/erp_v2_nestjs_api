@@ -18,10 +18,24 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@app/propelauth": ["libs/propelauth/src"],
-      "@app/propelauth/*": ["libs/propelauth/src/*"],
-      "@app/kysely-pg": ["libs/kysely-pg/src"],
-      "@app/kysely-pg/*": ["libs/kysely-pg/src/*"]
+      "@app/propelauth": [
+        "libs/propelauth/src"
+      ],
+      "@app/propelauth/*": [
+        "libs/propelauth/src/*"
+      ],
+      "@app/kysely-pg": [
+        "libs/kysely-pg/src"
+      ],
+      "@app/kysely-pg/*": [
+        "libs/kysely-pg/src/*"
+      ],
+      "@app/filestack": [
+        "libs/filestack/src"
+      ],
+      "@app/filestack/*": [
+        "libs/filestack/src/*"
+      ]
     }
   }
 }

@@ -4,10 +4,15 @@ import { DB } from 'src/common/types';
 import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
 import { User } from '@propelauth/node';
+import { filestackClient } from 'src/common/lib/filestack';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ReimbursementApiService {
-  constructor(@InjectKysely() private readonly pgsql: DB) {}
+  constructor(
+    @InjectKysely() private readonly pgsql: DB,
+    private readonly configService: ConfigService,
+  ) {}
 
   async getRequestTypes() {
     return await this.pgsql
@@ -41,6 +46,8 @@ export class ReimbursementApiService {
     data: GetAllReimbursementRequestType,
   ) {
     const { userId } = user;
+
+    console.log(userId);
 
     let query = this.pgsql
       .selectFrom('finance_reimbursement_requests')
@@ -98,10 +105,21 @@ export class ReimbursementApiService {
     return await query.limit(10).execute();
   }
 
-  async createReimbursementRequest(data: CreateReimbursementRequestType) {
+  async createReimbursementRequest(
+    user: User,
+    data: CreateReimbursementRequestType,
+  ) {
+    const { userId } = user;
+
     const newReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
+        const queryUser = await trx
+          .selectFrom('users')
+          .select('user_id')
+          .where('users.propelauth_user_id', '=', userId)
+          .executeTakeFirstOrThrow();
+
         const newReferenceNo = await trx
           .insertInto('finance_reimbursement_reference_numbers')
           .values({
@@ -113,7 +131,7 @@ export class ReimbursementApiService {
         const newReimbursementRequest = await trx
           .insertInto('finance_reimbursement_requests')
           .values({
-            requestor_id: data.user_id,
+            requestor_id: queryUser.user_id,
             reimbursement_request_type_id: data.reimbursement_request_type_id,
             expense_type_id: data.expense_type_id,
             reference_no: `${newReferenceNo.prefix}${newReferenceNo.year}-${newReferenceNo.reference_no_id}`,
@@ -193,5 +211,24 @@ export class ReimbursementApiService {
     reimbursementRequestId: string,
   ) {
     return reimbursementRequestId;
+  }
+
+  async createReimbursementRequestAttachments(file: Express.Multer.File) {
+    const fileHandle = await filestackClient.upload(
+      file.buffer,
+      {
+        tags: {
+          search_query: file.originalname,
+        },
+      },
+      {
+        location: this.configService.get('UPLOAD_LOCATION'),
+        filename: file.originalname,
+        container: this.configService.get('UPLOAD_CONTAINER'),
+        access: this.configService.get('UPLOAD_ACCESS'),
+      },
+    );
+
+    return fileHandle;
   }
 }

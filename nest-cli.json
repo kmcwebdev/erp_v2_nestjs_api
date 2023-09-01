@@ -24,6 +24,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/kysely-pg/tsconfig.lib.json"
       }
+    },
+    "filestack": {
+      "type": "library",
+      "root": "libs/filestack",
+      "entryFile": "index",
+      "sourceRoot": "libs/filestack/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/filestack/tsconfig.lib.json"
+      }
     }
   }
 }
