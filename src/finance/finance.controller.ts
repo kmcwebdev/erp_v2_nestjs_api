@@ -80,7 +80,9 @@ export class FinanceController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/reimbursements/requests/attachments')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
   createReimbursementRequestAttachments(
     @UploadedFile() file: Express.Multer.File,
   ) {
