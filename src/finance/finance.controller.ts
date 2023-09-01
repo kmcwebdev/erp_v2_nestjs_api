@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   Patch,
@@ -83,6 +84,10 @@ export class FinanceController {
   createReimbursementRequestAttachments(
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!file) {
+      throw new HttpException('File not found', HttpStatus.NOT_FOUND);
+    }
+
     return this.financeReimbursementApiService.createReimbursementRequestAttachments(
       file,
     );
