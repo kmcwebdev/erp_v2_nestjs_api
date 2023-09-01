@@ -133,6 +133,7 @@ export class ReimbursementApiService {
           .values({
             requestor_id: queryUser.user_id,
             reimbursement_request_type_id: data.reimbursement_request_type_id,
+            remarks: data?.remarks,
             expense_type_id: data.expense_type_id,
             reference_no: `${newReferenceNo.prefix}${newReferenceNo.year}-${newReferenceNo.reference_no_id}`,
             attachment: data.attachment,
