@@ -22,7 +22,6 @@ import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementR
 import { User } from '@propelauth/node';
 import type { Request, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Public } from 'src/auth/common/decorator/public.decorator';
 
 @Controller('finance')
 export class FinanceController {
@@ -78,7 +77,6 @@ export class FinanceController {
     return body;
   }
 
-  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('/reimbursements/requests/attachments')
   @UseInterceptors(FileInterceptor('file'))

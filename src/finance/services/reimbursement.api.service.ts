@@ -4,7 +4,6 @@ import { DB } from 'src/common/types';
 import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
 import { User } from '@propelauth/node';
-import type { Express } from 'express';
 import { filestackClient } from 'src/common/lib/filestack';
 import { ConfigService } from '@nestjs/config';
 
