@@ -5,10 +5,10 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { propelauth } from 'src/common/lib/propelauth';
-import { IS_PUBLIC_KEY } from '../constant';
+import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class PropelauthGuard implements CanActivate {

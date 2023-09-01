@@ -8,6 +8,7 @@ import { FINANCE_REIMBURSEMENT_REQUESTS_TABLE } from './common/constant';
 import { Reimbursement } from 'src/finance/common/interface/reimbursement.interface';
 import { NewUserMemphisService } from 'src/users/services/new-user.memphis.service';
 import { UpdateUserMemphisService } from 'src/users/services/update-user.memphis.service';
+import { ReimbursementMemphisNewRequestService } from 'src/finance/services/reimbursement.memphis.new-request.service';
 
 @Injectable()
 export class MemphisCdcService {
@@ -20,6 +21,7 @@ export class MemphisCdcService {
     private readonly memphisService: MemphisService,
     private readonly newUserMemphisService: NewUserMemphisService,
     private readonly updateUserMemphisService: UpdateUserMemphisService,
+    private readonly reimbursementMemphisNewRequestService: ReimbursementMemphisNewRequestService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -78,7 +80,10 @@ export class MemphisCdcService {
           const newReimbursementRequest = after as Reimbursement;
 
           console.log('New reimbursement request created');
-          console.log(newReimbursementRequest);
+
+          await this.reimbursementMemphisNewRequestService.producer.produce({
+            message: Buffer.from(JSON.stringify(newReimbursementRequest)),
+          });
         }
 
         if (table === FINANCE_REIMBURSEMENT_REQUESTS_TABLE && after === null) {

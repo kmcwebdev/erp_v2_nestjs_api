@@ -4,6 +4,8 @@ import { DB } from 'src/common/types';
 import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
 import { User } from '@propelauth/node';
+import type { Express } from 'express';
+import { filestackClient } from 'src/common/lib/filestack';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -41,6 +43,8 @@ export class ReimbursementApiService {
     data: GetAllReimbursementRequestType,
   ) {
     const { userId } = user;
+
+    console.log(userId);
 
     let query = this.pgsql
       .selectFrom('finance_reimbursement_requests')
@@ -204,5 +208,24 @@ export class ReimbursementApiService {
     reimbursementRequestId: string,
   ) {
     return reimbursementRequestId;
+  }
+
+  async createReimbursementRequestAttachments(file: Express.Multer.File) {
+    const fileHandle = await filestackClient.upload(
+      file.buffer,
+      {
+        tags: {
+          search_query: file.originalname,
+        },
+      },
+      {
+        location: 'azure',
+        filename: file.originalname,
+        container: 'lexisnexis-pdf',
+        access: 'private',
+      },
+    );
+
+    return fileHandle;
   }
 }

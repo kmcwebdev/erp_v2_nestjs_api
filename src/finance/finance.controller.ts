@@ -3,11 +3,15 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ExpenseTypeDto } from 'src/finance/common/dto/expenseType.dto';
@@ -16,7 +20,9 @@ import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReim
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
 import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
 import { User } from '@propelauth/node';
-import { type Request } from 'express';
+import type { Request, Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/auth/common/decorator/public.decorator';
 
 @Controller('finance')
 export class FinanceController {
@@ -70,5 +76,17 @@ export class FinanceController {
   @Delete('/reimbursements/requests')
   deleteReimbursementRequests(@Param() body: DeleteReimbursementRequestDTO) {
     return body;
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursements/requests/attachments')
+  @UseInterceptors(FileInterceptor('file'))
+  createReimbursementRequestAttachments(
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.financeReimbursementApiService.createReimbursementRequestAttachments(
+      file,
+    );
   }
 }

@@ -21,5 +21,9 @@ import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
     ReimbursementMemphisSendEmailService,
     ReimbursementMemphisNewRequestService,
   ],
+  exports: [
+    ReimbursementMemphisSendEmailService,
+    ReimbursementMemphisNewRequestService,
+  ],
 })
 export class FinanceModule {}

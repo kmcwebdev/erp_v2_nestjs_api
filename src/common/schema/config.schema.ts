@@ -22,7 +22,7 @@ export const configSchema = z.object({
       required_error: 'DATABASE_HOST is required',
       invalid_type_error: 'DATABASE_HOST must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'DATABASE_HOST must be at least 1 character',
     }),
   DATABASE_USER: z
@@ -31,7 +31,7 @@ export const configSchema = z.object({
       required_error: 'DATABASE_USER is required',
       invalid_type_error: 'DATABASE_USER must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'DATABASE_USER must be at least 1 character',
     }),
   DATABASE_PASS: z
@@ -40,7 +40,7 @@ export const configSchema = z.object({
       required_error: 'DATABASE_PASS is required',
       invalid_type_error: 'DATABASE_PASS must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'DATABASE_PASS must be at least 1 character',
     }),
   DATABASE_NAME: z
@@ -49,7 +49,7 @@ export const configSchema = z.object({
       required_error: 'DATABASE_NAME is required',
       invalid_type_error: 'DATABASE_NAME must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'DATABASE_NAME must be at least 1 character',
     }),
   DATABASE_PORT: z
@@ -58,7 +58,7 @@ export const configSchema = z.object({
       required_error: 'DATABASE_PORT is required',
       invalid_type_error: 'DATABASE_PORT must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'DATABASE_PORT must be at least 1 character',
     }),
   MEMPHIS_HOST: z
@@ -76,7 +76,7 @@ export const configSchema = z.object({
       required_error: 'MEMPHIS_USERNAME is required',
       invalid_type_error: 'MEMPHIS_USERNAME must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'MEMPHIS_USERNAME must be at least 1 character',
     }),
   MEMPHIS_PASSWORD: z
@@ -85,7 +85,7 @@ export const configSchema = z.object({
       required_error: 'MEMPHIS_PASSWORD is required',
       invalid_type_error: 'MEMPHIS_PASSWORD must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'MEMPHIS_PASSWORD must be at least 1 character',
     }),
   PROPELAUTH_AUTH_URL: z
@@ -103,7 +103,7 @@ export const configSchema = z.object({
       required_error: 'PROPELAUTH_API_KEY is required',
       invalid_type_error: 'PROPELAUTH_API_KEY must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'PROPELAUTH_API_KEY must be at least 1 character',
     }),
   PROPELAUTH_EXTERNAL_ORG_ID: z
@@ -139,7 +139,7 @@ export const configSchema = z.object({
       required_error: 'PROPELAUTH_VERIFIER_KEY is required',
       invalid_type_error: 'PROPELAUTH_VERIFIER_KEY must be a string',
     })
-    .min(1, {
+    .nonempty({
       message: 'PROPELAUTH_VERIFIER_KEY must be at least 1 character',
     }),
   ERP_HR_V1_API_KEY: z
@@ -168,6 +168,24 @@ export const configSchema = z.object({
     })
     .url({
       message: 'ERP_HR_V1_DEV_BASE_URL must be a valid URL',
+    }),
+  OPENAI_API_KEY: z
+    .string({
+      description: 'OpenAI API key',
+      required_error: 'OPENAI_API_KEY is required',
+      invalid_type_error: 'OPENAI_API_KEY must be a string',
+    })
+    .nonempty({
+      message: 'OPENAI_API_KEY must not be empty',
+    }),
+  FILESTACK_API_KEY: z
+    .string({
+      description: 'Filestack API key',
+      required_error: 'FILESTACK_API_KEY is required',
+      invalid_type_error: 'FILESTACK_API_KEY must be a string',
+    })
+    .nonempty({
+      message: 'FILESTACK_API_KEY must not be empty',
     }),
 });
 
