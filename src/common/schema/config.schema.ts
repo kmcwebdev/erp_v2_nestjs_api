@@ -187,6 +187,29 @@ export const configSchema = z.object({
     .nonempty({
       message: 'FILESTACK_API_KEY must not be empty',
     }),
+  UPLOAD_LOCATION: z
+    .string({
+      description: 'Filestack upload location',
+      required_error: 'UPLOAD_LOCATION is required',
+      invalid_type_error: 'UPLOAD_LOCATION must be a string',
+    })
+    .nonempty({
+      message: 'UPLOAD_LOCATION must not be empty',
+    }),
+  UPLOAD_CONTAINER: z
+    .string({
+      description: 'Filestack upload container',
+      required_error: 'UPLOAD_CONTAINER is required',
+      invalid_type_error: 'UPLOAD_CONTAINER must be a string',
+    })
+    .nonempty({
+      message: 'UPLOAD_CONTAINER must not be empty',
+    }),
+  UPLOAD_ACCESS: z.enum(['public', 'private'], {
+    description: 'Filestack upload access',
+    required_error: 'UPLOAD_ACCESS is required',
+    invalid_type_error: 'UPLOAD_ACCESS must be one of "public" or "private"',
+  }),
 });
 
 export type Config = z.infer<typeof configSchema>;

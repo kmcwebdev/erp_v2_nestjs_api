@@ -6,10 +6,14 @@ import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursemen
 import { User } from '@propelauth/node';
 import type { Express } from 'express';
 import { filestackClient } from 'src/common/lib/filestack';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ReimbursementApiService {
-  constructor(@InjectKysely() private readonly pgsql: DB) {}
+  constructor(
+    @InjectKysely() private readonly pgsql: DB,
+    private readonly configService: ConfigService,
+  ) {}
 
   async getRequestTypes() {
     return await this.pgsql
@@ -219,10 +223,10 @@ export class ReimbursementApiService {
         },
       },
       {
-        location: 'azure',
+        location: this.configService.get('UPLOAD_LOCATION'),
         filename: file.originalname,
-        container: 'lexisnexis-pdf',
-        access: 'private',
+        container: this.configService.get('UPLOAD_CONTAINER'),
+        access: this.configService.get('UPLOAD_ACCESS'),
       },
     );
 
