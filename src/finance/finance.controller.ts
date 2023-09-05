@@ -95,4 +95,14 @@ export class FinanceController {
       file,
     );
   }
+
+  // TODO: Be careful this query can return the reimbursement request of other users unless it's an approver or admin
+  @Get('/reimbursements/requests/:reimbursementRequestId')
+  getOneReimbursementRequest(
+    @Param('reimbursementRequestId') reimbursementRequestId: string,
+  ) {
+    return this.financeReimbursementApiService.getOneReimbursementRequest(
+      reimbursementRequestId,
+    );
+  }
 }

@@ -48,6 +48,7 @@ export class ReimbursementApiService {
     data: GetAllReimbursementRequestType,
   ) {
     const { original_user_id } = user;
+    const default_page_limit = 10;
 
     const rawQuery = sql`SELECT 
               frr.reimbursement_request_id,
@@ -60,7 +61,8 @@ export class ReimbursementApiService {
               u.full_name,
               u.email,
               u.employee_id,
-              frr.date_approve
+              frr.date_approve,
+              frr.cursor_id::TEXT
               ${
                 data?.text_search
                   ? sql`
@@ -108,6 +110,12 @@ export class ReimbursementApiService {
                   : sql``
               }
               ${
+                data?.last_id
+                  ? sql`
+              AND frr.cursor_id > ${data.last_id}`
+                  : sql``
+              }
+              ${
                 data?.text_search
                   ? sql`
               AND to_tsvector('english', coalesce(frr.text_search_properties, '')) @@ websearch_to_tsquery(${data.text_search})`
@@ -116,13 +124,61 @@ export class ReimbursementApiService {
             ${
               data?.text_search
                 ? sql`ORDER BY rank DESC`
-                : sql`ORDER BY frr.created_at DESC`
-            } LIMIT 10
+                : sql`${
+                    data?.last_id ? sql`` : sql`ORDER BY frr.created_at DESC`
+                  }`
+            } LIMIT ${data?.page_limit || default_page_limit}
             `;
 
     const execute = await rawQuery.execute(this.pgsql);
 
     return execute.rows;
+  }
+
+  async getOneReimbursementRequest(reimbursementRequestId: string) {
+    const request = this.pgsql
+      .selectFrom('finance_reimbursement_requests')
+      .innerJoin(
+        'finance_reimbursement_request_types',
+        'finance_reimbursement_request_types.reimbursement_request_type_id',
+        'finance_reimbursement_requests.reimbursement_request_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_expense_types',
+        'finance_reimbursement_expense_types.expense_type_id',
+        'finance_reimbursement_requests.expense_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_status',
+        'finance_reimbursement_request_status.request_status_id',
+        'finance_reimbursement_requests.request_status_id',
+      )
+      .innerJoin(
+        'users',
+        'users.user_id',
+        'finance_reimbursement_requests.requestor_id',
+      )
+      .select([
+        'finance_reimbursement_requests.reimbursement_request_id',
+        'finance_reimbursement_requests.reference_no',
+        'finance_reimbursement_request_types.request_type',
+        'finance_reimbursement_expense_types.expense_type',
+        'finance_reimbursement_request_status.request_status',
+        'finance_reimbursement_requests.amount',
+        'finance_reimbursement_requests.attachment',
+        'users.full_name',
+        'users.email',
+        'users.employee_id',
+        'finance_reimbursement_requests.date_approve',
+        'finance_reimbursement_requests.cursor_id',
+      ])
+      .where(
+        'finance_reimbursement_requests.reimbursement_request_id',
+        '=',
+        reimbursementRequestId,
+      );
+
+    return await request.executeTakeFirst();
   }
 
   async createReimbursementRequest(
