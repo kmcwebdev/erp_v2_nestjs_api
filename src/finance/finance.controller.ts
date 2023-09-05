@@ -79,13 +79,20 @@ export class FinanceController {
     return body;
   }
 
-  @Get('/reimbursements/requests/analytics')
-  getReimbursementRequestsAnalytics(@Req() req: Request) {
+  @Get('/reimbursements/requests/dashboard/analytics')
+  getReimbursementRequestsAnalyticsForRequestor(@Req() req: Request) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.getReimbursementRequestsAnalytics(
+    return this.financeReimbursementApiService.getReimbursementRequestsAnalyticsForRequestor(
       user,
     );
+  }
+
+  @Get('/reimbursements/requests/finance/analytics')
+  getReimbursementRequestsAnalyticsForFinance(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return user;
   }
 
   @HttpCode(HttpStatus.OK)
