@@ -4,7 +4,7 @@ import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { Reimbursement } from '../common/interface/reimbursement.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import {
   GROUP_APPROVERS_BILLING,
   GROUP_APPROVERS_TREASURY,
