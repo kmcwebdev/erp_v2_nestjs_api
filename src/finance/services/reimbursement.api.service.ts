@@ -270,6 +270,9 @@ export class ReimbursementApiService {
             reference_no: `${newReferenceNo.prefix}${newReferenceNo.year}-${newReferenceNo.reference_no_id}`,
             attachment: data.attachment,
             amount: data.amount,
+            dynamic_approvers: data?.approvers.length
+              ? data.approvers.join(',')
+              : null,
           })
           .returning('reimbursement_request_id')
           .executeTakeFirstOrThrow();
