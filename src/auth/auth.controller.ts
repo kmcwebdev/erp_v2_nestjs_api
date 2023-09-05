@@ -1,14 +1,17 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { PropelauthGuard } from './common/guard/propelauth.guard';
+import { GeneratePropelauthLongliveAccessTokenDTO } from './common/dto/generatePropelauthLongliveAccessToken.dto';
+import { Apikey } from './common/decorator/apiKey.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get()
-  @UseGuards(PropelauthGuard)
-  test(@Req() req: Request) {
-    return req['user'];
+  @Apikey()
+  @Post('generate-propelauth-longlive-access-token')
+  async generatePropelauthLongliveAcessToken(
+    @Body() body: GeneratePropelauthLongliveAccessTokenDTO,
+  ) {
+    return this.authService.generatePropelauthLongliveAcessToken(body);
   }
 }

@@ -1,5 +1,14 @@
-export const SCHEDULED_ID = '83ad9a7a-3ff6-469f-a4e0-20c202ac6ba4';
-export const UNSCHEDULED_ID = '9850f2aa-40c4-4fd5-8708-c8edf734d83f';
+export const SCHEDULED_REQUEST = '83ad9a7a-3ff6-469f-a4e0-20c202ac6ba4';
+export const UNSCHEDULED_REQUEST = '9850f2aa-40c4-4fd5-8708-c8edf734d83f';
 export const REIMBURSEMENT_REQUEST_TABLE = 'finance_reimbursement_requests';
 export const EXPENSE_TYPE_OTHERS = '1de6c849-39d9-421b-b0db-2fb3202cb7c6';
 export const PENDING_REQUEST = '33bfa3b3-1dfa-471f-a7bb-80a9a8842fc5';
+export const APPROVED_REQUEST = 'e20c1796-7344-407f-be7c-b2d896caa87f';
+export const PROCESSING_REQUEST = '0995c17f-db8f-458b-86eb-df4d4e80b77d';
+export const CREDITED_REQUEST = 'c6b03e0a-17a7-44e9-a776-3884ca77ea8f';
+export const ONHOLD_REQUEST = '7742da9d-e5ad-4d3b-80a4-9b7f1c5bac87';
+export const REJECTED_REQUEST = '7e4e6d17-cfeb-487a-800d-60d0a23e772d';
+export const CANCELLED_REQUEST = 'ef40f00f-8ca7-45bb-ac10-d023885b1658';
+export const GROUP_APPROVER_PAYABLES = 'dc785ab6-a41c-4460-bf58-ca72fb6b0994';
+export const GROUP_APPROVERS_TREASURY = 'd7fbdbd1-cf03-4944-a680-2f833e4d6f62';
+export const GROUP_APPROVERS_BILLING = 'dba4b4e5-38ec-4c4a-82bd-0732d753dd65';

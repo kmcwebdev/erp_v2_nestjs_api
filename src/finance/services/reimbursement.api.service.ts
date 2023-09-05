@@ -8,7 +8,12 @@ import { filestackClient } from 'src/common/lib/filestack';
 import { ConfigService } from '@nestjs/config';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { GetOneReimbursementRequestType } from '../common/dto/getOneReimbursementRequest.dto';
-import { PENDING_REQUEST } from '../common/constant';
+import {
+  ONHOLD_REQUEST,
+  PENDING_REQUEST,
+  SCHEDULED_REQUEST,
+  UNSCHEDULED_REQUEST,
+} from '../common/constant';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -186,23 +191,55 @@ export class ReimbursementApiService {
     return await request.executeTakeFirst();
   }
 
-  async getReimbursementRequestsAnalyticsForRequestor(user: RequestUser) {
-    const { original_user_id } = user;
-
-    const pendingRequestCount =
-      await sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
-        WHERE requestor_id = ${original_user_id}
-        AND request_status_id = ${PENDING_REQUEST}`.execute(this.pgsql);
-
-    const overallRequestCount =
-      await sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
-        WHERE requestor_id = ${original_user_id}`.execute(this.pgsql);
+  async getReimbursementRequestsAnalyticsForFinance() {
+    const [scheduledRequestCount, unScheduledRequestCount, onHoldRequestCount] =
+      await Promise.all([
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE reimbursement_request_type_id = ${SCHEDULED_REQUEST}`.execute(
+          this.pgsql,
+        ),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE reimbursement_request_type_id = ${UNSCHEDULED_REQUEST}`.execute(
+          this.pgsql,
+        ),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests
+        WHERE request_status_id = ${ONHOLD_REQUEST}`.execute(this.pgsql),
+      ]);
 
     return {
-      pending: pendingRequestCount.rows.length
+      totalScheduledRequest: scheduledRequestCount.rows.length
+        ? scheduledRequestCount.rows[0]
+        : 0,
+      totalUnScheduledRequest: unScheduledRequestCount.rows.length
+        ? unScheduledRequestCount.rows[0]
+        : 0,
+      totalOnholdRequest: onHoldRequestCount.rows.length
+        ? onHoldRequestCount.rows[0]
+        : 0,
+    };
+  }
+
+  async getReimbursementRequestsAnalytics(user: RequestUser) {
+    const { original_user_id, user_assigned_role } = user;
+
+    const [financeAnalytics, pendingRequestCount, overallRequestCount] =
+      await Promise.all([
+        this.getReimbursementRequestsAnalyticsForFinance(),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE requestor_id = ${original_user_id}
+        AND request_status_id = ${PENDING_REQUEST}`.execute(this.pgsql),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE requestor_id = ${original_user_id}`.execute(this.pgsql),
+      ]);
+
+    return {
+      myPendingRequest: pendingRequestCount.rows.length
         ? pendingRequestCount.rows[0]
         : 0,
-      total: overallRequestCount.rows.length ? overallRequestCount.rows[0] : 0,
+      myTotalRequest: overallRequestCount.rows.length
+        ? overallRequestCount.rows[0]
+        : 0,
+      others: user_assigned_role === 'finance' ? financeAnalytics : null,
     };
   }
 
@@ -295,18 +332,6 @@ export class ReimbursementApiService {
       });
 
     return newReimbursementRequest;
-  }
-
-  async scheduledReimbursementRequestApprovalRouting(
-    reimbursementRequestId: string,
-  ) {
-    return reimbursementRequestId;
-  }
-
-  async unScheduledReimbursementRequestApprovalRouting(
-    reimbursementRequestId: string,
-  ) {
-    return reimbursementRequestId;
   }
 
   async createReimbursementRequestAttachments(file: Express.Multer.File) {
