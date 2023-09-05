@@ -186,7 +186,7 @@ export class ReimbursementApiService {
     return await request.executeTakeFirst();
   }
 
-  async getReimbursementRequestsAnalytics(user: RequestUser) {
+  async getReimbursementRequestsAnalyticsForRequestor(user: RequestUser) {
     const { original_user_id } = user;
 
     const pendingRequestCount =
