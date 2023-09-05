@@ -206,17 +206,11 @@ export class ReimbursementApiService {
     user: RequestUser,
     data: CreateReimbursementRequestType,
   ) {
-    const { userId } = user;
+    const { original_user_id } = user;
 
     const newReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const queryUser = await trx
-          .selectFrom('users')
-          .select('user_id')
-          .where('users.propelauth_user_id', '=', userId)
-          .executeTakeFirstOrThrow();
-
         const newReferenceNo = await trx
           .insertInto('finance_reimbursement_reference_numbers')
           .values({
@@ -228,7 +222,7 @@ export class ReimbursementApiService {
         const newReimbursementRequest = await trx
           .insertInto('finance_reimbursement_requests')
           .values({
-            requestor_id: queryUser.user_id,
+            requestor_id: original_user_id,
             reimbursement_request_type_id: data.reimbursement_request_type_id,
             remarks: data?.remarks,
             expense_type_id: data.expense_type_id,
