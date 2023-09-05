@@ -42,7 +42,7 @@ export class UpdateUserMemphisService implements OnModuleInit {
       const BASE_URL =
         NODE_ENV === 'development'
           ? this.configService.get('ERP_HR_V1_DEV_BASE_URL')
-          : this.configService.get('ERP_HR_V1_DEV_BASE_URL');
+          : this.configService.get('ERP_HR_V1_PROD_BASE_URL');
 
       const response = await fetch(
         `${BASE_URL}/api/employees/visa-application-details?email=${email}`,
