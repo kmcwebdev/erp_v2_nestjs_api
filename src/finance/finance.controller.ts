@@ -24,6 +24,7 @@ import { User } from '@propelauth/node';
 import type { Request, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -93,6 +94,14 @@ export class FinanceController {
 
     return this.financeReimbursementApiService.createReimbursementRequestAttachments(
       file,
+    );
+  }
+
+  // TODO: Be careful this query can return the reimbursement request of other users unless it's an approver or admin
+  @Get('/reimbursements/requests/:reimbursement_type_id')
+  getOneReimbursementRequest(@Param() params: GetOneReimbursementRequestDTO) {
+    return this.financeReimbursementApiService.getOneReimbursementRequest(
+      params,
     );
   }
 }
