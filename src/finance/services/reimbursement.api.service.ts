@@ -4,11 +4,11 @@ import { sql } from 'kysely';
 import { DB } from 'src/common/types';
 import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
-import { User } from '@propelauth/node';
 import { filestackClient } from 'src/common/lib/filestack';
 import { ConfigService } from '@nestjs/config';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { GetOneReimbursementRequestType } from '../common/dto/getOneReimbursementRequest.dto';
+import { PENDING_REQUEST } from '../common/constant';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -182,8 +182,28 @@ export class ReimbursementApiService {
     return await request.executeTakeFirst();
   }
 
+  async getReimbursementRequestsAnalytics(user: RequestUser) {
+    const { original_user_id } = user;
+
+    const pendingRequestCount =
+      await sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE requestor_id = ${original_user_id}
+        AND request_status_id = ${PENDING_REQUEST}`.execute(this.pgsql);
+
+    const overallRequestCount =
+      await sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE requestor_id = ${original_user_id}`.execute(this.pgsql);
+
+    return {
+      pending: pendingRequestCount.rows.length
+        ? pendingRequestCount.rows[0]
+        : 0,
+      total: overallRequestCount.rows.length ? overallRequestCount.rows[0] : 0,
+    };
+  }
+
   async createReimbursementRequest(
-    user: User,
+    user: RequestUser,
     data: CreateReimbursementRequestType,
   ) {
     const { userId } = user;

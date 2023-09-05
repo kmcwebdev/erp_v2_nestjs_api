@@ -20,7 +20,6 @@ import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/updateReim
 import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
 import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
-import { User } from '@propelauth/node';
 import type { Request, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
@@ -62,7 +61,7 @@ export class FinanceController {
     @Req() req: Request,
     @Body() body: CreateReimbursementRequestDTO,
   ) {
-    const user = req['user'] as User;
+    const user = req['user'] as RequestUser;
 
     return this.financeReimbursementApiService.createReimbursementRequest(
       user,
@@ -78,6 +77,15 @@ export class FinanceController {
   @Delete('/reimbursements/requests')
   deleteReimbursementRequests(@Param() body: DeleteReimbursementRequestDTO) {
     return body;
+  }
+
+  @Get('/reimbursements/requests/analytics')
+  getReimbursementRequestsAnalytics(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return this.financeReimbursementApiService.getReimbursementRequestsAnalytics(
+      user,
+    );
   }
 
   @HttpCode(HttpStatus.OK)
