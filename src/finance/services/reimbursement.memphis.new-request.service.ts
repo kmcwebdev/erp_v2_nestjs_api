@@ -77,11 +77,12 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             'finance_reimbursement_request_status.request_status',
             'finance_reimbursement_requests.amount',
             'finance_reimbursement_requests.attachment',
+            'finance_reimbursement_requests.date_approve',
+            'finance_reimbursement_requests.dynamic_approvers',
             'users.user_id',
             'users.full_name',
             'users.email',
             'users.employee_id',
-            'finance_reimbursement_requests.date_approve',
           ])
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
