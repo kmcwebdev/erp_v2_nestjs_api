@@ -8,6 +8,7 @@ import { User } from '@propelauth/node';
 import { filestackClient } from 'src/common/lib/filestack';
 import { ConfigService } from '@nestjs/config';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { GetOneReimbursementRequestType } from '../common/dto/getOneReimbursementRequest.dto';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -135,7 +136,7 @@ export class ReimbursementApiService {
     return execute.rows;
   }
 
-  async getOneReimbursementRequest(reimbursementRequestId: string) {
+  async getOneReimbursementRequest(params: GetOneReimbursementRequestType) {
     const request = this.pgsql
       .selectFrom('finance_reimbursement_requests')
       .innerJoin(
@@ -175,7 +176,7 @@ export class ReimbursementApiService {
       .where(
         'finance_reimbursement_requests.reimbursement_request_id',
         '=',
-        reimbursementRequestId,
+        params.reimbursement_type_id,
       );
 
     return await request.executeTakeFirst();
