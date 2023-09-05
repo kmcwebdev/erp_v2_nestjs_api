@@ -74,7 +74,7 @@ export class PropelauthGuard implements CanActivate {
   private extractApiKeyFromHeader(request: Request): string | undefined {
     const apiKey = request.headers['x_api_key'] as string;
 
-    console.log(request);
+    console.log(request.headers.authorization);
 
     return apiKey ? apiKey : undefined;
   }
