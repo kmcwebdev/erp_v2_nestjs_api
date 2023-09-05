@@ -11,6 +11,7 @@ import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 import { Reflector } from '@nestjs/core';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
+import { IS_API_KEY } from '../decorator/apiKey.decorator';
 
 @Injectable()
 export class PropelauthGuard implements CanActivate {
@@ -22,6 +23,8 @@ export class PropelauthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -31,7 +34,19 @@ export class PropelauthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const isApiKey = this.reflector.getAllAndOverride<boolean>(IS_API_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isApiKey) {
+      const apiKey = this.extractApiKeyFromHeader(request);
+
+      this.logger.log('api_key: ' + apiKey);
+
+      return true;
+    }
+
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -54,6 +69,12 @@ export class PropelauthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     return true;
+  }
+
+  private extractApiKeyFromHeader(request: Request): string | undefined {
+    const apiKey = request.headers['api_key'] as string;
+
+    return apiKey ? apiKey : undefined;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
