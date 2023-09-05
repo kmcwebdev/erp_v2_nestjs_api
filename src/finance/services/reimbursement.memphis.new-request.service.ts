@@ -4,6 +4,7 @@ import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { Reimbursement } from '../common/interface/reimbursement.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
+import crypto from 'crypto';
 import {
   GROUP_APPROVERS_TREASURY,
   GROUP_APPROVER_PAYABLES,
@@ -148,10 +149,30 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .executeTakeFirst();
 
           if (!hrbp_in_approvers) {
-            console.log('HRBP is not an approver');
+            this.logger.log(
+              'HRBP is not an approver [approver_id]: ' +
+                hrbp_in_approvers.approver_id,
+            );
 
             return message.ack();
           }
+
+          const randomBytes = crypto.randomBytes(16);
+          const hexToken = randomBytes.toString('hex');
+
+          await this.pgsql
+            .insertInto('finance_reimbursement_approval_links')
+            .values({
+              reimbursement_request_id: newRequest.reimbursement_request_id,
+              approval_link: `https://reimbursement.kmcc-app.cc/sessionless-approval-link?token=${hexToken}`,
+              token: hexToken,
+              link_expired: false,
+            })
+            .execute();
+
+          this.logger.log(
+            `https://reimbursement.kmcc-app.cc/sessionless-approval-link?token=${hexToken}`,
+          );
 
           await this.pgsql
             .insertInto('finance_reimbursement_approval_matrix')
@@ -176,8 +197,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               },
             ])
             .execute();
-
-          console.log(newRequest);
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
