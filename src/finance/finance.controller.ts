@@ -23,6 +23,7 @@ import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementR
 import { User } from '@propelauth/node';
 import type { Request, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 
 @Controller('finance')
 export class FinanceController {
@@ -47,7 +48,7 @@ export class FinanceController {
     @Req() req: Request,
     @Query() query: GetAllReimbursementRequestDTO,
   ) {
-    const user = req['user'] as User;
+    const user = req['user'] as RequestUser;
 
     return this.financeReimbursementApiService.getAllReimbursementRequest(
       user,
@@ -80,7 +81,9 @@ export class FinanceController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/reimbursements/requests/attachments')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
   createReimbursementRequestAttachments(
     @UploadedFile() file: Express.Multer.File,
   ) {

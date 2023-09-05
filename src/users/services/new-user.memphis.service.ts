@@ -66,6 +66,7 @@ export class NewUserMemphisService implements OnModuleInit {
           const temporaryPassword = String(new Date());
 
           const isKmcSolutions = data.email.includes('@kmc.solutions');
+
           const orgId = isKmcSolutions
             ? this.configService.get('PROPELAUTH_SOLUTIONS_ORG_ID')
             : this.configService.get('PROPELAUTH_EXTERNAL_ORG_ID');

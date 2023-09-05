@@ -9,12 +9,17 @@ import { Request } from 'express';
 import { propelauth } from 'src/common/lib/propelauth';
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 import { Reflector } from '@nestjs/core';
+import { InjectKysely } from 'nestjs-kysely';
+import { DB } from 'src/common/types';
 
 @Injectable()
 export class PropelauthGuard implements CanActivate {
   private readonly logger = new Logger(PropelauthGuard.name);
 
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    @InjectKysely() private readonly pgsql: DB,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -36,7 +41,14 @@ export class PropelauthGuard implements CanActivate {
     try {
       const payload = await propelauth.validateAccessTokenAndGetUser(token);
 
+      const userFromDb = await this.pgsql
+        .selectFrom('users')
+        .select(['users.user_id'])
+        .where('users.propelauth_user_id', '=', payload.userId)
+        .executeTakeFirst();
+
       request.user = payload;
+      if (userFromDb) request.user.original_user_id = userFromDb.user_id;
     } catch (error: any) {
       this.logger.error(error);
       throw new UnauthorizedException();

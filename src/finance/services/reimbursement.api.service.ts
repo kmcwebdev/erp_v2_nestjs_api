@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
+import { sql } from 'kysely';
 import { DB } from 'src/common/types';
 import { CreateReimbursementRequestType } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
 import { User } from '@propelauth/node';
 import { filestackClient } from 'src/common/lib/filestack';
 import { ConfigService } from '@nestjs/config';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -42,67 +44,85 @@ export class ReimbursementApiService {
   }
 
   async getAllReimbursementRequest(
-    user: User,
+    user: RequestUser,
     data: GetAllReimbursementRequestType,
   ) {
-    const { userId } = user;
+    const { original_user_id } = user;
 
-    console.log(userId);
+    const rawQuery = sql`SELECT 
+                frr.reimbursement_request_id,
+                frr.reference_no,
+                frrt.request_type,
+                fret.expense_type,
+                frrs.request_status,
+                frr.amount,
+                frr.attachment,
+                u.full_name,
+                u.email,
+                u.employee_id,
+                frr.date_approve
+                ${
+                  data?.text_search
+                    ? sql`
+                ,ts_rank(to_tsvector('english', coalesce(frr.text_search_properties, '')), websearch_to_tsquery(${data.text_search})) AS rank`
+                    : sql``
+                }  
+              FROM finance_reimbursement_requests as frr
+              INNER JOIN finance_reimbursement_request_types AS frrt
+                ON frrt.reimbursement_request_type_id = frr.reimbursement_request_type_id
+              INNER JOIN finance_reimbursement_expense_types AS fret
+                ON frr.expense_type_id = fret.expense_type_id
+              INNER JOIN finance_reimbursement_request_status AS frrs
+                ON frrs.request_status_id = frr.request_status_id
+              INNER JOIN users AS u
+                ON u.user_id = frr.requestor_id
+              WHERE frr.requestor_id = ${original_user_id}
+                ${
+                  data?.reimbursement_type_id
+                    ? sql`
+                AND frr.reimbursement_request_type_id = ${data.reimbursement_type_id}`
+                    : sql``
+                }
+                ${
+                  data?.expense_type_id
+                    ? sql`
+                AND frr.expense_type_id = ${data.expense_type_id}`
+                    : sql``
+                }
+                ${
+                  data?.request_status_id
+                    ? sql`
+                AND frr.request_status_id = ${data.request_status_id}`
+                    : sql``
+                }
+                ${
+                  data?.amount_min && data?.amount_max
+                    ? sql`
+                AND frr.amount BETWEEN ${data.amount_min} AND ${data.amount_max}`
+                    : sql``
+                }
+                ${
+                  data?.reference_no
+                    ? sql`
+                AND frr.reference_no = ${data.reference_no}`
+                    : sql``
+                }
+                ${
+                  data?.text_search
+                    ? sql`
+                AND to_tsvector('english', coalesce(frr.text_search_properties, '')) @@ websearch_to_tsquery(${data.text_search})`
+                    : sql``
+                }
+              ${
+                data?.text_search
+                  ? sql`ORDER BY rank DESC`
+                  : sql`ORDER BY frr.created_at DESC`
+              } LIMIT 10
+             `;
 
-    let query = this.pgsql
-      .selectFrom('finance_reimbursement_requests')
-      .innerJoin(
-        'finance_reimbursement_request_types',
-        'finance_reimbursement_request_types.reimbursement_request_type_id',
-        'finance_reimbursement_requests.reimbursement_request_type_id',
-      )
-      .innerJoin(
-        'finance_reimbursement_expense_types',
-        'finance_reimbursement_expense_types.expense_type_id',
-        'finance_reimbursement_requests.expense_type_id',
-      )
-      .innerJoin(
-        'finance_reimbursement_request_status',
-        'finance_reimbursement_request_status.request_status_id',
-        'finance_reimbursement_requests.request_status_id',
-      )
-      .innerJoin(
-        'users',
-        'users.user_id',
-        'finance_reimbursement_requests.requestor_id',
-      )
-      .select([
-        'finance_reimbursement_requests.reimbursement_request_id',
-        'finance_reimbursement_requests.reference_no',
-        'finance_reimbursement_request_types.request_type',
-        'finance_reimbursement_expense_types.expense_type',
-        'finance_reimbursement_request_status.request_status',
-        'finance_reimbursement_requests.amount',
-        'finance_reimbursement_requests.attachment',
-        'users.full_name',
-        'users.email',
-        'users.employee_id',
-        'finance_reimbursement_requests.date_approve',
-      ]);
+    const execute = await rawQuery.execute(this.pgsql);
 
-    if (data?.reimbursement_type_id) {
-      query = query.where(
-        'finance_reimbursement_requests.reimbursement_request_type_id',
-        '=',
-        data.reimbursement_type_id,
-      );
-    }
-
-    // TODO: Limit who can search request by requestor_id to admin only
-    if (data?.requestor_id) {
-      query = query.where(
-        'finance_reimbursement_requests.requestor_id',
-        '=',
-        data.request_status_id,
-      );
-    }
-
-    return await query.limit(10).execute();
+    return execute.rows;
   }
 
   async createReimbursementRequest(
@@ -133,6 +153,7 @@ export class ReimbursementApiService {
           .values({
             requestor_id: queryUser.user_id,
             reimbursement_request_type_id: data.reimbursement_request_type_id,
+            remarks: data?.remarks,
             expense_type_id: data.expense_type_id,
             reference_no: `${newReferenceNo.prefix}${newReferenceNo.year}-${newReferenceNo.reference_no_id}`,
             attachment: data.attachment,
