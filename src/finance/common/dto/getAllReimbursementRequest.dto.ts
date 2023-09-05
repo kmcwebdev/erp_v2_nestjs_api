@@ -3,15 +3,78 @@ import { createZodDto } from 'nestjs-zod';
 
 const GetAllReimbursementRequestSchema = z
   .object({
-    reimbursement_type_id: z.string().uuid(),
-    expense_type_id: z.string().uuid(),
-    requestor_id: z.string().uuid(),
-    request_status_id: z.string().uuid(),
-    reference_no: z.string().nonempty(),
-    amount_min: z.number().positive(),
-    amount_max: z.number().positive(),
-    date_filed: z.string().datetime(),
-    text_search: z.string().nonempty(),
+    reimbursement_type_id: z
+      .string({
+        description: 'reimbursement_type_id',
+        invalid_type_error: 'reimbursement_type_id must be a string',
+      })
+      .uuid({
+        message: 'reimbursement_type_id must be a valid uuid',
+      }),
+    expense_type_id: z
+      .string({
+        description: 'expense_type_id',
+        invalid_type_error: 'expense_type_id must be a string',
+      })
+      .uuid({
+        message: 'expense_type_id must be a valid uuid',
+      }),
+    requestor_id: z
+      .string({
+        description: 'requestor_id',
+        invalid_type_error: 'requestor_id must be a string',
+      })
+      .uuid({
+        message: 'requestor_id must be a valid uuid',
+      }),
+    request_status_id: z
+      .string({
+        description: 'request_status_id',
+        invalid_type_error: 'request_status_id must be a string',
+      })
+      .uuid({
+        message: 'request_status_id must be a valid uuid',
+      }),
+    reference_no: z
+      .string({
+        description: 'reference_no',
+        invalid_type_error: 'reference_no must be a string',
+      })
+      .nonempty({
+        message: 'reference_no must not be empty',
+      }),
+    amount_min: z
+      .number({
+        description: 'amount_min',
+        invalid_type_error: 'amount_min must be a number',
+      })
+      .positive({
+        message: 'amount_min must be a positive number',
+      }),
+    amount_max: z
+      .number({
+        description: 'amount_max',
+        invalid_type_error: 'amount_max must be a number',
+      })
+      .positive({
+        message: 'amount_max must be a positive number',
+      }),
+    date_filed: z
+      .string({
+        description: 'date_filed',
+        invalid_type_error: 'date_filed must be a string',
+      })
+      .datetime({
+        message: 'date_filed must be a valid datetime',
+      }),
+    text_search: z
+      .string({
+        description: 'text_search',
+        invalid_type_error: 'text_search must be a string',
+      })
+      .nonempty({
+        message: 'text_search must not be empty',
+      }),
   })
   .partial()
   .refine(
