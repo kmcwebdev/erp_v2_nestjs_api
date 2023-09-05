@@ -22,6 +22,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       },
       envFilePath: ['.env', '.env.*'],
     }),
+    DevtoolsModule.register({
+      http: process.env.NODE_ENV !== 'production',
+    }),
     EventEmitterModule.forRoot(),
     MemphisModule.register(),
     MemphisCdcModule,
@@ -30,9 +33,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     UsersModule,
     FinanceModule,
     LegalAndComplianceModule,
-    DevtoolsModule.register({
-      http: process.env.NODE_ENV !== 'production',
-    }),
   ],
   providers: [
     {

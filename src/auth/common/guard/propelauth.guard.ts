@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { propelauth } from 'src/common/lib/propelauth';
+import { propelauth } from 'src/auth/common/lib/propelauth';
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 import { Reflector } from '@nestjs/core';
 import { InjectKysely } from 'nestjs-kysely';
@@ -56,14 +56,38 @@ export class PropelauthGuard implements CanActivate {
     try {
       const payload = await propelauth.validateAccessTokenAndGetUser(token);
 
+      const userMetadata = await propelauth.fetchUserMetadataByUserId(
+        payload.userId,
+        true,
+      );
+
+      const result = Object.values(userMetadata.orgIdToOrgInfo).map(
+        (orgMemberInfo) => ({
+          orgId: orgMemberInfo.orgId,
+          orgName: orgMemberInfo.orgName,
+          userAssignedRole: orgMemberInfo.assignedRole,
+          usersPermission: orgMemberInfo.permissions,
+        }),
+      );
+
       const userFromDb = await this.pgsql
         .selectFrom('users')
-        .select(['users.user_id'])
+        .select(['users.user_id', 'users.hrbp_approver_email'])
         .where('users.propelauth_user_id', '=', payload.userId)
         .executeTakeFirst();
 
       request.user = payload;
-      if (userFromDb) request.user.original_user_id = userFromDb.user_id;
+
+      if (userFromDb) {
+        request.user.original_user_id = userFromDb.user_id;
+        request.user.hrbp_approver_email = userFromDb.hrbp_approver_email;
+      }
+
+      if (result.length) {
+        request.user.user_assigned_role =
+          result[0].userAssignedRole.toLowerCase();
+        request.user.permissions = result[0].usersPermission;
+      }
     } catch (error: any) {
       this.logger.error(error);
       throw new UnauthorizedException();
@@ -72,9 +96,7 @@ export class PropelauthGuard implements CanActivate {
   }
 
   private extractApiKeyFromHeader(request: Request): string | undefined {
-    const apiKey = request.headers['x_api_key'] as string;
-
-    console.log(request.headers.authorization);
+    const apiKey = request.headers['x-api-key'] as string;
 
     return apiKey ? apiKey : undefined;
   }

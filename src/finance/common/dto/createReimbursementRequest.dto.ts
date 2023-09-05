@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { EXPENSE_TYPE_OTHERS, UNSCHEDULED_ID } from '../constant';
+import { EXPENSE_TYPE_OTHERS, UNSCHEDULED_REQUEST } from '../constant';
 
 const CreateReimbursementReqeustSchema = z
   .object({
@@ -65,7 +65,7 @@ const CreateReimbursementReqeustSchema = z
   })
   .refine(
     (input) => {
-      if (input.reimbursement_request_type_id === UNSCHEDULED_ID) {
+      if (input.reimbursement_request_type_id === UNSCHEDULED_REQUEST) {
         return input?.approvers ? input.approvers.length > 0 : false;
       }
 

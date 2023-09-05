@@ -4,6 +4,12 @@ import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { Reimbursement } from '../common/interface/reimbursement.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
+import {
+  GROUP_APPROVERS_TREASURY,
+  GROUP_APPROVER_PAYABLES,
+  SCHEDULED_REQUEST,
+  UNSCHEDULED_REQUEST,
+} from '../common/constant';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -63,11 +69,13 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           .select([
             'finance_reimbursement_requests.reimbursement_request_id',
             'finance_reimbursement_requests.reference_no',
+            'finance_reimbursement_request_types.reimbursement_request_type_id as request_type_id',
             'finance_reimbursement_request_types.request_type',
             'finance_reimbursement_expense_types.expense_type',
             'finance_reimbursement_request_status.request_status',
             'finance_reimbursement_requests.amount',
             'finance_reimbursement_requests.attachment',
+            'users.user_id',
             'users.full_name',
             'users.email',
             'users.employee_id',
@@ -103,6 +111,77 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             newRequest.reimbursement_request_id,
           )
           .execute();
+
+        const requestor = await this.pgsql
+          .selectFrom('users')
+          .select(['users.hrbp_approver_email'])
+          .where('user_id', '=', newRequest.user_id)
+          .executeTakeFirst();
+
+        if (!requestor.hrbp_approver_email) {
+          await this.pgsql
+            .updateTable('finance_reimbursement_requests')
+            .set({
+              no_hrbp_set: true,
+            })
+            .where(
+              'reimbursement_request_id',
+              '=',
+              newRequest.reimbursement_request_id,
+            )
+            .execute();
+
+          return message.ack();
+        }
+
+        if (newRequest.request_type_id === SCHEDULED_REQUEST) {
+          const hrbp_in_users = await this.pgsql
+            .selectFrom('users')
+            .select(['users.user_id'])
+            .where('email', '=', requestor.hrbp_approver_email)
+            .executeTakeFirst();
+
+          const hrbp_in_approvers = await this.pgsql
+            .selectFrom('finance_reimbursement_approvers')
+            .select(['finance_reimbursement_approvers.approver_id'])
+            .where('signatory_id', '=', hrbp_in_users.user_id)
+            .executeTakeFirst();
+
+          if (!hrbp_in_approvers) {
+            console.log('HRBP is not an approver');
+
+            return message.ack();
+          }
+
+          await this.pgsql
+            .insertInto('finance_reimbursement_approval_matrix')
+            .values([
+              {
+                reimbursement_request_id: newRequest.reimbursement_request_id,
+                approver_id: hrbp_in_approvers.approver_id,
+                approver_order: 1,
+                approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
+              },
+              {
+                reimbursement_request_id: newRequest.reimbursement_request_id,
+                approver_id: GROUP_APPROVER_PAYABLES,
+                approver_order: 2,
+                approver_verifier: `${newRequest.reimbursement_request_id}<->2`,
+              },
+              {
+                reimbursement_request_id: newRequest.reimbursement_request_id,
+                approver_id: GROUP_APPROVERS_TREASURY,
+                approver_order: 3,
+                approver_verifier: `${newRequest.reimbursement_request_id}<->3`,
+              },
+            ])
+            .execute();
+
+          console.log(newRequest);
+        }
+
+        if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
+        }
 
         message.ack();
       });

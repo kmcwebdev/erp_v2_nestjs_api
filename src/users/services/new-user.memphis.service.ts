@@ -4,7 +4,7 @@ import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { User } from '../common/interface/user.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { propelauth } from 'src/common/lib/propelauth';
+import { propelauth } from 'src/auth/common/lib/propelauth';
 
 @Injectable()
 export class NewUserMemphisService implements OnModuleInit {

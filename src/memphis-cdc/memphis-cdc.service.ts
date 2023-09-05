@@ -79,8 +79,6 @@ export class MemphisCdcService {
         if (table === FINANCE_REIMBURSEMENT_REQUESTS_TABLE && before === null) {
           const newReimbursementRequest = after as Reimbursement;
 
-          console.log('New reimbursement request created');
-
           await this.reimbursementMemphisNewRequestService.producer.produce({
             message: Buffer.from(JSON.stringify(newReimbursementRequest)),
           });
