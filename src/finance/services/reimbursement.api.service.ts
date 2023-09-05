@@ -59,10 +59,12 @@ export class ReimbursementApiService {
               frrs.request_status,
               frr.amount,
               frr.attachment,
+              frr.remarks,
               u.full_name,
               u.email,
               u.employee_id,
               frr.date_approve,
+              frr.created_at,
               frr.cursor_id::TEXT
               ${
                 data?.text_search
@@ -167,10 +169,12 @@ export class ReimbursementApiService {
         'finance_reimbursement_request_status.request_status',
         'finance_reimbursement_requests.amount',
         'finance_reimbursement_requests.attachment',
+        'finance_reimbursement_requests.remarks',
         'users.full_name',
         'users.email',
         'users.employee_id',
         'finance_reimbursement_requests.date_approve',
+        'finance_reimbursement_requests.created_at',
         'finance_reimbursement_requests.cursor_id',
       ])
       .where(
