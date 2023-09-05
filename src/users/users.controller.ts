@@ -18,6 +18,8 @@ export class UsersController {
     console.log(body);
     console.log(query);
 
-    return true;
+    return {
+      message: 'ok',
+    };
   }
 }
