@@ -252,6 +252,7 @@ export class ReimbursementApiService {
                       INNER JOIN finance_reimbursement_request_status AS frrs
                         ON frrs.request_status_id = frr.request_status_id
                       WHERE fram.approver_id IN (${approverIds.join(',')})
+                      AND fram.has_approved = false
                       ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
 
     return rawQuery.rows;
