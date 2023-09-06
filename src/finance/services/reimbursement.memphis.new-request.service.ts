@@ -214,6 +214,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 approver_verifier: `${newRequest.reimbursement_request_id}<->4`,
               },
             ])
+            .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
           const sendEmailConfirmation = await firstValueFrom(
