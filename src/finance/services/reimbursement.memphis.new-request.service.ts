@@ -239,6 +239,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 catchError((error: AxiosError) => {
                   this.logger.log(error?.response?.data);
 
+                  message.ack();
+
                   throw Error('Failed to send confirmation email');
                 }),
               ),
@@ -266,6 +268,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               .pipe(
                 catchError((error: AxiosError) => {
                   this.logger.log(error?.response?.data);
+
+                  message.ack();
 
                   throw Error('Failed to send confirmation email');
                 }),
