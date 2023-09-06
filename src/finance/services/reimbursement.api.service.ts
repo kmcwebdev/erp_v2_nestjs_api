@@ -216,7 +216,7 @@ export class ReimbursementApiService {
       return { single, group };
     });
 
-    if (!approvers.single || !approvers.group) {
+    if (!approvers.single && !approvers.group) {
       return [];
     }
 
