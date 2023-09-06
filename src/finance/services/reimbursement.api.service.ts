@@ -235,6 +235,7 @@ export class ReimbursementApiService {
     }
 
     const rawQuery = await sql`SELECT 
+                        fram.approval_matrix_id,
                         frr.reimbursement_request_id,
                         frr.reference_no,
                         frrt.request_type,
