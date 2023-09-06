@@ -216,16 +216,16 @@ export class ReimbursementApiService {
       return { single, group };
     });
 
-    if (!approvers.single && !approvers.group) {
-      return [];
-    }
-
     if (approvers.single) {
       approverIds.push(approvers.single.approver_id);
     }
 
     if (approvers.group) {
       approverIds.push(approvers.group.group_id);
+    }
+
+    if (approverIds.length === 0) {
+      return [];
     }
 
     const rawQuery = await sql`SELECT 
