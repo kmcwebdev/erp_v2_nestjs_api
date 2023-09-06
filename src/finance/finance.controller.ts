@@ -88,6 +88,20 @@ export class FinanceController {
     );
   }
 
+  // TODO: Implement DTO here.
+  @Post('/reimbursement/requests/approve')
+  approveReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: { matrixId: string },
+  ) {
+    const user = req['user'] as RequestUser;
+
+    return this.financeReimbursementApiService.approveReimbursementRequest(
+      user,
+      body.matrixId,
+    );
+  }
+
   @Get('/reimbursements/requests/dashboard/analytics')
   getReimbursementRequestsAnalytics(@Req() req: Request) {
     const user = req['user'] as RequestUser;
