@@ -144,63 +144,97 @@ export class ReimbursementApiService {
             } LIMIT ${data?.page_limit || default_page_limit}
             `;
 
-    const execute = await rawQuery.execute(this.pgsql);
+    const requests = await rawQuery.execute(this.pgsql);
 
-    return execute.rows;
+    return requests.rows;
   }
 
   async getOneReimbursementRequest(params: GetOneReimbursementRequestType) {
-    const request = this.pgsql
-      .selectFrom('finance_reimbursement_requests')
-      .innerJoin(
-        'finance_reimbursement_request_types',
-        'finance_reimbursement_request_types.reimbursement_request_type_id',
-        'finance_reimbursement_requests.reimbursement_request_type_id',
-      )
-      .innerJoin(
-        'finance_reimbursement_expense_types',
-        'finance_reimbursement_expense_types.expense_type_id',
-        'finance_reimbursement_requests.expense_type_id',
-      )
-      .innerJoin(
-        'finance_reimbursement_request_status',
-        'finance_reimbursement_request_status.request_status_id',
-        'finance_reimbursement_requests.request_status_id',
-      )
-      .innerJoin(
-        'finance_reimbursement_approval_matrix',
-        'finance_reimbursement_approval_matrix.reimbursement_request_id',
-        'finance_reimbursement_requests.reimbursement_request_id',
-      )
-      .innerJoin(
-        'users',
-        'users.user_id',
-        'finance_reimbursement_requests.requestor_id',
-      )
-      .select([
-        'finance_reimbursement_requests.reimbursement_request_id',
-        'finance_reimbursement_approval_matrix.approval_matrix_id',
-        'finance_reimbursement_requests.reference_no',
-        'finance_reimbursement_request_types.request_type',
-        'finance_reimbursement_expense_types.expense_type',
-        'finance_reimbursement_request_status.request_status',
-        'finance_reimbursement_requests.amount',
-        'finance_reimbursement_requests.attachment',
-        'finance_reimbursement_requests.remarks',
-        'users.full_name',
-        'users.email',
-        'users.employee_id',
-        'finance_reimbursement_requests.date_approve',
-        'finance_reimbursement_requests.created_at',
-        'finance_reimbursement_requests.cursor_id',
-      ])
-      .where(
-        'finance_reimbursement_requests.reimbursement_request_id',
-        '=',
-        params.reimbursement_type_id,
-      );
+    const singleRequest = await this.pgsql
+      .transaction()
+      .execute(async (trx) => {
+        const request = trx
+          .selectFrom('finance_reimbursement_requests')
+          .innerJoin(
+            'finance_reimbursement_request_types',
+            'finance_reimbursement_request_types.reimbursement_request_type_id',
+            'finance_reimbursement_requests.reimbursement_request_type_id',
+          )
+          .innerJoin(
+            'finance_reimbursement_expense_types',
+            'finance_reimbursement_expense_types.expense_type_id',
+            'finance_reimbursement_requests.expense_type_id',
+          )
+          .innerJoin(
+            'finance_reimbursement_request_status',
+            'finance_reimbursement_request_status.request_status_id',
+            'finance_reimbursement_requests.request_status_id',
+          )
+          .innerJoin(
+            'finance_reimbursement_approval_matrix',
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            'finance_reimbursement_requests.reimbursement_request_id',
+          )
+          .innerJoin(
+            'users',
+            'users.user_id',
+            'finance_reimbursement_requests.requestor_id',
+          )
+          .select([
+            'finance_reimbursement_requests.reimbursement_request_id',
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            'finance_reimbursement_requests.reference_no',
+            'finance_reimbursement_request_types.request_type',
+            'finance_reimbursement_expense_types.expense_type',
+            'finance_reimbursement_request_status.request_status',
+            'finance_reimbursement_requests.amount',
+            'finance_reimbursement_requests.attachment',
+            'finance_reimbursement_requests.remarks',
+            'users.full_name',
+            'users.email',
+            'users.employee_id',
+            'finance_reimbursement_requests.date_approve',
+            'finance_reimbursement_requests.created_at',
+            'finance_reimbursement_requests.cursor_id',
+          ])
+          .where(
+            'finance_reimbursement_requests.reimbursement_request_id',
+            '=',
+            params.reimbursement_request_id,
+          );
 
-    return await request.executeTakeFirst();
+        const singleRequest = await request.executeTakeFirst();
+
+        const approvers = await this.pgsql
+          .selectFrom('finance_reimbursement_approval_matrix')
+          .innerJoin(
+            'finance_reimbursement_approvers',
+            'finance_reimbursement_approvers.approver_id',
+            'finance_reimbursement_approval_matrix.approver_id',
+          )
+          .select([
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            'finance_reimbursement_approval_matrix.approver_order',
+            'finance_reimbursement_approval_matrix.has_approved',
+            'finance_reimbursement_approval_matrix.performed_by_user_id',
+            'finance_reimbursement_approval_matrix.description',
+            'finance_reimbursement_approval_matrix.updated_at as date_approve',
+            'finance_reimbursement_approvers.signatory_id',
+            'finance_reimbursement_approvers.is_group_of_approvers',
+            'finance_reimbursement_approvers.table_reference',
+          ])
+          .where(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            '=',
+            singleRequest.reimbursement_request_id,
+          )
+          .orderBy('approver_order', 'asc')
+          .execute();
+
+        return Object.assign(singleRequest, { approvers: approvers });
+      });
+
+    return singleRequest;
   }
 
   async getForApprovalReimbursementRequest(user: RequestUser) {
@@ -228,11 +262,11 @@ export class ReimbursementApiService {
       return { single, group };
     });
 
-    if (approvers.single) {
+    if (approvers?.single) {
       approverIds.push(approvers.single.approver_id);
     }
 
-    if (approvers.group) {
+    if (approvers?.group) {
       approverIds.push(approvers.group.group_id);
     }
 

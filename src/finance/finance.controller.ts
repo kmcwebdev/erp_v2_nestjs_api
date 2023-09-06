@@ -129,7 +129,7 @@ export class FinanceController {
   }
 
   // TODO: Be careful this query can return the reimbursement request of other users unless it's an approver or admin
-  @Get('/reimbursements/requests/:reimbursement_type_id')
+  @Get('/reimbursements/requests/:reimbursement_request_id')
   getOneReimbursementRequest(@Param() params: GetOneReimbursementRequestDTO) {
     return this.financeReimbursementApiService.getOneReimbursementRequest(
       params,

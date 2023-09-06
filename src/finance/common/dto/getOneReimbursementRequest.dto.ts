@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
 const GetOneReimbursementRequestSchema = z.object({
-  reimbursement_type_id: z
+  reimbursement_request_id: z
     .string({
       description: 'reimbursement_type_id',
       invalid_type_error: 'reimbursement_type_id must be a string',
