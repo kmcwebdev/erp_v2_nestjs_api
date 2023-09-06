@@ -168,12 +168,18 @@ export class ReimbursementApiService {
         'finance_reimbursement_requests.request_status_id',
       )
       .innerJoin(
+        'finance_reimbursement_approval_matrix',
+        'finance_reimbursement_approval_matrix.reimbursement_request_id',
+        'finance_reimbursement_requests.reimbursement_request_id',
+      )
+      .innerJoin(
         'users',
         'users.user_id',
         'finance_reimbursement_requests.requestor_id',
       )
       .select([
         'finance_reimbursement_requests.reimbursement_request_id',
+        'finance_reimbursement_approval_matrix.approval_matrix_id',
         'finance_reimbursement_requests.reference_no',
         'finance_reimbursement_request_types.request_type',
         'finance_reimbursement_expense_types.expense_type',
