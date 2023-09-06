@@ -21,6 +21,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
   private readonly logger = new Logger(
     ReimbursementMemphisNewRequestService.name,
   );
+
   consumer: Consumer;
   producer: Producer;
 
@@ -214,7 +215,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
-          const sendEmailConfirmation = await firstValueFrom(
+          const sendEmailConfirmationResponse = await firstValueFrom(
             this.httpService
               .post(
                 '/api/email/confirmation',
@@ -243,7 +244,35 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               ),
           );
 
-          this.logger.log(sendEmailConfirmation);
+          this.logger.log(sendEmailConfirmationResponse);
+
+          const sendToHrbpForApproval = await firstValueFrom(
+            this.httpService
+              .post(
+                '/api/email/hrbp-approval',
+                {
+                  to: newRequest.email,
+                  fullName: newRequest?.full_name || newRequest.email,
+                  employeeId: newRequest?.employee_id || newRequest.email,
+                  expenseType: newRequest.expense_type,
+                  expenseDate: newRequest.created_at,
+                  amount: newRequest.amount,
+                  receiptsAttached: newRequest.attachment,
+                },
+                {
+                  baseURL: this.configService.get('FRONT_END_URL'),
+                },
+              )
+              .pipe(
+                catchError((error: AxiosError) => {
+                  this.logger.log(error?.response?.data);
+
+                  throw Error('Failed to send confirmation email');
+                }),
+              ),
+          );
+
+          this.logger.log(sendToHrbpForApproval);
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {

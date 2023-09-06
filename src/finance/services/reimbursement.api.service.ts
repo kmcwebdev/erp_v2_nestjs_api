@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { sql } from 'kysely';
 import { DB } from 'src/common/types';
@@ -14,12 +14,18 @@ import {
   SCHEDULED_REQUEST,
   UNSCHEDULED_REQUEST,
 } from '../common/constant';
+import { HttpService } from '@nestjs/axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class ReimbursementApiService {
+  private readonly logger = new Logger(ReimbursementApiService.name);
+
   constructor(
     @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   async getRequestTypes() {
@@ -256,6 +262,70 @@ export class ReimbursementApiService {
                       ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
 
     return rawQuery.rows;
+  }
+
+  async approveReimbursementRequest(user: RequestUser, matrixId: string) {
+    const approveReimbursementRequest = await this.pgsql
+      .transaction()
+      .execute(async (trx) => {
+        const updateMatrix = await trx
+          .updateTable('finance_reimbursement_approval_matrix')
+          .set({
+            has_approved: true,
+            performed_by_user_id: user.original_user_id,
+            updated_at: new Date(),
+          })
+          .where('approval_matrix_id', '=', matrixId)
+          .executeTakeFirst();
+
+        const matrix = await trx
+          .selectFrom('finance_reimbursement_approval_matrix')
+          .select([
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            'finance_reimbursement_approval_matrix.approver_order',
+          ])
+          .where('approval_matrix_id', '=', matrixId)
+          .where('has_approved', '=', false)
+          .orderBy('approver_order', 'asc')
+          .executeTakeFirst();
+
+        if (matrix) {
+          const sendToNextApproverResponse = await firstValueFrom(
+            this.httpService
+              .post(
+                '/api/email/confirmation',
+                {
+                  to: 'chrisgelosulit@gmail.com',
+                  requestId: 'test',
+                  hrbpManagerName: 'test',
+                  fullName: 'test',
+                  employeeId: 'test',
+                  expenseType: 'test',
+                  expenseDate: 'test',
+                  amount: 'test',
+                  receiptsAttached: 'test',
+                },
+                {
+                  baseURL: this.configService.get('FRONT_END_URL'),
+                },
+              )
+              .pipe(
+                catchError((error: AxiosError) => {
+                  this.logger.log(error?.response?.data);
+
+                  throw Error('Failed to send to next approver');
+                }),
+              ),
+          );
+
+          this.logger.log(sendToNextApproverResponse);
+        }
+
+        return updateMatrix;
+      });
+
+    return approveReimbursementRequest;
   }
 
   async getReimbursementRequestsAnalyticsForFinance() {
