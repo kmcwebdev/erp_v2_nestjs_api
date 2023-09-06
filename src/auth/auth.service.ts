@@ -1,6 +1,5 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { catchError, firstValueFrom } from 'rxjs';
 import { GeneratePropelauthLongliveAccessTokenType } from './common/dto/generatePropelauthLongliveAccessToken.dto';
@@ -35,10 +34,8 @@ export class AuthService {
           },
         )
         .pipe(
-          catchError((error: AxiosError) => {
-            this.logger.error(error.response.data);
-
-            throw 'An error happened in scraper-api async job!';
+          catchError(() => {
+            throw 'Failed to generate long live access token';
           }),
         ),
     );
