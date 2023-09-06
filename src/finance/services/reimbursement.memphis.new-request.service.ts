@@ -166,23 +166,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
             return message.ack();
           }
-          this.httpService.post(
-            '/api/email/confirmation',
-            {
-              to: newRequest.email,
-              requestId: newRequest.reference_no,
-              hrbpManagerName: hrbp_in_users?.full_name || hrbp_in_users.email,
-              fullName: hrbp_in_users?.full_name || hrbp_in_users.email,
-              employeeId: hrbp_in_users?.employee_id || hrbp_in_users.email,
-              expenseType: newRequest.expense_type,
-              expenseDate: newRequest.created_at,
-              amount: newRequest.amount,
-              receiptsAttached: newRequest.attachment,
-            },
-            {
-              baseURL: this.configService.get('FRONT_END_URL'),
-            },
-          );
 
           const randomBytes = crypto.randomBytes(16);
           const hexToken = randomBytes.toString('hex');
@@ -230,6 +213,24 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               },
             ])
             .execute();
+
+          this.httpService.post(
+            '/api/email/confirmation',
+            {
+              to: newRequest.email,
+              requestId: newRequest.reference_no,
+              hrbpManagerName: hrbp_in_users?.full_name || hrbp_in_users.email,
+              fullName: hrbp_in_users?.full_name || hrbp_in_users.email,
+              employeeId: hrbp_in_users?.employee_id || hrbp_in_users.email,
+              expenseType: newRequest.expense_type,
+              expenseDate: newRequest.created_at,
+              amount: newRequest.amount,
+              receiptsAttached: newRequest.attachment,
+            },
+            {
+              baseURL: this.configService.get('FRONT_END_URL'),
+            },
+          );
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
