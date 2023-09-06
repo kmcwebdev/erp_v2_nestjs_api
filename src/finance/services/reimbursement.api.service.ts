@@ -191,6 +191,67 @@ export class ReimbursementApiService {
     return await request.executeTakeFirst();
   }
 
+  async getForApprovalReimbursementRequest(user: RequestUser) {
+    const approverIds = [];
+
+    const approvers = await this.pgsql.transaction().execute(async (trx) => {
+      const single = await trx
+        .selectFrom('finance_reimbursement_approvers')
+        .select('approver_id')
+        .where('signatory_id', '=', user.original_user_id)
+        .executeTakeFirst();
+
+      const approverDepartment = await trx
+        .selectFrom('departments')
+        .select(['departments.group_id'])
+        .where('user_id', '=', user.original_user_id)
+        .executeTakeFirst();
+
+      const group = await trx
+        .selectFrom('groups')
+        .select(['groups.group_id'])
+        .where('groups.group_id', '=', approverDepartment?.group_id || null)
+        .executeTakeFirst();
+
+      return { single, group };
+    });
+
+    if (!approvers.single || !approvers.group) {
+      return [];
+    }
+
+    const rawQuery = await sql`SELECT 
+                                frr.reimbursement_request_id,
+                                frr.reference_no,
+                                frrt.request_type,
+                                fret.expense_type,
+                                frrs.request_status,
+                                frr.amount,
+                                fram.approver_id,
+                                fram.approver_order,
+                                fram.has_approved,
+                                fram.performed_by_user_id,
+                                fram.description,
+                                fram.updated_at as date_approve,
+                                frr.created_at
+                              FROM finance_reimbursement_approval_matrix AS fram
+                              INNER JOIN finance_reimbursement_requests AS frr
+                                ON frr.reimbursement_request_id = fram.reimbursement_request_id
+                              INNER JOIN finance_reimbursement_request_types AS frrt
+                                ON frrt.reimbursement_request_type_id = frr.reimbursement_request_type_id
+                              INNER JOIN finance_reimbursement_expense_types AS fret
+                                ON frr.expense_type_id = fret.expense_type_id
+                              INNER JOIN finance_reimbursement_request_status AS frrs
+                                ON frrs.request_status_id = frr.request_status_id
+                              WHERE fram.approver_id IN (${approverIds.join(
+                                ',',
+                              )})
+                              ORDER BY created_at DESC LIMIT 50
+                              `.execute(this.pgsql);
+
+    return rawQuery.rows;
+  }
+
   async getReimbursementRequestsAnalyticsForFinance() {
     const [scheduledRequestCount, unScheduledRequestCount, onHoldRequestCount] =
       await Promise.all([
