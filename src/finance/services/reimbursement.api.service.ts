@@ -220,6 +220,14 @@ export class ReimbursementApiService {
       return [];
     }
 
+    if (approvers.single) {
+      approverIds.push(approvers.single.approver_id);
+    }
+
+    if (approvers.group) {
+      approverIds.push(approvers.group.group_id);
+    }
+
     const rawQuery = await sql`SELECT 
                         frr.reimbursement_request_id,
                         frr.reference_no,
