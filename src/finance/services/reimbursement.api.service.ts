@@ -216,6 +216,8 @@ export class ReimbursementApiService {
       return { single, group };
     });
 
+    console.log(approvers);
+
     if (!approvers.single && !approvers.group) {
       return [];
     }
