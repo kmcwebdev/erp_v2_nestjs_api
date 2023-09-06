@@ -12,6 +12,7 @@ import {
   SCHEDULED_REQUEST,
   UNSCHEDULED_REQUEST,
 } from '../common/constant';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -24,6 +25,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
   constructor(
     private configService: ConfigService,
     private memphisService: MemphisService,
+    private readonly httpService: HttpService,
     @InjectKysely() private readonly pgsql: DB,
   ) {}
 
@@ -83,6 +85,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             'users.full_name',
             'users.email',
             'users.employee_id',
+            'finance_reimbursement_requests.created_at',
           ])
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
@@ -140,7 +143,12 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         if (newRequest.request_type_id === SCHEDULED_REQUEST) {
           const hrbp_in_users = await this.pgsql
             .selectFrom('users')
-            .select(['users.user_id'])
+            .select([
+              'users.user_id',
+              'users.employee_id',
+              'users.full_name',
+              'users.email',
+            ])
             .where('email', '=', requestor.hrbp_approver_email)
             .executeTakeFirst();
 
@@ -158,23 +166,40 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
             return message.ack();
           }
+          this.httpService.post(
+            '/api/email/confirmation',
+            {
+              to: newRequest.email,
+              requestId: newRequest.reference_no,
+              hrbpManagerName: hrbp_in_users?.full_name || hrbp_in_users.email,
+              fullName: hrbp_in_users?.full_name || hrbp_in_users.email,
+              employeeId: hrbp_in_users?.employee_id || hrbp_in_users.email,
+              expenseType: newRequest.expense_type,
+              expenseDate: newRequest.created_at,
+              amount: newRequest.amount,
+              receiptsAttached: newRequest.attachment,
+            },
+            {
+              baseURL: this.configService.get('FRONT_END_URL'),
+            },
+          );
 
           const randomBytes = crypto.randomBytes(16);
           const hexToken = randomBytes.toString('hex');
+
+          const generatedLink = `${this.configService.get(
+            'FRONT_END_URL',
+          )}/sessionless-approval-link?token=${hexToken}`;
 
           await this.pgsql
             .insertInto('finance_reimbursement_approval_links')
             .values({
               reimbursement_request_id: newRequest.reimbursement_request_id,
-              approval_link: `https://reimbursement.kmcc-app.cc/sessionless-approval-link?token=${hexToken}`,
+              approval_link: generatedLink,
               token: hexToken,
               link_expired: false,
             })
             .execute();
-
-          this.logger.log(
-            `https://reimbursement.kmcc-app.cc/sessionless-approval-link?token=${hexToken}`,
-          );
 
           await this.pgsql
             .insertInto('finance_reimbursement_approval_matrix')

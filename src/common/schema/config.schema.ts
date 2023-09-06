@@ -210,6 +210,15 @@ export const configSchema = z.object({
     required_error: 'UPLOAD_ACCESS is required',
     invalid_type_error: 'UPLOAD_ACCESS must be one of "public" or "private"',
   }),
+  FRONT_END_URL: z
+    .string({
+      description: 'Front end URL',
+      required_error: 'FRONT_END_URL is required',
+      invalid_type_error: 'FRONT_END_URL must be a string',
+    })
+    .url({
+      message: 'FRONT_END_URL must be a valid URL',
+    }),
 });
 
 export type Config = z.infer<typeof configSchema>;
