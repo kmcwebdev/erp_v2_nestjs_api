@@ -240,10 +240,10 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               .pipe(
                 catchError((error: AxiosError) => {
                   this.logger.error(
-                    error?.response?.data || error.response.statusText,
+                    error.response?.data || error.response.statusText,
                   );
 
-                  throw 'An error happened sending confirmation email!';
+                  throw Error(error.response.statusText);
                 }),
               ),
           );
