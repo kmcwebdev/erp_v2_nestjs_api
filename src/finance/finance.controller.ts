@@ -79,6 +79,15 @@ export class FinanceController {
     return body;
   }
 
+  @Get('/reimbursements/requests/for-approvals')
+  getForApprovalReimbursementRequest(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return this.financeReimbursementApiService.getForApprovalReimbursementRequest(
+      user,
+    );
+  }
+
   @Get('/reimbursements/requests/dashboard/analytics')
   getReimbursementRequestsAnalytics(@Req() req: Request) {
     const user = req['user'] as RequestUser;
