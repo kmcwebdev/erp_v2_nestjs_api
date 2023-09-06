@@ -161,10 +161,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .executeTakeFirst();
 
           if (!hrbp_in_approvers) {
-            this.logger.log(
-              'HRBP is not an approver [approver_id]: ' +
-                hrbp_in_approvers.approver_id,
-            );
+            this.logger.log('HRBP is not an approver');
 
             return message.ack();
           }
@@ -239,11 +236,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               )
               .pipe(
                 catchError((error: AxiosError) => {
-                  this.logger.error(
-                    error.response?.data || error.response.statusText,
-                  );
+                  this.logger.log(error?.response?.data);
 
-                  throw Error(error.response.statusText);
+                  throw Error('Failed to send confirmation email');
                 }),
               ),
           );
