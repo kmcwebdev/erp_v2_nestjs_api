@@ -515,6 +515,8 @@ export class ReimbursementApiService {
   }
 
   async createReimbursementRequestAttachments(file: Express.Multer.File) {
+    const dateNumber = Date.now();
+
     const fileHandle = await filestackClient.upload(
       file.buffer,
       {
@@ -524,7 +526,7 @@ export class ReimbursementApiService {
       },
       {
         location: this.configService.get('UPLOAD_LOCATION'),
-        filename: file.originalname,
+        filename: `${file.originalname}_${dateNumber}`.toLowerCase(),
         container: this.configService.get('UPLOAD_CONTAINER'),
         access: this.configService.get('UPLOAD_ACCESS'),
       },
