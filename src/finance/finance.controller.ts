@@ -80,10 +80,10 @@ export class FinanceController {
   }
 
   @Get('/reimbursements/requests/for-approvals')
-  getForApprovalReimbursementRequest(@Req() req: Request) {
+  getAllForApprovalReimbursementRequest(@Req() req: Request) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.getForApprovalReimbursementRequest(
+    return this.financeReimbursementApiService.getAllForApprovalReimbursementRequest(
       user,
     );
   }

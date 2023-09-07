@@ -14,7 +14,6 @@ import {
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -222,7 +221,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
-          const sendEmailConfirmationResponse = await firstValueFrom(
+          await firstValueFrom(
             this.httpService
               .post(
                 '/api/email/confirmation',
@@ -243,19 +242,19 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 },
               )
               .pipe(
-                catchError((error: AxiosError) => {
-                  this.logger.log(error?.response?.data);
+                catchError(() => {
+                  this.logger.log(
+                    'Failed to send confirmation email to requestor',
+                  );
 
                   message.ack();
 
-                  throw Error('Failed to send confirmation email');
+                  throw Error('Failed to send confirmation email to requestor');
                 }),
               ),
           );
 
-          this.logger.log(sendEmailConfirmationResponse);
-
-          const sendToHrbpForApproval = await firstValueFrom(
+          await firstValueFrom(
             this.httpService
               .post(
                 '/api/email/hrbp-approval',
@@ -273,17 +272,19 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 },
               )
               .pipe(
-                catchError((error: AxiosError) => {
-                  this.logger.log(error?.response?.data);
+                catchError(() => {
+                  this.logger.log(
+                    'Failed to send confirmation email to requestor hrbp',
+                  );
 
                   message.ack();
 
-                  throw Error('Failed to send confirmation email');
+                  throw Error(
+                    'Failed to send confirmation email to requestor hrbp',
+                  );
                 }),
               ),
           );
-
-          this.logger.log(sendToHrbpForApproval);
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
