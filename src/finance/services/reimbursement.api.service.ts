@@ -195,7 +195,6 @@ export class ReimbursementApiService {
             'users.employee_id',
             'finance_reimbursement_requests.date_approve',
             'finance_reimbursement_requests.created_at',
-            'finance_reimbursement_requests.cursor_id',
           ])
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
