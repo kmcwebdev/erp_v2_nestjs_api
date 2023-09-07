@@ -25,8 +25,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
   producer: Producer;
 
   constructor(
-    private configService: ConfigService,
-    private memphisService: MemphisService,
+    private readonly configService: ConfigService,
+    private readonly memphisService: MemphisService,
     private readonly httpService: HttpService,
     @InjectKysely() private readonly pgsql: DB,
   ) {}
