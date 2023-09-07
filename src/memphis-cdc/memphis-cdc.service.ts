@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { CdcRequestEnvelope } from './common/interface/requestEnvelope.interface';
 import { USERS_TABLE } from 'src/users/common/constant';
@@ -17,7 +16,6 @@ export class MemphisCdcService {
   producer: Producer;
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
     private readonly newUserMemphisService: NewUserMemphisService,
     private readonly updateUserMemphisService: UpdateUserMemphisService,
@@ -26,12 +24,6 @@ export class MemphisCdcService {
 
   async onModuleInit(): Promise<void> {
     try {
-      await this.memphisService.connect({
-        host: this.configService.get<string>('MEMPHIS_HOST'),
-        username: this.configService.get<string>('MEMPHIS_USERNAME'),
-        password: this.configService.get<string>('MEMPHIS_PASSWORD'),
-      });
-
       this.producer = await this.memphisService.producer({
         stationName: 'erp.cdc-events',
         producerName: 'erp.cdc-events.producer-name',

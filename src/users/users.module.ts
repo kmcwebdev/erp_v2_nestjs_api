@@ -5,7 +5,6 @@ import { NewUserMemphisService } from './services/new-user.memphis.service';
 import { UpdateUserMemphisService } from './services/update-user.memphis.service';
 
 @Module({
-  imports: [],
   controllers: [UsersController],
   providers: [UsersApiService, NewUserMemphisService, UpdateUserMemphisService],
   exports: [NewUserMemphisService, UpdateUserMemphisService],

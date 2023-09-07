@@ -34,12 +34,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
   async onModuleInit() {
     try {
-      await this.memphisService.connect({
-        host: this.configService.get<string>('MEMPHIS_HOST'),
-        username: this.configService.get<string>('MEMPHIS_USERNAME'),
-        password: this.configService.get<string>('MEMPHIS_PASSWORD'),
-      });
-
       this.consumer = await this.memphisService.consumer({
         stationName: 'erp.finance-reimbursement-new-request',
         consumerName: 'erp.finance-reimbursement-new-request.consumer-name',
