@@ -152,6 +152,8 @@ export class ReimbursementApiService {
     const singleRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
+        console.log(params);
+
         const request = trx
           .selectFrom('finance_reimbursement_requests')
           .innerJoin(
@@ -224,12 +226,14 @@ export class ReimbursementApiService {
           .where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             '=',
-            singleRequest.reimbursement_request_id,
+            singleRequest?.reimbursement_request_id || null,
           )
           .orderBy('approver_order', 'asc')
           .execute();
 
-        return Object.assign(singleRequest, { approvers: approvers });
+        return Object.assign(singleRequest ?? { no_record_found: true }, {
+          approvers: approvers,
+        });
       });
 
     return singleRequest;
