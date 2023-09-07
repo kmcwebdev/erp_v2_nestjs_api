@@ -288,9 +288,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
-          this.logger.error(
-            'Failed routing un-scheduled reimbursement check dead letter message in memhpis console',
-          );
         }
 
         message.ack();
