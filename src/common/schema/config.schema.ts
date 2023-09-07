@@ -70,6 +70,15 @@ export const configSchema = z.object({
     .nonempty({
       message: 'MEMPHIS_HOST must be a valid url address',
     }),
+  MEMPHIS_ACCOUNT_ID: z
+    .string({
+      description: 'Memphis account ID',
+      required_error: 'MEMPHIS_ACCOUNT_ID is required',
+      invalid_type_error: 'MEMPHIS_ACCOUNT_ID must be a string',
+    })
+    .nonempty({
+      message: 'MEMPHIS_ACCOUNT_ID must be at least 1 character',
+    }),
   MEMPHIS_USERNAME: z
     .string({
       description: 'Memphis username',

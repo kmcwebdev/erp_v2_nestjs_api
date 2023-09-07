@@ -17,6 +17,7 @@ export class MemphisDevModule implements OnModuleInit {
     try {
       await this.memphisService.connect({
         host: this.configService.get<string>('MEMPHIS_HOST'),
+        accountId: Number(this.configService.get<string>('MEMPHIS_ACCOUNT_ID')),
         username: this.configService.get<string>('MEMPHIS_USERNAME'),
         password: this.configService.get<string>('MEMPHIS_PASSWORD'),
       });
