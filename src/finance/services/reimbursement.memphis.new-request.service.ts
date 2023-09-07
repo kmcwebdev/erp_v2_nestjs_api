@@ -94,7 +94,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         await this.pgsql
           .updateTable('finance_reimbursement_requests')
           .set({
-            attachment: `${newRequest.full_name}_${newRequest.reference_no}`,
+            attachment_mask_name: `${newRequest.full_name}_${newRequest.reference_no}`,
           })
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
