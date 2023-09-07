@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { sql } from 'kysely';
 import { DB } from 'src/common/types';
@@ -230,6 +230,10 @@ export class ReimbursementApiService {
           )
           .orderBy('approver_order', 'asc')
           .execute();
+
+        if (!singleRequest) {
+          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+        }
 
         return Object.assign(singleRequest ?? { no_record_found: true }, {
           approvers: approvers,
