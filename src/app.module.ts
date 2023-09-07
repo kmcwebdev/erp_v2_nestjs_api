@@ -48,19 +48,20 @@ export class AppModule implements OnModuleInit {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly memphis: MemphisService,
+    private readonly memphisService: MemphisService,
   ) {}
 
   async onModuleInit(): Promise<void> {
     try {
-      await this.memphis.connect({
+      await this.memphisService.connect({
         host: this.configService.get<string>('MEMPHIS_HOST'),
         username: this.configService.get<string>('MEMPHIS_USERNAME'),
         password: this.configService.get<string>('MEMPHIS_PASSWORD'),
+        accountId: 1,
       });
     } catch (error: unknown) {
       this.logger.error("Couldn't connect to Memphis");
-      await this.memphis.close();
+      await this.memphisService.close();
     }
   }
 }
