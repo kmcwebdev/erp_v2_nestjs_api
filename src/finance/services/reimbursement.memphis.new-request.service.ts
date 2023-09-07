@@ -91,6 +91,18 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           )
           .executeTakeFirst();
 
+        await this.pgsql
+          .updateTable('finance_reimbursement_requests')
+          .set({
+            attachment: `${newRequest.full_name}_${newRequest.reference_no}`,
+          })
+          .where(
+            'finance_reimbursement_requests.reimbursement_request_id',
+            '=',
+            data.reimbursement_request_id,
+          )
+          .execute();
+
         const refNoWithoutTheLetterAndHypen = newRequest.reference_no
           .match(/\d+-\d+/)[0]
           .split('-');
