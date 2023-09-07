@@ -16,7 +16,6 @@ import {
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -236,7 +235,7 @@ export class ReimbursementApiService {
     return singleRequest;
   }
 
-  async getForApprovalReimbursementRequest(user: RequestUser) {
+  async getAllForApprovalReimbursementRequest(user: RequestUser) {
     const approverIds = [];
 
     const approvers = await this.pgsql.transaction().execute(async (trx) => {
@@ -351,8 +350,8 @@ export class ReimbursementApiService {
                 },
               )
               .pipe(
-                catchError((error: AxiosError) => {
-                  this.logger.log(error?.response?.data);
+                catchError(() => {
+                  this.logger.log("Failed to send to next approver's email");
 
                   throw Error('Failed to send to next approver');
                 }),
