@@ -67,8 +67,8 @@ export const configSchema = z.object({
       required_error: 'MEMPHIS_HOST is required',
       invalid_type_error: 'MEMPHIS_HOST must be a string',
     })
-    .ip({
-      message: 'MEMPHIS_HOST must be a valid IP address',
+    .nonempty({
+      message: 'MEMPHIS_HOST must be a valid url address',
     }),
   MEMPHIS_USERNAME: z
     .string({
