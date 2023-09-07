@@ -152,8 +152,6 @@ export class ReimbursementApiService {
     const singleRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        console.log(params);
-
         const request = trx
           .selectFrom('finance_reimbursement_requests')
           .innerJoin(
