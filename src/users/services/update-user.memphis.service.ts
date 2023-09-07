@@ -106,6 +106,8 @@ export class UpdateUserMemphisService implements OnModuleInit {
         stationName: 'erp.update-user',
         producerName: 'erp.update-user.producer-name',
       });
+
+      this.logger.log('Memphis user update station is ready');
     } catch (error: unknown) {
       this.logger.error(error);
       this.memphisService.close();

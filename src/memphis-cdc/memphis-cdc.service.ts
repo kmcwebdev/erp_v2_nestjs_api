@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { CdcRequestEnvelope } from './common/interface/requestEnvelope.interface';
 import { USERS_TABLE } from 'src/users/common/constant';
@@ -10,7 +10,7 @@ import { UpdateUserMemphisService } from 'src/users/services/update-user.memphis
 import { ReimbursementMemphisNewRequestService } from 'src/finance/services/reimbursement.memphis.new-request.service';
 
 @Injectable()
-export class MemphisCdcService {
+export class MemphisCdcService implements OnModuleInit {
   private readonly logger = new Logger(MemphisCdcService.name);
   consumer: Consumer;
   producer: Producer;
@@ -85,6 +85,8 @@ export class MemphisCdcService {
 
         message.ack();
       });
+
+      this.logger.log('Memphis cdc station is ready');
     } catch (error: unknown) {
       this.logger.error(error);
       this.memphisService.close();

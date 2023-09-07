@@ -8,9 +8,10 @@ import { ReimbursementMemphisNewRequestService } from './services/reimbursement.
 import { APP_GUARD } from '@nestjs/core';
 import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
 import { HttpModule } from '@nestjs/axios';
+import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
 
 @Module({
-  imports: [HttpModule, ScheduleModule.forRoot()],
+  imports: [ScheduleModule.forRoot(), HttpModule, MemphisDevModule],
   controllers: [FinanceController],
   providers: [
     {

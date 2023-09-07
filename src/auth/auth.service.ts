@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { catchError, firstValueFrom } from 'rxjs';
 import { GeneratePropelauthLongliveAccessTokenType } from './common/dto/generatePropelauthLongliveAccessToken.dto';
+import { propelauth } from './common/lib/propelauth';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +41,18 @@ export class AuthService {
         ),
     );
 
+    this.logger.log('Generate success for propelauth long live access token');
+
     return response;
+  }
+
+  async changeUserRoleAccessInPropelauth() {
+    const updatedUserRole = await propelauth.changeUserRoleInOrg({
+      orgId: '',
+      userId: '',
+      role: '',
+    });
+
+    return updatedUserRole;
   }
 }

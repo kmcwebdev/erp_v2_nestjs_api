@@ -341,7 +341,7 @@ export class ReimbursementApiService {
               .post(
                 '/api/email/confirmation',
                 {
-                  to: 'chrisgelosulit@gmail.com',
+                  to: ['chrisgelosulit@gmail.com'],
                   requestId: 'test',
                   hrbpManagerName: 'test',
                   fullName: 'test',

@@ -24,6 +24,8 @@ export class ReimbursementMemphisSendEmailService implements OnModuleInit {
         stationName: 'erp.finance-reimbursement-send-email',
         producerName: 'erp.finance-reimbursement-send-email.producer-name',
       });
+
+      this.logger.log('Memphis reimbursement send email station is ready');
     } catch (error: unknown) {
       this.logger.error(error);
       this.memphisService.close();

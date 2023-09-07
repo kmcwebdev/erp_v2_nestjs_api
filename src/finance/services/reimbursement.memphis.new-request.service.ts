@@ -90,11 +90,15 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           )
           .executeTakeFirst();
 
+        if (!newRequest) {
+          return message.ack();
+        }
+
         await this.pgsql
           .updateTable('finance_reimbursement_requests')
           .set({
             attachment_mask_name:
-              `${newRequest.full_name}_${newRequest.reference_no}`.toUpperCase(),
+              `${newRequest?.full_name}_${newRequest?.reference_no}`.toUpperCase(),
           })
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
@@ -226,7 +230,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               .post(
                 '/api/email/confirmation',
                 {
-                  to: newRequest.email,
+                  to: [newRequest.email],
                   requestId: newRequest.reference_no,
                   hrbpManagerName:
                     hrbp_in_users?.full_name || hrbp_in_users.email,
@@ -259,7 +263,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               .post(
                 '/api/email/hrbp-approval',
                 {
-                  to: newRequest.email,
+                  to: [newRequest.email],
                   fullName: newRequest?.full_name || newRequest.email,
                   employeeId: newRequest?.employee_id || newRequest.email,
                   expenseType: newRequest.expense_type,
@@ -297,8 +301,10 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         stationName: 'erp.finance-reimbursement-new-request',
         producerName: 'erp.finance-reimbursement-new-request.producer-name',
       });
-    } catch (error: unknown) {
-      this.logger.error(error);
+
+      this.logger.log('Memphis reimbursement new request station is ready');
+    } catch (error: any) {
+      this.logger.error(error.message);
       this.memphisService.close();
     }
   }
