@@ -185,6 +185,10 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
+          console.log(
+            this.configService.get('FRONT_END_URL') + '/api/email/confirmation',
+          );
+
           console.log({
             to: [newRequest.email],
             requestId: newRequest.reference_no,
