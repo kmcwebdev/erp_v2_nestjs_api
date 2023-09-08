@@ -15,7 +15,7 @@ import {
   UNSCHEDULED_REQUEST,
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
+// import { catchError, firstValueFrom } from 'rxjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -346,33 +346,32 @@ export class ReimbursementApiService {
         });
 
         if (matrix && request) {
-          await firstValueFrom(
-            this.httpService
-              .post(
-                '/api/email/confirmation',
-                {
-                  to: [user.email],
-                  requestId: request.reference_no,
-                  hrbpManagerName: request.hrbp_approver_email,
-                  fullName: request.full_name || 'no_full_name',
-                  employeeId: request.employee_id || 'no_employee_id',
-                  expenseType: request.expense_type,
-                  expenseDate: request.created_at,
-                  amount: request.amount,
-                  receiptsAttached: request.attachment,
-                },
-                {
-                  baseURL: this.configService.get('FRONT_END_URL'),
-                },
-              )
-              .pipe(
-                catchError(() => {
-                  this.logger.log("Failed to send to next approver's email");
-
-                  throw Error('Failed to send to next approver');
-                }),
-              ),
-          );
+          // await firstValueFrom(
+          //   this.httpService
+          //     .post(
+          //       '/api/email/confirmation',
+          //       {
+          //         to: [user.email],
+          //         requestId: request.reference_no,
+          //         hrbpManagerName: request.hrbp_approver_email,
+          //         fullName: request.full_name || 'no_full_name',
+          //         employeeId: request.employee_id || 'no_employee_id',
+          //         expenseType: request.expense_type,
+          //         expenseDate: request.created_at,
+          //         amount: request.amount,
+          //         receiptsAttached: request.attachment,
+          //       },
+          //       {
+          //         baseURL: this.configService.get('FRONT_END_URL'),
+          //       },
+          //     )
+          //     .pipe(
+          //       catchError(() => {
+          //         this.logger.log("Failed to send to next approver's email");
+          //         throw Error('Failed to send to next approver');
+          //       }),
+          //     ),
+          // );
         }
 
         return updateMatrix;
