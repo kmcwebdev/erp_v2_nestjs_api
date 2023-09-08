@@ -128,6 +128,12 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .where('email', '=', newRequest.hrbp_approver_email)
             .executeTakeFirst();
 
+          if (!hrbp_in_users) {
+            this.logger.error('HRBP is not a user of the system');
+
+            return message.ack();
+          }
+
           const hrbp_in_approvers = await this.pgsql
             .selectFrom('finance_reimbursement_approvers')
             .select(['finance_reimbursement_approvers.approver_id'])
