@@ -48,7 +48,9 @@ export class MemphisCdcService implements OnModuleInit {
           const newUser = after as User;
 
           await this.newUserMemphisService.producer.produce({
-            message: Buffer.from(JSON.stringify(newUser)),
+            message: Buffer.from(
+              JSON.stringify(Object.assign(newUser, { new: true })),
+            ),
           });
         }
 
@@ -57,7 +59,9 @@ export class MemphisCdcService implements OnModuleInit {
           const updatedUser = after as User;
 
           await this.updateUserMemphisService.producer.produce({
-            message: Buffer.from(JSON.stringify(updatedUser)),
+            message: Buffer.from(
+              JSON.stringify(Object.assign(updatedUser, { updated: true })),
+            ),
           });
         }
 
@@ -65,22 +69,27 @@ export class MemphisCdcService implements OnModuleInit {
         if (table === USERS_TABLE && after === null) {
           const deletedUser = before as User;
 
-          console.log(deletedUser);
+          console.log(Object.assign(deletedUser, { deleted: true }));
         }
 
         if (table === FINANCE_REIMBURSEMENT_REQUESTS_TABLE && before === null) {
           const newReimbursementRequest = after as Reimbursement;
 
           await this.reimbursementMemphisNewRequestService.producer.produce({
-            message: Buffer.from(JSON.stringify(newReimbursementRequest)),
+            message: Buffer.from(
+              JSON.stringify(
+                Object.assign(newReimbursementRequest, { new: true }),
+              ),
+            ),
           });
         }
 
         if (table === FINANCE_REIMBURSEMENT_REQUESTS_TABLE && after === null) {
           const deletedReimbursementRequest = before as Reimbursement;
 
-          console.log('Reimbursement request deleted');
-          console.log(deletedReimbursementRequest);
+          console.log(
+            Object.assign(deletedReimbursementRequest, { deleted: true }),
+          );
         }
 
         message.ack();

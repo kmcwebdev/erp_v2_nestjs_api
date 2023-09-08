@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { catchError, firstValueFrom } from 'rxjs';
 import { GeneratePropelauthLongliveAccessTokenType } from './common/dto/generatePropelauthLongliveAccessToken.dto';
 import { propelauth } from './common/lib/propelauth';
+import { RequestUser } from './common/interface/propelauthUser.interface';
+import { UpdatePropelauthUserRoleType } from './common/dto/updatePropelauthUserRole.dto';
 
 @Injectable()
 export class AuthService {
@@ -46,11 +48,16 @@ export class AuthService {
     return response;
   }
 
-  async changeUserRoleAccessInPropelauth() {
+  async changeUserRoleAccessInPropelauth(
+    user: RequestUser,
+    data: UpdatePropelauthUserRoleType,
+  ) {
+    console.log(user);
+
     const updatedUserRole = await propelauth.changeUserRoleInOrg({
-      orgId: '',
-      userId: '',
-      role: '',
+      orgId: data.org_id,
+      userId: data.user_id,
+      role: data.role,
     });
 
     return updatedUserRole;
