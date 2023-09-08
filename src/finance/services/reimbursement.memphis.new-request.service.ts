@@ -43,6 +43,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
   async onModuleInit() {
     try {
+      const frontEndUrl = this.configService.get('FRONT_END_URL');
+
       this.consumer = await this.memphisService.consumer({
         stationName: 'erp.finance-reimbursement-new-request',
         consumerName: 'erp.finance-reimbursement-new-request.consumer-name',
@@ -203,8 +205,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   receiptsAttached: newRequest.attachment,
                 },
                 {
-                  baseURL: this.configService.get('FRONT_END_URL'),
-                  method: 'POST',
+                  baseURL: frontEndUrl,
                 },
               )
               .pipe(
@@ -236,8 +237,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   receiptsAttached: newRequest.attachment,
                 },
                 {
-                  baseURL: this.configService.get('FRONT_END_URL'),
-                  method: 'POST',
+                  baseURL: frontEndUrl,
                 },
               )
               .pipe(
