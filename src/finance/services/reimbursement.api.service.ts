@@ -76,6 +76,7 @@ export class ReimbursementApiService {
               u.full_name,
               u.email,
               u.employee_id,
+              u.hrbp_approver_email,
               frr.date_approve,
               frr.created_at,
               frr.cursor_id::TEXT
@@ -155,7 +156,7 @@ export class ReimbursementApiService {
     const singleRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const request = trx
+        const reimbursement = await trx
           .selectFrom('finance_reimbursement_requests')
           .innerJoin(
             'finance_reimbursement_request_types',
@@ -204,11 +205,10 @@ export class ReimbursementApiService {
             'finance_reimbursement_requests.reimbursement_request_id',
             '=',
             params.reimbursement_request_id,
-          );
+          )
+          .executeTakeFirst();
 
-        const singleRequest = await request.executeTakeFirst();
-
-        if (!singleRequest) {
+        if (!reimbursement) {
           throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
         }
 
@@ -233,12 +233,12 @@ export class ReimbursementApiService {
           .where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             '=',
-            singleRequest.reimbursement_request_id,
+            reimbursement.reimbursement_request_id,
           )
           .orderBy('approver_order', 'asc')
           .execute();
 
-        return Object.assign(singleRequest, {
+        return Object.assign(reimbursement, {
           approvers: approvers,
         });
       });
@@ -510,7 +510,6 @@ export class ReimbursementApiService {
             'finance_reimbursement_request_status.request_status',
             'finance_reimbursement_requests.attachment',
             'finance_reimbursement_requests.amount',
-            'finance_reimbursement_requests.date_approve',
             'finance_reimbursement_requests.dynamic_approvers',
             'users.user_id',
             'users.full_name',
@@ -519,6 +518,7 @@ export class ReimbursementApiService {
             'users.hrbp_approver_email',
             'date_approve',
             'users.employee_id',
+            'finance_reimbursement_requests.date_approve',
             'finance_reimbursement_requests.created_at',
           ])
           .where(

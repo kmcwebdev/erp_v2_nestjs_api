@@ -60,7 +60,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
         this.logger.log('New request received:' + data.reference_no);
 
-        if (newRequest?.dynamic_approvers.length) {
+        if (newRequest?.dynamic_approvers?.length) {
           this.logger.log("Request has dynamic approvers, let's add them");
         }
 
