@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@highlight-run/nest':
-    specifier: ^3.2.0
-    version: 3.2.0(@nestjs/core@10.2.4)(rxjs@7.8.1)
+    specifier: ^3.3.0
+    version: 3.3.0(@nestjs/core@10.2.4)(rxjs@7.8.1)
   '@nestjs/axios':
     specifier: ^3.0.0
     version: 3.0.0(@nestjs/common@10.2.4)(axios@1.5.0)(reflect-metadata@0.1.13)(rxjs@7.8.1)
@@ -900,13 +900,13 @@ packages:
       '@hapi/topo': 5.1.0
     dev: false
 
-  /@highlight-run/nest@3.2.0(@nestjs/core@10.2.4)(rxjs@7.8.1):
-    resolution: {integrity: sha512-tTc6Mb06YJcmtl2h0WyWCUyYy0wTWDawPtRTvSl5jVQkzFc+GpqrhjEmXcsBlEPxpHyp9QmFEE/i/8LE2w3Zvg==}
+  /@highlight-run/nest@3.3.0(@nestjs/core@10.2.4)(rxjs@7.8.1):
+    resolution: {integrity: sha512-hPzXOiYsIqn7mBCS62ox+G5WLqLTVht+lFFJRT5UpSEw1XqyVYETCKUDPfeZDczL3aTtwX9Sis4mYjJFAwuy8A==}
     peerDependencies:
       '@nestjs/core': '>=8'
       rxjs: '>=7'
     dependencies:
-      '@highlight-run/node': 3.2.0
+      '@highlight-run/node': 3.3.0
       '@nestjs/core': 10.2.4(@nestjs/common@10.2.4)(@nestjs/platform-express@10.2.4)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       rxjs: 7.8.1
     transitivePeerDependencies:
@@ -914,8 +914,8 @@ packages:
       - supports-color
     dev: false
 
-  /@highlight-run/node@3.2.0:
-    resolution: {integrity: sha512-F5FSdfKSKOLkB6PmbCF2QyCzw3QsXU77+s0lUtPQg6m1ZNbr4ZwUnRwLM1bxAXvzLXJj9x8xaxCIHa8hBkFziA==}
+  /@highlight-run/node@3.3.0:
+    resolution: {integrity: sha512-LFUHhw65ITl9ppq5MQjT5a57upa1XJ6H8A/AzPMgW1N5Cf/vMiOLltmXjnnvVskwzLnmQzP2kOErmPnBX7xknA==}
     dependencies:
       '@opentelemetry/api': 1.4.1
       '@opentelemetry/auto-instrumentations-node': 0.38.0(@opentelemetry/api@1.4.1)
@@ -925,7 +925,7 @@ packages:
       '@opentelemetry/sdk-node': 0.41.2(@opentelemetry/api@1.4.1)
       '@opentelemetry/sdk-trace-base': 1.15.2(@opentelemetry/api@1.4.1)
       '@opentelemetry/semantic-conventions': 1.15.2
-      highlight.run: 7.4.3
+      highlight.run: 7.5.1
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -5141,8 +5141,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /highlight.run@7.4.3:
-    resolution: {integrity: sha512-Sc0E/ZEydjegHXHbvZCSOUYhZLfVwk0MLqSgE5ez8uHUjn+rSzb3U+Ct2y4Bo36sZcPhxVLf4RHH7BvRJJUtOQ==}
+  /highlight.run@7.5.1:
+    resolution: {integrity: sha512-tBojeSw/AyE7if8+f3A9/uFQG2MsLprlhNmDKBi8lWjT+NAPwhKBRxop9F/FpmPMbpJIjjBBdO7YNoidM1n16g==}
     dev: false
 
   /hpp@0.2.3:

@@ -27,7 +27,7 @@
     "kysely-codegen": "kysely-codegen"
   },
   "dependencies": {
-    "@highlight-run/nest": "^3.2.0",
+    "@highlight-run/nest": "^3.3.0",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.2.4",
     "@nestjs/config": "^3.0.1",
