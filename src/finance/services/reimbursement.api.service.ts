@@ -495,17 +495,21 @@ export class ReimbursementApiService {
             'finance_reimbursement_requests.request_status_id',
           )
           .select([
-            'reimbursement_request_id',
-            'reference_no',
+            'finance_reimbursement_requests.reimbursement_request_id',
+            'finance_reimbursement_requests.reference_no',
+            'finance_reimbursement_request_types.reimbursement_request_type_id as request_type_id',
             'finance_reimbursement_request_types.request_type',
             'finance_reimbursement_expense_types.expense_type',
+            'finance_reimbursement_request_status.request_status',
+            'finance_reimbursement_requests.attachment',
+            'finance_reimbursement_requests.amount',
+            'finance_reimbursement_requests.date_approve',
+            'finance_reimbursement_requests.dynamic_approvers',
             'users.full_name',
             'users.client_name',
             'users.email',
-            'attachment',
-            'amount',
-            'finance_reimbursement_request_status.request_status',
             'date_approve',
+            'users.employee_id',
             'finance_reimbursement_requests.created_at',
           ])
           .where(
