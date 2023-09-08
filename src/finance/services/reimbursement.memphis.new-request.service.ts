@@ -13,6 +13,7 @@ import {
   UNSCHEDULED_REQUEST,
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
+import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
@@ -185,18 +186,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
-          console.log({
-            to: [newRequest.email],
-            requestId: newRequest.reference_no,
-            hrbpManagerName: hrbp_in_users?.full_name || hrbp_in_users.email,
-            fullName: hrbp_in_users?.full_name || hrbp_in_users.email,
-            employeeId: hrbp_in_users?.employee_id || hrbp_in_users.email,
-            expenseType: newRequest.expense_type,
-            expenseDate: newRequest.created_at,
-            amount: newRequest.amount,
-            receiptsAttached: newRequest.attachment,
-          });
-
           await firstValueFrom(
             this.httpService
               .post(
@@ -215,13 +204,16 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 },
                 {
                   baseURL: this.configService.get('FRONT_END_URL'),
+                  method: 'POST',
                 },
               )
               .pipe(
-                catchError(() => {
+                catchError((error: AxiosError) => {
                   this.logger.log(
                     'Failed to send confirmation email to requestor',
                   );
+
+                  console.log(error?.response?.data);
 
                   message.ack();
 
@@ -245,13 +237,16 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 },
                 {
                   baseURL: this.configService.get('FRONT_END_URL'),
+                  method: 'POST',
                 },
               )
               .pipe(
-                catchError(() => {
+                catchError((error: AxiosError) => {
                   this.logger.log(
                     'Failed to send confirmation email to requestor hrbp',
                   );
+
+                  console.log(error?.response?.data);
 
                   message.ack();
 
