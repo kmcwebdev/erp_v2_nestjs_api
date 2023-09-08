@@ -60,6 +60,10 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
         this.logger.log('New request received:' + data.reference_no);
 
+        if (newRequest?.dynamic_approvers.length) {
+          this.logger.log("Request has dynamic approvers, let's add them");
+        }
+
         await this.pgsql
           .updateTable('finance_reimbursement_requests')
           .set({
