@@ -55,6 +55,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
         this.logger.log('New request received:' + data.reference_no);
 
+        console.log(data);
+
         const newRequest = await this.pgsql
           .selectFrom('finance_reimbursement_requests')
           .innerJoin(
