@@ -56,7 +56,7 @@ export class AuthService {
 
     const updatedUserRole = await propelauth.changeUserRoleInOrg({
       orgId: data.org_id,
-      userId: data.user_id,
+      userId: data?.user_id ? data.user_id : user.userId,
       role: data.role,
     });
 
