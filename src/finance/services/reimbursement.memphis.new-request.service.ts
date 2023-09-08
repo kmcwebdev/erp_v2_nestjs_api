@@ -227,7 +227,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               .post(
                 '/api/email/hrbp-approval',
                 {
-                  to: [newRequest.email],
+                  to: [newRequest.hrbp_approver_email],
                   fullName: newRequest?.full_name || newRequest.email,
                   employeeId: newRequest?.employee_id || newRequest.email,
                   expenseType: newRequest.expense_type,
