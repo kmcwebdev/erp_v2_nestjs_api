@@ -121,7 +121,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         }
 
         if (newRequest.request_type_id === SCHEDULED_REQUEST) {
-          const hrbp_in_users = await this.pgsql
+          const hrbpInUsers = await this.pgsql
             .selectFrom('users')
             .select([
               'users.user_id',
@@ -132,19 +132,19 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .where('email', '=', newRequest.hrbp_approver_email)
             .executeTakeFirst();
 
-          if (!hrbp_in_users) {
+          if (!hrbpInUsers) {
             this.logger.error('HRBP is not a user of the system');
 
             return message.ack();
           }
 
-          const hrbp_in_approvers = await this.pgsql
+          const hrbpInApprovers = await this.pgsql
             .selectFrom('finance_reimbursement_approvers')
             .select(['finance_reimbursement_approvers.approver_id'])
-            .where('signatory_id', '=', hrbp_in_users.user_id)
+            .where('signatory_id', '=', hrbpInUsers.user_id)
             .executeTakeFirst();
 
-          if (!hrbp_in_approvers) {
+          if (!hrbpInApprovers) {
             this.logger.log('HRBP is not an approver');
 
             return message.ack();
@@ -172,7 +172,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .values([
               {
                 reimbursement_request_id: newRequest.reimbursement_request_id,
-                approver_id: hrbp_in_approvers.approver_id,
+                approver_id: hrbpInApprovers.approver_id,
                 approver_order: 1,
                 approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
               },
@@ -205,10 +205,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 {
                   to: [newRequest.email],
                   requestId: newRequest.reference_no,
-                  hrbpManagerName:
-                    hrbp_in_users?.full_name || hrbp_in_users.email,
-                  fullName: hrbp_in_users?.full_name || hrbp_in_users.email,
-                  employeeId: hrbp_in_users?.employee_id || hrbp_in_users.email,
+                  hrbpManagerName: newRequest?.full_name || 'No name set',
+                  fullName: newRequest?.full_name || 'No name set',
+                  employeeId: newRequest?.employee_id || 'No emp id set',
                   expenseType: newRequest.expense_type,
                   expenseDate: newRequest.created_at,
                   amount: newRequest.amount,
@@ -239,8 +238,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 '/api/email/hrbp-approval',
                 {
                   to: [newRequest.hrbp_approver_email],
-                  fullName: newRequest?.full_name || newRequest.email,
-                  employeeId: newRequest?.employee_id || newRequest.email,
+                  fullName: hrbpInUsers?.full_name || 'No name set',
+                  employeeId: newRequest?.employee_id || 'No employee id set',
                   expenseType: newRequest.expense_type,
                   expenseDate: newRequest.created_at,
                   amount: newRequest.amount,
