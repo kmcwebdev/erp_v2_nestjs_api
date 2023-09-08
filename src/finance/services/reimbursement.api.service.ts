@@ -208,6 +208,10 @@ export class ReimbursementApiService {
 
         const singleRequest = await request.executeTakeFirst();
 
+        if (!singleRequest) {
+          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+        }
+
         const approvers = await this.pgsql
           .selectFrom('finance_reimbursement_approval_matrix')
           .innerJoin(
@@ -229,14 +233,10 @@ export class ReimbursementApiService {
           .where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             '=',
-            singleRequest?.reimbursement_request_id || null,
+            singleRequest.reimbursement_request_id,
           )
           .orderBy('approver_order', 'asc')
           .execute();
-
-        if (!singleRequest) {
-          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
-        }
 
         return Object.assign(singleRequest, {
           approvers: approvers,
