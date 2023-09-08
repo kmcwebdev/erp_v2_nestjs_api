@@ -61,7 +61,7 @@ export class ReimbursementApiService {
     data: GetAllReimbursementRequestType,
   ) {
     const { original_user_id } = user;
-    const default_page_limit = 10;
+    const default_page_limit = 20;
 
     const rawQuery = sql`SELECT 
               frr.reimbursement_request_id,
