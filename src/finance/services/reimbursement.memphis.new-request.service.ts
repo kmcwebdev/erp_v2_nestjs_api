@@ -53,65 +53,16 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           message.getData().toString() || '{}',
         );
 
+        const newRequest = data;
+
         this.logger.log('New request received:' + data.reference_no);
-
-        console.log(data);
-
-        const newRequest = await this.pgsql
-          .selectFrom('finance_reimbursement_requests')
-          .innerJoin(
-            'finance_reimbursement_request_types',
-            'finance_reimbursement_request_types.reimbursement_request_type_id',
-            'finance_reimbursement_requests.reimbursement_request_type_id',
-          )
-          .innerJoin(
-            'finance_reimbursement_expense_types',
-            'finance_reimbursement_expense_types.expense_type_id',
-            'finance_reimbursement_requests.expense_type_id',
-          )
-          .innerJoin(
-            'finance_reimbursement_request_status',
-            'finance_reimbursement_request_status.request_status_id',
-            'finance_reimbursement_requests.request_status_id',
-          )
-          .innerJoin(
-            'users',
-            'users.user_id',
-            'finance_reimbursement_requests.requestor_id',
-          )
-          .select([
-            'finance_reimbursement_requests.reimbursement_request_id',
-            'finance_reimbursement_requests.reference_no',
-            'finance_reimbursement_request_types.reimbursement_request_type_id as request_type_id',
-            'finance_reimbursement_request_types.request_type',
-            'finance_reimbursement_expense_types.expense_type',
-            'finance_reimbursement_request_status.request_status',
-            'finance_reimbursement_requests.amount',
-            'finance_reimbursement_requests.attachment',
-            'finance_reimbursement_requests.date_approve',
-            'finance_reimbursement_requests.dynamic_approvers',
-            'users.user_id',
-            'users.full_name',
-            'users.email',
-            'users.employee_id',
-            'finance_reimbursement_requests.created_at',
-          ])
-          .where(
-            'finance_reimbursement_requests.reimbursement_request_id',
-            '=',
-            data.reimbursement_request_id,
-          )
-          .executeTakeFirst();
-
-        if (!newRequest) {
-          return message.ack();
-        }
 
         await this.pgsql
           .updateTable('finance_reimbursement_requests')
           .set({
-            attachment_mask_name:
-              `${newRequest?.full_name}_${newRequest?.reference_no}`.toUpperCase(),
+            attachment_mask_name: `${
+              newRequest?.full_name ? newRequest.full_name : 'no_name'
+            }_${newRequest?.reference_no}`.toUpperCase(),
           })
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
@@ -127,15 +78,17 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         await this.pgsql
           .updateTable('finance_reimbursement_requests')
           .set({
-            text_search_properties: `${newRequest.full_name} ${
-              newRequest.email
-            } ${newRequest.employee_id} ${
-              newRequest.reference_no
-            } ${refNoWithoutTheLetterAndHypen.join(' ')} ${
-              newRequest.request_type
-            } ${newRequest.expense_type} ${newRequest.amount} ${
-              newRequest.attachment
-            }`,
+            text_search_properties: `${
+              newRequest?.full_name ? newRequest.full_name : 'no_full_name'
+            } ${newRequest.email} ${
+              newRequest?.employee_id
+                ? newRequest.employee_id
+                : 'no_employee_id'
+            } ${newRequest.reference_no} ${refNoWithoutTheLetterAndHypen.join(
+              ' ',
+            )} ${newRequest.request_type} ${newRequest.expense_type} ${
+              newRequest.amount
+            } ${newRequest.attachment}`,
           })
           .where(
             'reimbursement_request_id',
