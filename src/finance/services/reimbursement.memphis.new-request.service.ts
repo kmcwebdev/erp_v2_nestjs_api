@@ -40,9 +40,11 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
       });
 
       this.consumer.on('message', async (message: Message) => {
-        const data: Reimbursement = JSON.parse(
-          message.getData().toString() || '{}',
-        );
+        const data: Reimbursement & {
+          new: boolean;
+        } = JSON.parse(message.getData().toString() || '{}');
+
+        this.logger.log('New request received:' + data.reference_no);
 
         const newRequest = await this.pgsql
           .selectFrom('finance_reimbursement_requests')
