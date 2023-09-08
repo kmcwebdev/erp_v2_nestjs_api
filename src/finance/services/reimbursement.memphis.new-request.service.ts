@@ -185,6 +185,18 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
+          console.log({
+            to: [newRequest.email],
+            requestId: newRequest.reference_no,
+            hrbpManagerName: hrbp_in_users?.full_name || hrbp_in_users.email,
+            fullName: hrbp_in_users?.full_name || hrbp_in_users.email,
+            employeeId: hrbp_in_users?.employee_id || hrbp_in_users.email,
+            expenseType: newRequest.expense_type,
+            expenseDate: newRequest.created_at,
+            amount: newRequest.amount,
+            receiptsAttached: newRequest.attachment,
+          });
+
           await firstValueFrom(
             this.httpService
               .post(
