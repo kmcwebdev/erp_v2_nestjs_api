@@ -14,6 +14,7 @@ import {
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -28,8 +29,16 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
     private readonly httpService: HttpService,
+    private readonly eventEmitter: EventEmitter2,
     @InjectKysely() private readonly pgsql: DB,
   ) {}
+
+  @OnEvent('reimbursement-request-created')
+  async test(data: Reimbursement) {
+    return await this.producer.produce({
+      message: Buffer.from(JSON.stringify(data)),
+    });
+  }
 
   async onModuleInit() {
     try {
@@ -40,9 +49,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
       });
 
       this.consumer.on('message', async (message: Message) => {
-        const data: Reimbursement & {
-          new: boolean;
-        } = JSON.parse(message.getData().toString() || '{}');
+        const data: Reimbursement = JSON.parse(
+          message.getData().toString() || '{}',
+        );
 
         this.logger.log('New request received:' + data.reference_no);
 

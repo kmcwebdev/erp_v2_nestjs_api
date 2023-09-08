@@ -16,6 +16,7 @@ import {
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -25,6 +26,7 @@ export class ReimbursementApiService {
     @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getRequestTypes() {
@@ -515,6 +517,11 @@ export class ReimbursementApiService {
 
         return queryNewReimbursementRequest;
       });
+
+    this.eventEmitter.emit(
+      'reimbursement-request-created',
+      newReimbursementRequest,
+    );
 
     return newReimbursementRequest;
   }
