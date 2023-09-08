@@ -196,6 +196,7 @@ export class ReimbursementApiService {
             'users.full_name',
             'users.email',
             'users.employee_id',
+            'users.hrbp_approver_email',
             'finance_reimbursement_requests.date_approve',
             'finance_reimbursement_requests.created_at',
           ])
@@ -237,7 +238,7 @@ export class ReimbursementApiService {
           throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
         }
 
-        return Object.assign(singleRequest ?? { no_record_found: true }, {
+        return Object.assign(singleRequest, {
           approvers: approvers,
         });
       });
@@ -333,27 +334,52 @@ export class ReimbursementApiService {
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             'finance_reimbursement_approval_matrix.approver_order',
+            'finance_reimbursement_approval_matrix.approver_id',
           ])
           .where('approval_matrix_id', '=', matrixId)
           .where('has_approved', '=', false)
           .orderBy('approver_order', 'asc')
           .executeTakeFirst();
 
-        if (matrix) {
-          const sendToNextApproverResponse = await firstValueFrom(
+        const requestApprover = await trx
+          .selectFrom('finance_reimbursement_approvers')
+          .select([
+            'finance_reimbursement_approvers.signatory_id',
+            'finance_reimbursement_approvers.table_reference',
+            'finance_reimbursement_approvers.is_group_of_approvers',
+          ])
+          .where(
+            'finance_reimbursement_approvers.approver_id',
+            '=',
+            matrix.approver_id,
+          )
+          .executeTakeFirst();
+
+        const requestUser = await trx
+          .selectFrom('users')
+          .select(['users.email'])
+          .where('users.user_id', '=', requestApprover.signatory_id)
+          .executeTakeFirst();
+
+        const request = await this.getOneReimbursementRequest({
+          reimbursement_request_id: matrix.reimbursement_request_id,
+        });
+
+        if (matrix && request) {
+          await firstValueFrom(
             this.httpService
               .post(
                 '/api/email/confirmation',
                 {
-                  to: ['chrisgelosulit@gmail.com'],
-                  requestId: 'test',
-                  hrbpManagerName: 'test',
-                  fullName: 'test',
-                  employeeId: 'test',
-                  expenseType: 'test',
-                  expenseDate: 'test',
-                  amount: 'test',
-                  receiptsAttached: 'test',
+                  to: [requestUser.email],
+                  requestId: request.reference_no,
+                  hrbpManagerName: request.hrbp_approver_email,
+                  fullName: request.full_name || 'no_full_name',
+                  employeeId: request.employee_id || 'no_employee_id',
+                  expenseType: request.expense_type,
+                  expenseDate: request.created_at,
+                  amount: request.amount,
+                  receiptsAttached: request.attachment,
                 },
                 {
                   baseURL: this.configService.get('FRONT_END_URL'),
@@ -367,8 +393,6 @@ export class ReimbursementApiService {
                 }),
               ),
           );
-
-          this.logger.log(sendToNextApproverResponse);
         }
 
         return updateMatrix;
