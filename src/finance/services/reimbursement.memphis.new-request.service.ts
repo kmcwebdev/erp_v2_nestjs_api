@@ -97,13 +97,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           )
           .execute();
 
-        const requestor = await this.pgsql
-          .selectFrom('users')
-          .select(['users.hrbp_approver_email'])
-          .where('user_id', '=', newRequest.user_id)
-          .executeTakeFirst();
-
-        if (!requestor.hrbp_approver_email) {
+        if (!newRequest.hrbp_approver_email) {
           await this.pgsql
             .updateTable('finance_reimbursement_requests')
             .set({
@@ -128,7 +122,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               'users.full_name',
               'users.email',
             ])
-            .where('email', '=', requestor.hrbp_approver_email)
+            .where('email', '=', newRequest.hrbp_approver_email)
             .executeTakeFirst();
 
           const hrbp_in_approvers = await this.pgsql

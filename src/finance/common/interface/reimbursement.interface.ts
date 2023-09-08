@@ -17,5 +17,6 @@ export interface Reimbursement {
   client_name: string | null;
   email: string | null;
   employee_id: string | null;
+  hrbp_approver_email: string | null;
   created_at: number;
 }

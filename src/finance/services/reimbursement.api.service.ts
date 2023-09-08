@@ -510,6 +510,7 @@ export class ReimbursementApiService {
             'users.full_name',
             'users.client_name',
             'users.email',
+            'users.hrbp_approver_email',
             'date_approve',
             'users.employee_id',
             'finance_reimbursement_requests.created_at',
