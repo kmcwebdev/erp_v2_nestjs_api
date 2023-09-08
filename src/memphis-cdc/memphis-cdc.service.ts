@@ -5,9 +5,6 @@ import { USERS_TABLE } from 'src/users/common/constant';
 import { User } from 'src/users/common/interface/user.interface';
 import { FINANCE_REIMBURSEMENT_REQUESTS_TABLE } from './common/constant';
 import { Reimbursement } from 'src/finance/common/interface/reimbursement.interface';
-import { NewUserMemphisService } from 'src/users/services/new-user.memphis.service';
-import { UpdateUserMemphisService } from 'src/users/services/update-user.memphis.service';
-import { ReimbursementMemphisNewRequestService } from 'src/finance/services/reimbursement.memphis.new-request.service';
 
 @Injectable()
 export class MemphisCdcService implements OnModuleInit {
@@ -15,12 +12,7 @@ export class MemphisCdcService implements OnModuleInit {
   consumer: Consumer;
   producer: Producer;
 
-  constructor(
-    private readonly memphisService: MemphisService,
-    private readonly newUserMemphisService: NewUserMemphisService,
-    private readonly updateUserMemphisService: UpdateUserMemphisService,
-    private readonly reimbursementMemphisNewRequestService: ReimbursementMemphisNewRequestService,
-  ) {}
+  constructor(private readonly memphisService: MemphisService) {}
 
   async onModuleInit(): Promise<void> {
     try {
@@ -47,22 +39,16 @@ export class MemphisCdcService implements OnModuleInit {
         if (table === USERS_TABLE && before === null) {
           const newUser = after as User;
 
-          await this.newUserMemphisService.producer.produce({
-            message: Buffer.from(
-              JSON.stringify(Object.assign(newUser, { new: true })),
-            ),
-          });
+          console.log(JSON.stringify(Object.assign(newUser, { new: true })));
         }
 
         // User updated
         if (table === USERS_TABLE && before !== null && after !== null) {
           const updatedUser = after as User;
 
-          await this.updateUserMemphisService.producer.produce({
-            message: Buffer.from(
-              JSON.stringify(Object.assign(updatedUser, { updated: true })),
-            ),
-          });
+          console.log(
+            JSON.stringify(Object.assign(updatedUser, { updated: true })),
+          );
         }
 
         // User deleted
@@ -75,13 +61,7 @@ export class MemphisCdcService implements OnModuleInit {
         if (table === FINANCE_REIMBURSEMENT_REQUESTS_TABLE && before === null) {
           const newReimbursementRequest = after as Reimbursement;
 
-          await this.reimbursementMemphisNewRequestService.producer.produce({
-            message: Buffer.from(
-              JSON.stringify(
-                Object.assign(newReimbursementRequest, { new: true }),
-              ),
-            ),
-          });
+          console.log(Object.assign(newReimbursementRequest, { new: true }));
         }
 
         if (table === FINANCE_REIMBURSEMENT_REQUESTS_TABLE && after === null) {

@@ -52,7 +52,7 @@ export class AuthService {
     user: RequestUser,
     data: UpdatePropelauthUserRoleType,
   ) {
-    console.log(user);
+    console.log(user.permissions);
 
     const updatedUserRole = await propelauth.changeUserRoleInOrg({
       orgId: data.org_id,
