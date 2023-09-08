@@ -341,26 +341,6 @@ export class ReimbursementApiService {
           .orderBy('approver_order', 'asc')
           .executeTakeFirst();
 
-        const requestApprover = await trx
-          .selectFrom('finance_reimbursement_approvers')
-          .select([
-            'finance_reimbursement_approvers.signatory_id',
-            'finance_reimbursement_approvers.table_reference',
-            'finance_reimbursement_approvers.is_group_of_approvers',
-          ])
-          .where(
-            'finance_reimbursement_approvers.approver_id',
-            '=',
-            matrix.approver_id,
-          )
-          .executeTakeFirst();
-
-        const requestUser = await trx
-          .selectFrom('users')
-          .select(['users.email'])
-          .where('users.user_id', '=', requestApprover.signatory_id)
-          .executeTakeFirst();
-
         const request = await this.getOneReimbursementRequest({
           reimbursement_request_id: matrix.reimbursement_request_id,
         });
@@ -371,7 +351,7 @@ export class ReimbursementApiService {
               .post(
                 '/api/email/confirmation',
                 {
-                  to: [requestUser.email],
+                  to: [user.email],
                   requestId: request.reference_no,
                   hrbpManagerName: request.hrbp_approver_email,
                   fullName: request.full_name || 'no_full_name',
