@@ -15,7 +15,6 @@ import {
   UNSCHEDULED_REQUEST,
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
-// import { catchError, firstValueFrom } from 'rxjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -153,97 +152,91 @@ export class ReimbursementApiService {
   }
 
   async getOneReimbursementRequest(params: GetOneReimbursementRequestType) {
-    const singleRequest = await this.pgsql
-      .transaction()
-      .execute(async (trx) => {
-        const reimbursement = await trx
-          .selectFrom('finance_reimbursement_requests')
-          .innerJoin(
-            'finance_reimbursement_request_types',
-            'finance_reimbursement_request_types.reimbursement_request_type_id',
-            'finance_reimbursement_requests.reimbursement_request_type_id',
-          )
-          .innerJoin(
-            'finance_reimbursement_expense_types',
-            'finance_reimbursement_expense_types.expense_type_id',
-            'finance_reimbursement_requests.expense_type_id',
-          )
-          .innerJoin(
-            'finance_reimbursement_request_status',
-            'finance_reimbursement_request_status.request_status_id',
-            'finance_reimbursement_requests.request_status_id',
-          )
-          .innerJoin(
-            'finance_reimbursement_approval_matrix',
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-            'finance_reimbursement_requests.reimbursement_request_id',
-          )
-          .innerJoin(
-            'users',
-            'users.user_id',
-            'finance_reimbursement_requests.requestor_id',
-          )
-          .select([
-            'finance_reimbursement_requests.reimbursement_request_id',
-            'finance_reimbursement_approval_matrix.approval_matrix_id',
-            'finance_reimbursement_requests.reference_no',
-            'finance_reimbursement_request_types.request_type',
-            'finance_reimbursement_expense_types.expense_type',
-            'finance_reimbursement_request_status.request_status',
-            'finance_reimbursement_requests.amount',
-            'finance_reimbursement_requests.attachment',
-            'finance_reimbursement_requests.attachment_mask_name',
-            'finance_reimbursement_requests.remarks',
-            'users.full_name',
-            'users.email',
-            'users.employee_id',
-            'users.hrbp_approver_email',
-            'finance_reimbursement_requests.date_approve',
-            'finance_reimbursement_requests.created_at',
-          ])
-          .where(
-            'finance_reimbursement_requests.reimbursement_request_id',
-            '=',
-            params.reimbursement_request_id,
-          )
-          .executeTakeFirst();
+    const singleRequest = await sql`
+          WITH ApproverAggregation AS (
+          SELECT
+              frr.reimbursement_request_id,
+              json_agg(
+                  json_build_object(
+                      'approval_matrix_id', fram.approval_matrix_id,
+                      'approver_id', fram.approver_id,
+                      'approver_order', fram.approver_order,
+                      'has_approved', fram.has_approved,
+                      'performed_by_user_id', fram.performed_by_user_id,
+                      'description', fram.description,
+                      'approver_name',
+                          CASE
+                              WHEN fra.table_reference = 'users' THEN u.full_name
+                              WHEN fra.table_reference = 'groups' THEN g.group_name
+                          END,
+                      'is_group_of_approvers', fra.is_group_of_approvers,
+                      'table_reference', fra.table_reference
+                  )
+                  ORDER BY fram.approver_order ASC
+              ) AS approvers
+          FROM
+              finance_reimbursement_requests frr
+              JOIN finance_reimbursement_approval_matrix fram ON frr.reimbursement_request_id = fram.reimbursement_request_id
+              JOIN finance_reimbursement_approvers fra ON fram.approver_id = fra.approver_id
+              LEFT JOIN users u ON fra.signatory_id = u.user_id AND fra.table_reference = 'users'
+              LEFT JOIN groups g ON fra.signatory_id = g.group_id AND fra.table_reference = 'groups'
+          WHERE
+              frr.reimbursement_request_id = ${params.reimbursement_request_id}
+          GROUP BY
+              frr.reimbursement_request_id
+      ), NextApprover AS (
+          SELECT
+              reimbursement_request_id,
+              MIN(approver_order) AS next_approver_order
+          FROM
+              finance_reimbursement_approval_matrix
+          WHERE
+              has_approved = false
+          GROUP BY
+              reimbursement_request_id
+      )
 
-        if (!reimbursement) {
-          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
-        }
+      SELECT
+        frr.reimbursement_request_id,
+        frrt.request_type,
+        fret.expense_type,
+        frr.reference_no,
+        frr.attachment,
+        frr.attachment_mask_name,
+        frr.amount,
+        frr.request_status_id,
+        frr.remarks,
+        frr.requestor_id,
+        u.full_name,
+        u.email,
+        u.employee_id,
+        u.client_id,
+        u.client_name,
+        u.hrbp_approver_email,
+        frr.dynamic_approvers,
+        frr.date_approve,
+        fram.approval_matrix_id AS next_approval_matrix_id,
+        na.next_approver_order,
+        frr.created_at,
+        aa.approvers
+    FROM
+        finance_reimbursement_requests frr
+        LEFT JOIN users u ON frr.requestor_id = u.user_id
+        LEFT JOIN finance_reimbursement_request_types frrt ON frr.reimbursement_request_type_id = frrt.reimbursement_request_type_id
+        LEFT JOIN finance_reimbursement_expense_types fret ON frr.expense_type_id = fret.expense_type_id
+        LEFT JOIN ApproverAggregation aa ON frr.reimbursement_request_id = aa.reimbursement_request_id
+        LEFT JOIN NextApprover na ON frr.reimbursement_request_id = na.reimbursement_request_id
+        LEFT JOIN finance_reimbursement_approval_matrix fram ON frr.reimbursement_request_id = fram.reimbursement_request_id
+            AND na.next_approver_order = fram.approver_order
+    WHERE
+        frr.reimbursement_request_id = ${params.reimbursement_request_id};
+    `.execute(this.pgsql);
 
-        const approvers = await this.pgsql
-          .selectFrom('finance_reimbursement_approval_matrix')
-          .innerJoin(
-            'finance_reimbursement_approvers',
-            'finance_reimbursement_approvers.approver_id',
-            'finance_reimbursement_approval_matrix.approver_id',
-          )
-          .select([
-            'finance_reimbursement_approval_matrix.approval_matrix_id',
-            'finance_reimbursement_approval_matrix.approver_order',
-            'finance_reimbursement_approval_matrix.has_approved',
-            'finance_reimbursement_approval_matrix.performed_by_user_id',
-            'finance_reimbursement_approval_matrix.description',
-            'finance_reimbursement_approval_matrix.updated_at as date_approve',
-            'finance_reimbursement_approvers.signatory_id',
-            'finance_reimbursement_approvers.is_group_of_approvers',
-            'finance_reimbursement_approvers.table_reference',
-          ])
-          .where(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-            '=',
-            reimbursement.reimbursement_request_id,
-          )
-          .orderBy('approver_order', 'asc')
-          .execute();
+    if (!singleRequest.rows.length) {
+      throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+    }
 
-        return Object.assign(reimbursement, {
-          approvers: approvers,
-        });
-      });
-
-    return singleRequest;
+    return singleRequest.rows[0];
   }
 
   async getAllForApprovalReimbursementRequest(user: RequestUser) {
@@ -318,15 +311,40 @@ export class ReimbursementApiService {
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const updateMatrix = await trx
+        const updatedReimbursementMatrix = await trx
           .updateTable('finance_reimbursement_approval_matrix')
           .set({
             has_approved: true,
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
-          .where('approval_matrix_id', '=', matrixId)
+          .returning([
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          ])
+          .where(
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            '=',
+            matrixId,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          // .where(
+          //   sql`SELECT finance_reimbursement_requests.reimbursement_request_id
+          //       FROM finance_reimbursement_requests AS frr
+          //       INNER JOIN finance_reimbursement_approval_matrix AS fram
+          //         ON fram.reimbursement_request_id = frr.reimbursement_request_id
+          //       WHERE `,
+          // )
           .executeTakeFirst();
+
+        if (!updatedReimbursementMatrix) {
+          return {
+            message: 'This request is already approved',
+          };
+        }
 
         const matrix = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
@@ -336,45 +354,44 @@ export class ReimbursementApiService {
             'finance_reimbursement_approval_matrix.approver_order',
             'finance_reimbursement_approval_matrix.approver_id',
           ])
-          .where('approval_matrix_id', '=', matrixId)
-          .where('has_approved', '=', false)
-          .orderBy('approver_order', 'asc')
+          .where(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            '=',
+            updatedReimbursementMatrix.reimbursement_request_id,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          .orderBy(
+            'finance_reimbursement_approval_matrix.approver_order',
+            'asc',
+          )
           .executeTakeFirst();
 
-        const request = await this.getOneReimbursementRequest({
-          reimbursement_request_id: matrix.reimbursement_request_id,
-        });
+        if (matrix) {
+          await this.pgsql
+            .updateTable('finance_reimbursement_requests')
+            .set({
+              next_approver_order: matrix.approver_order,
+            })
+            .where(
+              'finance_reimbursement_requests.reimbursement_request_id',
+              '=',
+              updatedReimbursementMatrix.reimbursement_request_id,
+            )
+            .execute();
 
-        if (matrix && request) {
-          // await firstValueFrom(
-          //   this.httpService
-          //     .post(
-          //       '/api/email/confirmation',
-          //       {
-          //         to: [user.email],
-          //         requestId: request.reference_no,
-          //         hrbpManagerName: request.hrbp_approver_email,
-          //         fullName: request.full_name || 'no_full_name',
-          //         employeeId: request.employee_id || 'no_employee_id',
-          //         expenseType: request.expense_type,
-          //         expenseDate: request.created_at,
-          //         amount: request.amount,
-          //         receiptsAttached: request.attachment,
-          //       },
-          //       {
-          //         baseURL: this.configService.get('FRONT_END_URL'),
-          //       },
-          //     )
-          //     .pipe(
-          //       catchError(() => {
-          //         this.logger.log("Failed to send to next approver's email");
-          //         throw Error('Failed to send to next approver');
-          //       }),
-          //     ),
-          // );
+          this.logger.log('Sending email to next approver');
         }
 
-        return updateMatrix;
+        const reimbursement = await this.getOneReimbursementRequest({
+          reimbursement_request_id:
+            updatedReimbursementMatrix.reimbursement_request_id,
+        });
+
+        return reimbursement;
       });
 
     return approveReimbursementRequest;

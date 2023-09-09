@@ -89,16 +89,17 @@ export class FinanceController {
   }
 
   // TODO: Implement DTO here.
+  @HttpCode(HttpStatus.OK)
   @Post('/reimbursement/requests/approve')
   approveReimbursementRequest(
     @Req() req: Request,
-    @Body() body: { matrixId: string },
+    @Body() body: { approval_matrix_id: string },
   ) {
     const user = req['user'] as RequestUser;
 
     return this.financeReimbursementApiService.approveReimbursementRequest(
       user,
-      body.matrixId,
+      body.approval_matrix_id,
     );
   }
 

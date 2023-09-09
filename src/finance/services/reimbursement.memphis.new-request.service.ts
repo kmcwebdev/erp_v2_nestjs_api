@@ -220,7 +220,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               .pipe(
                 catchError((error: AxiosError) => {
                   this.logger.log(
-                    'Failed to send confirmation email to requestor',
+                    '[memphis_new_request]: Failed to send confirmation email to requestor',
                   );
 
                   console.log(error?.response?.data);
@@ -252,7 +252,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               .pipe(
                 catchError((error: AxiosError) => {
                   this.logger.log(
-                    'Failed to send confirmation email to requestor hrbp',
+                    '[memphis_new_request]: Failed to send confirmation email to requestor hrbp',
                   );
 
                   console.log(error?.response?.data);
