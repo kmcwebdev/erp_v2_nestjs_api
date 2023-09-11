@@ -24,6 +24,7 @@ import type { Request, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
+import { ReimbursementRequestApprovalDTO } from './common/dto/reimbursementRequestApproval.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -88,18 +89,17 @@ export class FinanceController {
     );
   }
 
-  // TODO: Implement DTO here.
   @HttpCode(HttpStatus.OK)
   @Post('/reimbursement/requests/approve')
   approveReimbursementRequest(
     @Req() req: Request,
-    @Body() body: { approval_matrix_id: string },
+    @Body() body: ReimbursementRequestApprovalDTO,
   ) {
     const user = req['user'] as RequestUser;
 
     return this.financeReimbursementApiService.approveReimbursementRequest(
       user,
-      body.approval_matrix_id,
+      body.approval_matrix_ids,
     );
   }
 
