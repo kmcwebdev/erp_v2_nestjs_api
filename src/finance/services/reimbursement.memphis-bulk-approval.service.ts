@@ -140,18 +140,27 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
           message.getData().toString() || '{}',
         );
 
-        data.matrixIds.forEach(async (matrixId) => {
+        const promises = data.matrixIds.map(async (matrixId) => {
           const approved = await this.approveRequest(data.user, matrixId);
 
-          this.logger.log(
-            'Request id approved: ' + approved &&
-              'reimbursement_request_id' in approved
+          const logMessage =
+            'Request id approved: ' +
+            (approved && 'reimbursement_request_id' in approved
               ? approved.reimbursement_request_id
               : 'message' in approved
               ? approved.message
-              : 'Somethings not right.',
-          );
+              : 'Somethings not right.');
+
+          return logMessage;
         });
+
+        Promise.all(promises)
+          .then((logMessages) => {
+            logMessages.forEach((message) => this.logger.log(message));
+          })
+          .catch((error) => {
+            this.logger.error('An error occurred:', error);
+          });
 
         message.ack();
       });
