@@ -172,7 +172,8 @@ export class ReimbursementApiService {
                               WHEN fra.table_reference = 'groups' THEN g.group_name
                           END,
                       'is_group_of_approvers', fra.is_group_of_approvers,
-                      'table_reference', fra.table_reference
+                      'table_reference', fra.table_reference,
+                      'updated_at', fram.updated_at,
                   )
                   ORDER BY fram.approver_order ASC
               ) AS approvers
