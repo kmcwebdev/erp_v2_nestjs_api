@@ -25,6 +25,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
 import { ReimbursementRequestApprovalDTO } from './common/dto/reimbursementRequestApproval.dto';
+import { CancelReimbursementRequestDTO } from './common/dto/cancelReimbursementRequest.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -100,6 +101,20 @@ export class FinanceController {
     return this.financeReimbursementApiService.approveReimbursementRequest(
       user,
       body.approval_matrix_ids,
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/cancel')
+  cancelReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: CancelReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as RequestUser;
+
+    return this.financeReimbursementApiService.cancelReimbursementRequest(
+      user,
+      body,
     );
   }
 
