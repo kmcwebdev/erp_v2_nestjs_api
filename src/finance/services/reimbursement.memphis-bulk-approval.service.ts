@@ -29,13 +29,6 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
     @InjectKysely() private readonly pgsql: DB,
   ) {}
 
-  @OnEvent('reimbursement-request-bulk-approval')
-  async test(data: { user: RequestUser; matrixIds: string[] }) {
-    return await this.producer.produce({
-      message: Buffer.from(JSON.stringify(data)),
-    });
-  }
-
   async approveRequest(
     user: RequestUser,
     matrixId: string,
@@ -121,6 +114,13 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
       });
 
     return approveReimbursementRequest;
+  }
+
+  @OnEvent('reimbursement-request-bulk-approval')
+  async test(data: { user: RequestUser; matrixIds: string[] }) {
+    return await this.producer.produce({
+      message: Buffer.from(JSON.stringify(data)),
+    });
   }
 
   async onModuleInit() {
