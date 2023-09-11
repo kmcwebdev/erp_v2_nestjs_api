@@ -309,7 +309,7 @@ export class ReimbursementApiService {
     return rawQuery.rows;
   }
 
-  async approveReimbursementRequest(user: RequestUser, matrixId: string) {
+  async approveReimbursementRequest(user: RequestUser, matrixId: string[]) {
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
@@ -326,7 +326,7 @@ export class ReimbursementApiService {
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
-            matrixId,
+            matrixId[0],
           )
           .where(
             'finance_reimbursement_approval_matrix.has_approved',
