@@ -16,9 +16,6 @@ const ReimbursementRequestApprovalSchema = z.object({
     )
     .min(1, {
       message: 'Approval matrix ids must at least 1 record',
-    })
-    .max(1, {
-      message: '1 max for now',
     }),
 });
 
