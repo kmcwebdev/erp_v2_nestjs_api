@@ -204,7 +204,7 @@ export class ReimbursementApiService {
         frr.attachment,
         frr.attachment_mask_name,
         frr.amount,
-        frr.request_status_id,
+        frrs.request_status,
         frr.remarks,
         frr.requestor_id,
         u.full_name,
@@ -224,6 +224,7 @@ export class ReimbursementApiService {
         LEFT JOIN users u ON frr.requestor_id = u.user_id
         LEFT JOIN finance_reimbursement_request_types frrt ON frr.reimbursement_request_type_id = frrt.reimbursement_request_type_id
         LEFT JOIN finance_reimbursement_expense_types fret ON frr.expense_type_id = fret.expense_type_id
+        LEFT JOIN finance_reimbursement_request_status frrs ON frrs.request_status_id = frr.request_status_id
         LEFT JOIN ApproverAggregation aa ON frr.reimbursement_request_id = aa.reimbursement_request_id
         LEFT JOIN NextApprover na ON frr.reimbursement_request_id = na.reimbursement_request_id
         LEFT JOIN finance_reimbursement_approval_matrix fram ON frr.reimbursement_request_id = fram.reimbursement_request_id
@@ -277,32 +278,32 @@ export class ReimbursementApiService {
     }
 
     const rawQuery = await sql`SELECT 
-                        fram.approval_matrix_id,
-                        frr.reimbursement_request_id,
-                        frr.reference_no,
-                        frrt.request_type,
-                        fret.expense_type,
-                        frrs.request_status,
-                        frr.amount,
-                        fram.approver_id,
-                        fram.approver_order,
-                        fram.has_approved,
-                        fram.performed_by_user_id,
-                        fram.description,
-                        fram.updated_at as date_approve,
-                        frr.created_at
-                      FROM finance_reimbursement_approval_matrix AS fram
-                      INNER JOIN finance_reimbursement_requests AS frr
-                        ON frr.reimbursement_request_id = fram.reimbursement_request_id
-                      INNER JOIN finance_reimbursement_request_types AS frrt
-                        ON frrt.reimbursement_request_type_id = frr.reimbursement_request_type_id
-                      INNER JOIN finance_reimbursement_expense_types AS fret
-                        ON frr.expense_type_id = fret.expense_type_id
-                      INNER JOIN finance_reimbursement_request_status AS frrs
-                        ON frrs.request_status_id = frr.request_status_id
-                      WHERE fram.approver_id IN (${approverIds.join(',')})
-                      AND fram.has_approved = false
-                      ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
+          fram.approval_matrix_id,
+          frr.reimbursement_request_id,
+          frr.reference_no,
+          frrt.request_type,
+          fret.expense_type,
+          frrs.request_status,
+          frr.amount,
+          fram.approver_id,
+          fram.approver_order,
+          fram.has_approved,
+          fram.performed_by_user_id,
+          fram.description,
+          fram.updated_at as date_approve,
+          frr.created_at
+        FROM finance_reimbursement_approval_matrix AS fram
+        INNER JOIN finance_reimbursement_requests AS frr
+          ON frr.reimbursement_request_id = fram.reimbursement_request_id
+        INNER JOIN finance_reimbursement_request_types AS frrt
+          ON frrt.reimbursement_request_type_id = frr.reimbursement_request_type_id
+        INNER JOIN finance_reimbursement_expense_types AS fret
+          ON frr.expense_type_id = fret.expense_type_id
+        INNER JOIN finance_reimbursement_request_status AS frrs
+          ON frrs.request_status_id = frr.request_status_id
+        WHERE fram.approver_id IN (${approverIds.join(',')})
+        AND fram.has_approved = false
+        ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
 
     return rawQuery.rows;
   }
@@ -331,13 +332,6 @@ export class ReimbursementApiService {
             '=',
             false,
           )
-          // .where(
-          //   sql`SELECT finance_reimbursement_requests.reimbursement_request_id
-          //       FROM finance_reimbursement_requests AS frr
-          //       INNER JOIN finance_reimbursement_approval_matrix AS fram
-          //         ON fram.reimbursement_request_id = frr.reimbursement_request_id
-          //       WHERE `,
-          // )
           .executeTakeFirst();
 
         if (!updatedReimbursementMatrix) {
