@@ -65,7 +65,7 @@
     "@types/hpp": "^0.2.2",
     "@types/jest": "^29.5.2",
     "@types/mssql": "^8.1.2",
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.6.0",
     "@types/pg": "^8.10.2",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
