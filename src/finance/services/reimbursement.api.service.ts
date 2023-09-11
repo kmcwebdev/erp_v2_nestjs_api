@@ -16,6 +16,7 @@ import {
 } from '../common/constant';
 import { HttpService } from '@nestjs/axios';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ReimbursementRequest } from '../common/interface/getOneRequest.interface';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -152,7 +153,7 @@ export class ReimbursementApiService {
   }
 
   async getOneReimbursementRequest(params: GetOneReimbursementRequestType) {
-    const singleRequest = await sql`
+    const singleRequest = await sql<ReimbursementRequest>`
           WITH ApproverAggregation AS (
           SELECT
               frr.reimbursement_request_id,
@@ -309,7 +310,18 @@ export class ReimbursementApiService {
     return rawQuery.rows;
   }
 
-  async approveReimbursementRequest(user: RequestUser, matrixId: string[]) {
+  async approveReimbursementRequest(user: RequestUser, matrixIds: string[]) {
+    if (matrixIds.length > 1) {
+      this.eventEmitter.emit('reimbursement-request-bulk-approval', {
+        user,
+        matrixIds,
+      });
+
+      return {
+        message: 'Request approval queue started.',
+      };
+    }
+
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
@@ -326,7 +338,7 @@ export class ReimbursementApiService {
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
-            matrixId[0],
+            matrixIds[0],
           )
           .where(
             'finance_reimbursement_approval_matrix.has_approved',

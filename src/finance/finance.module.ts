@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
 import { HttpModule } from '@nestjs/axios';
 import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
+import { ReimbursementMemphisBulkApprovalService } from './services/reimbursement.memphis-bulk-approval.service';
 
 @Module({
   imports: [ScheduleModule.forRoot(), HttpModule, MemphisDevModule],
@@ -22,10 +23,12 @@ import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
     ReimbursementCronService,
     ReimbursementMemphisSendEmailService,
     ReimbursementMemphisNewRequestService,
+    ReimbursementMemphisBulkApprovalService,
   ],
   exports: [
     ReimbursementMemphisSendEmailService,
     ReimbursementMemphisNewRequestService,
+    ReimbursementMemphisBulkApprovalService,
   ],
 })
 export class FinanceModule {}
