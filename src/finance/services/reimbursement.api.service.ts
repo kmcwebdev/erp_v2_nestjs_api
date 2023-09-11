@@ -291,9 +291,16 @@ export class ReimbursementApiService {
           fram.approver_id,
           fram.approver_order,
           fram.has_approved,
+          fram.has_rejected,
           fram.performed_by_user_id,
           fram.description,
-          fram.updated_at as date_approve,
+          fram.updated_at,
+          u.full_name,
+          u.email,
+          u.employee_id,
+          u.client_id,
+          u.client_name,
+          u.hrbp_approver_email,
           frr.created_at
         FROM finance_reimbursement_approval_matrix AS fram
         INNER JOIN finance_reimbursement_requests AS frr
@@ -304,6 +311,8 @@ export class ReimbursementApiService {
           ON frr.expense_type_id = fret.expense_type_id
         INNER JOIN finance_reimbursement_request_status AS frrs
           ON frrs.request_status_id = frr.request_status_id
+        INNER JOIN users AS u
+          ON u.user_id = frr.requestor_id
         WHERE fram.approver_id IN (${approverIds.join(',')})
         AND fram.has_approved = false
         ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
