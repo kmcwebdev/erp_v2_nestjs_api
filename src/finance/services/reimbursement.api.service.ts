@@ -162,6 +162,7 @@ export class ReimbursementApiService {
                       'approver_id', fram.approver_id,
                       'approver_order', fram.approver_order,
                       'has_approved', fram.has_approved,
+                      'has_rejected', fram.has_rejected,
                       'performed_by_user_id', fram.performed_by_user_id,
                       'description', fram.description,
                       'approver_name',
