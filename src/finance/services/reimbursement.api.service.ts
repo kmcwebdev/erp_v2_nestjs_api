@@ -17,6 +17,7 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ReimbursementRequest } from '../common/interface/getOneRequest.interface';
+import { CancelReimbursementRequestType } from '../common/dto/cancelReimbursementRequest.dto';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -78,6 +79,7 @@ export class ReimbursementApiService {
               u.employee_id,
               u.hrbp_approver_email,
               frr.date_approve,
+              frr.is_cancelled,
               frr.created_at,
               frr.cursor_id::TEXT
               ${
@@ -220,6 +222,7 @@ export class ReimbursementApiService {
         frr.date_approve,
         fram.approval_matrix_id AS next_approval_matrix_id,
         na.next_approver_order,
+        frr.is_cancelled,
         frr.created_at,
         aa.approvers
     FROM
@@ -281,8 +284,8 @@ export class ReimbursementApiService {
     }
 
     const rawQuery = await sql`SELECT 
-          fram.approval_matrix_id,
           frr.reimbursement_request_id,
+          fram.approval_matrix_id,
           frr.reference_no,
           frrt.request_type,
           fret.expense_type,
@@ -301,6 +304,7 @@ export class ReimbursementApiService {
           u.client_id,
           u.client_name,
           u.hrbp_approver_email,
+          frr.is_cancelled,
           frr.created_at
         FROM finance_reimbursement_approval_matrix AS fram
         INNER JOIN finance_reimbursement_requests AS frr
@@ -315,6 +319,7 @@ export class ReimbursementApiService {
           ON u.user_id = frr.requestor_id
         WHERE fram.approver_id IN (${approverIds.join(',')})
         AND fram.has_approved = false
+        AND frr.is_cancelled = false
         ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
 
     return rawQuery.rows;
@@ -342,6 +347,11 @@ export class ReimbursementApiService {
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
+          .leftJoin(
+            'finance_reimbursement_requests',
+            'reimbursement_request_id',
+            'reimbursement_request_id',
+          )
           .returning([
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           ])
@@ -355,11 +365,12 @@ export class ReimbursementApiService {
             '=',
             false,
           )
+          .where('finance_reimbursement_requests.is_cancelled', '=', false)
           .executeTakeFirst();
 
         if (!updatedReimbursementMatrix) {
           return {
-            message: 'This request is already approved',
+            message: 'This request is already approved or cancelled',
           };
         }
 
@@ -552,6 +563,7 @@ export class ReimbursementApiService {
             'date_approve',
             'users.employee_id',
             'finance_reimbursement_requests.date_approve',
+            'finance_reimbursement_requests.is_cancelled',
             'finance_reimbursement_requests.created_at',
           ])
           .where(
@@ -591,5 +603,34 @@ export class ReimbursementApiService {
     );
 
     return fileHandle;
+  }
+
+  async cancelReimbursementRequest(
+    user: RequestUser,
+    data: CancelReimbursementRequestType,
+  ) {
+    const cancellRequest = await this.pgsql
+      .updateTable('finance_reimbursement_requests')
+      .set({
+        is_cancelled: true,
+      })
+      .returning(['finance_reimbursement_requests.reimbursement_request_id'])
+      .where(
+        'finance_reimbursement_requests.requestor_id',
+        '=',
+        user.original_user_id,
+      )
+      .where(
+        'finance_reimbursement_requests.reimbursement_request_id',
+        '=',
+        data.reimbursement_request_id,
+      )
+      .executeTakeFirst();
+
+    if (!cancellRequest) {
+      throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+    }
+
+    return cancellRequest;
   }
 }

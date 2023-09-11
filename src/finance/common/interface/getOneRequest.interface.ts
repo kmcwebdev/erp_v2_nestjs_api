@@ -19,6 +19,7 @@ export interface ReimbursementRequest {
   date_approve: string | null;
   next_approval_matrix_id: string;
   next_approver_order: number;
+  is_cancelled: boolean;
   created_at: string;
   approvers: Approver[];
 }
