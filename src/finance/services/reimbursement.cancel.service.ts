@@ -3,6 +3,7 @@ import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface'
 import { CancelReimbursementRequestType } from '../common/dto/cancelReimbursementRequest.dto';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
+import { CANCELLED_REQUEST } from '../common/constant';
 
 @Injectable()
 export class ReimbursementCancelService {
@@ -16,6 +17,7 @@ export class ReimbursementCancelService {
         .updateTable('finance_reimbursement_requests')
         .set({
           is_cancelled: true,
+          request_status_id: CANCELLED_REQUEST,
         })
         .returning(['finance_reimbursement_requests.reimbursement_request_id'])
         .where('finance_reimbursement_requests.is_cancelled', '=', false)

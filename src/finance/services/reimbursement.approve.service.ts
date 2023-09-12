@@ -101,7 +101,7 @@ export class ReimbursementApproveService {
             .executeTakeFirst();
 
           if (matrix) {
-            await this.pgsql
+            await trx
               .updateTable('finance_reimbursement_requests')
               .set({
                 next_approver_order: matrix.approver_order,
