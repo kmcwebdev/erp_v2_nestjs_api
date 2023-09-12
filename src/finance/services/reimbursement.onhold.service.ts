@@ -57,6 +57,7 @@ export class ReimbursementOhHoldService {
           reimbursement_request_id:
             reimbursementRequest.reimbursement_request_id,
           request_status: 'On-hold',
+          onhold_reason: data.onhold_reason,
         };
       });
 
