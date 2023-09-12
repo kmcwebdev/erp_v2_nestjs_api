@@ -28,7 +28,7 @@ export class ReimbursementRejectService {
               description: data.rejection_reason,
               updated_at: new Date(),
             })
-            .leftJoin(
+            .innerJoin(
               'finance_reimbursement_requests',
               'reimbursement_request_id',
               'reimbursement_request_id',
@@ -60,30 +60,6 @@ export class ReimbursementRejectService {
             };
           }
 
-          const matrix = await trx
-            .selectFrom('finance_reimbursement_approval_matrix')
-            .select([
-              'finance_reimbursement_approval_matrix.approval_matrix_id',
-              'finance_reimbursement_approval_matrix.reimbursement_request_id',
-              'finance_reimbursement_approval_matrix.approver_order',
-              'finance_reimbursement_approval_matrix.approver_id',
-            ])
-            .where(
-              'finance_reimbursement_approval_matrix.reimbursement_request_id',
-              '=',
-              updatedReimbursementMatrix.reimbursement_request_id,
-            )
-            .where(
-              'finance_reimbursement_approval_matrix.has_rejected',
-              '=',
-              false,
-            )
-            .orderBy(
-              'finance_reimbursement_approval_matrix.approver_order',
-              'asc',
-            )
-            .executeTakeFirst();
-
           await trx
             .updateTable('finance_reimbursement_requests')
             .set({
@@ -95,22 +71,6 @@ export class ReimbursementRejectService {
               updatedReimbursementMatrix.reimbursement_request_id,
             )
             .execute();
-
-          if (matrix) {
-            await trx
-              .updateTable('finance_reimbursement_requests')
-              .set({
-                next_approver_order: matrix.approver_order,
-              })
-              .where(
-                'finance_reimbursement_requests.reimbursement_request_id',
-                '=',
-                updatedReimbursementMatrix.reimbursement_request_id,
-              )
-              .execute();
-
-            this.logger.log('Sending email to next approver');
-          }
 
           const reimbursement = await this.reimbursementGetOneService.get({
             reimbursement_request_id:
