@@ -19,7 +19,7 @@ export class ReimbursementCancelService {
     const cancelRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const request = await trx
+        const reimbursementRequest = await trx
           .updateTable('finance_reimbursement_requests')
           .set({
             is_cancelled: true,
@@ -41,22 +41,25 @@ export class ReimbursementCancelService {
           )
           .executeTakeFirst();
 
-        if (!request) {
+        if (!reimbursementRequest) {
           throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
         }
 
         await trx
           .insertInto('finance_reimbursement_approval_audit_logs')
           .values({
-            reimbursement_request_id: request.reimbursement_request_id,
+            reimbursement_request_id:
+              reimbursementRequest.reimbursement_request_id,
             user_id: user.original_user_id,
             description: `${user.email} cancelled this reimbursement request`,
           })
           .execute();
 
-        return await this.reimbursementGetOneService.get({
-          reimbursement_request_id: request.reimbursement_request_id,
-        });
+        return {
+          reimbursement_request_id:
+            reimbursementRequest.reimbursement_request_id,
+          request_status: 'Cancelled',
+        };
       });
 
     return cancelRequest;
