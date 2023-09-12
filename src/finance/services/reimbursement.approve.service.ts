@@ -4,6 +4,7 @@ import { InjectKysely } from 'nestjs-kysely';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
+import { ReimbursementRequestApprovalType } from '../common/dto/approveReimbursementRequest.dto';
 
 @Injectable()
 export class ReimbursementApproveService {
@@ -15,12 +16,12 @@ export class ReimbursementApproveService {
     private readonly reimbursementGetOneService: ReimbursementGetOneService,
   ) {}
 
-  async approve(user: RequestUser, approval_matrix_ids: string[]) {
+  async approve(user: RequestUser, data: ReimbursementRequestApprovalType) {
     try {
-      if (approval_matrix_ids.length > 1) {
+      if (data.approval_matrix_ids.length > 1) {
         this.eventEmitter.emit('reimbursement-request-bulk-approval', {
           user,
-          matrixIds: approval_matrix_ids,
+          matrixIds: data.approval_matrix_ids,
         });
 
         return {
@@ -52,7 +53,7 @@ export class ReimbursementApproveService {
             .where(
               'finance_reimbursement_approval_matrix.approval_matrix_id',
               '=',
-              approval_matrix_ids[0],
+              data.approval_matrix_ids[0],
             )
             .where(
               'finance_reimbursement_approval_matrix.has_approved',

@@ -24,7 +24,7 @@ import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementR
 import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
 import { CancelReimbursementRequestDTO } from './common/dto/cancelReimbursementRequest.dto';
 import { RejectReimbursementRequestDTO } from './common/dto/rejectReimbursementRequest.dto';
-import { ReimbursementRequestApprovalDTO } from './common/dto/reimbursementRequestApproval.dto';
+import { ReimbursementRequestApprovalDTO } from './common/dto/approveReimbursementRequest.dto';
 import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/updateReimbursementRequest.dto';
 import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
@@ -41,6 +41,8 @@ import { ReimbursementCreateAttachmentService } from './services/reimbursement.c
 import { ReimbursementApproveService } from './services/reimbursement.approve.service';
 import { Readable } from 'stream';
 import { jsonToCsv } from 'src/common/utils/jsonToCsv.utils';
+import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
+import { OnHoldReimbursementRequestDTO } from './common/dto/onHoldReimbursementRequest.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -54,6 +56,7 @@ export class FinanceController {
     private readonly reimbursementForApprovalService: ReimbursementForApprovalService,
     private readonly reimbursementApproveService: ReimbursementApproveService,
     private readonly reimbursementRejectService: ReimbursementRejectService,
+    private readonly reimbursementOhHoldService: ReimbursementOhHoldService,
     private readonly reimbursementCancelService: ReimbursementCancelService,
     private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
   ) {}
@@ -113,10 +116,18 @@ export class FinanceController {
   ) {
     const user = req['user'] as RequestUser;
 
-    return this.reimbursementApproveService.approve(
-      user,
-      body.approval_matrix_ids,
-    );
+    return this.reimbursementApproveService.approve(user, body);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/onhold')
+  onholdReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: OnHoldReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementOhHoldService.onhold(user, body);
   }
 
   @HttpCode(HttpStatus.OK)
