@@ -43,17 +43,9 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
-          .innerJoin(
-            'finance_reimbursement_requests',
-            'reimbursement_request_id',
-            'reimbursement_request_id',
-          )
           .returning([
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           ])
-          .where('finance_reimbursement_requests.is_cancelled', '=', false)
-          .where('finance_reimbursement_requests.is_onhold', '=', false)
-          .where('finance_reimbursement_requests.date_approve', 'is', null)
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',

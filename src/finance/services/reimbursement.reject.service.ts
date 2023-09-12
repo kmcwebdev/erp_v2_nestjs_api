@@ -27,14 +27,6 @@ export class ReimbursementRejectService {
             description: data.rejection_reason,
             updated_at: new Date(),
           })
-          .innerJoin(
-            'finance_reimbursement_requests',
-            'reimbursement_request_id',
-            'reimbursement_request_id',
-          )
-          .returning([
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          ])
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
@@ -50,7 +42,9 @@ export class ReimbursementRejectService {
             '=',
             false,
           )
-          .where('finance_reimbursement_requests.is_cancelled', '=', false)
+          .returning([
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          ])
           .executeTakeFirst();
 
         if (!updatedReimbursementMatrix) {

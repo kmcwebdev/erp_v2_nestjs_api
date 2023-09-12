@@ -28,6 +28,7 @@ export class ReimbursementOhHoldService {
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
           ])
+          .where('finance_reimbursement_requests.is_onhold', '=', false)
           .where('finance_reimbursement_requests.is_cancelled', '=', false)
           .where(
             'finance_reimbursement_requests.requestor_id',
