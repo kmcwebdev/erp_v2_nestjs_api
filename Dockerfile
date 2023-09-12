@@ -15,7 +15,7 @@ ENV NODE_ENV dev
 ARG DATABASE_URL
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8.7.5
 
 # Copy source code into app folder
 COPY . .
@@ -40,7 +40,7 @@ ENV NODE_ENV production
 ARG DATABASE_URL
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8.7.5
 
 # Copy only the necessary files
 COPY --from=dev /app/node_modules ./node_modules
