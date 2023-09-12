@@ -43,9 +43,6 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
-          .returning([
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          ])
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
@@ -61,11 +58,14 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
             '=',
             false,
           )
+          .returning([
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          ])
           .executeTakeFirst();
 
         if (!updatedReimbursementMatrix) {
           return {
-            message: 'This request is already approved',
+            message: 'This request is already approved or rejected',
           };
         }
 

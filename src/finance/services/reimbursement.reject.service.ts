@@ -49,7 +49,7 @@ export class ReimbursementRejectService {
 
         if (!updatedReimbursementMatrix) {
           return {
-            message: 'This request is already approved or cancelled',
+            message: 'This request is already approved or rejected',
           };
         }
 
