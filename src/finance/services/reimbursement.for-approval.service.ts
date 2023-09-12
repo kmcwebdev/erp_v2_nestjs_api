@@ -68,8 +68,6 @@ export class ReimbursementForApprovalService {
           u.client_id,
           u.client_name,
           u.hrbp_approver_email,
-          frr.is_cancelled,
-          frr.is_onhold,
           frr.created_at
         FROM finance_reimbursement_approval_matrix AS fram
         INNER JOIN finance_reimbursement_requests AS frr

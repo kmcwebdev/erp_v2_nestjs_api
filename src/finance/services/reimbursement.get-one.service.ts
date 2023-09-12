@@ -79,8 +79,6 @@ export class ReimbursementGetOneService {
         frr.date_approve,
         fram.approval_matrix_id AS next_approval_matrix_id,
         na.next_approver_order,
-        frr.is_cancelled,
-        frr.is_onhold,
         frr.created_at,
         aa.approvers
     FROM
