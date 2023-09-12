@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
@@ -29,7 +29,6 @@ export class ReimbursementOhHoldService {
             'finance_reimbursement_requests.reimbursement_request_id',
           ])
           .where('finance_reimbursement_requests.is_onhold', '=', false)
-          .where('finance_reimbursement_requests.is_cancelled', '=', false)
           .where(
             'finance_reimbursement_requests.requestor_id',
             '=',
@@ -42,8 +41,10 @@ export class ReimbursementOhHoldService {
           )
           .executeTakeFirst();
 
-        if (!onHoldRequest) {
-          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+        if (!request) {
+          return {
+            message: 'Request is already put onhold',
+          };
         }
 
         await trx
