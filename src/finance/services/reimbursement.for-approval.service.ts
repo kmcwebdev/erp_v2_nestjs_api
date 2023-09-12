@@ -85,7 +85,6 @@ export class ReimbursementForApprovalService {
         WHERE fram.approver_id IN (${approverIds.join(',')})
         AND fram.has_approved = false
         AND frr.is_cancelled = false
-        AND frr.is_onhold = false
         ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
 
     return rawQuery.rows;
