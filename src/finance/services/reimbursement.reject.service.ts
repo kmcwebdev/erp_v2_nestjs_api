@@ -71,12 +71,10 @@ export class ReimbursementRejectService {
           )
           .execute();
 
-        const reimbursement = await this.reimbursementGetOneService.get({
+        return await this.reimbursementGetOneService.get({
           reimbursement_request_id:
             updatedReimbursementMatrix.reimbursement_request_id,
         });
-
-        return reimbursement;
       });
 
     return rejectReimbursementRequest;

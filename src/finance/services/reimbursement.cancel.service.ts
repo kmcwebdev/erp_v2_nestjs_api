@@ -4,12 +4,16 @@ import { CancelReimbursementRequestType } from '../common/dto/cancelReimbursemen
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { CANCELLED_REQUEST } from '../common/constant';
+import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 
 @Injectable()
 export class ReimbursementCancelService {
   private readonly logger = new Logger(ReimbursementCancelService.name);
 
-  constructor(@InjectKysely() private readonly pgsql: DB) {}
+  constructor(
+    @InjectKysely() private readonly pgsql: DB,
+    private readonly reimbursementGetOneService: ReimbursementGetOneService,
+  ) {}
 
   async cancel(user: RequestUser, data: CancelReimbursementRequestType) {
     const cancelRequest = await this.pgsql
@@ -50,7 +54,9 @@ export class ReimbursementCancelService {
           })
           .execute();
 
-        return request;
+        return await this.reimbursementGetOneService.get({
+          reimbursement_request_id: request.reimbursement_request_id,
+        });
       });
 
     return cancelRequest;
