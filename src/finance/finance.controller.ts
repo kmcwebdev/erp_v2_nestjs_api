@@ -14,36 +14,54 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ReimbursementApiService } from './services/reimbursement.api.service';
+import type { Request, Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ExpenseTypeDto } from 'src/finance/common/dto/expenseType.dto';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
+import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
+import { CancelReimbursementRequestDTO } from './common/dto/cancelReimbursementRequest.dto';
+import { RejectReimbursementRequestDTO } from './common/dto/rejectReimbursementRequest.dto';
+import { ReimbursementRequestApprovalDTO } from './common/dto/reimbursementRequestApproval.dto';
 import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/updateReimbursementRequest.dto';
 import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
-import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
-import type { Request, Express } from 'express';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
-import { ReimbursementRequestApprovalDTO } from './common/dto/reimbursementRequestApproval.dto';
-import { CancelReimbursementRequestDTO } from './common/dto/cancelReimbursementRequest.dto';
-import { RejectReimbursementRequestDTO } from './common/dto/rejectReimbursementRequest.dto';
+import { ReimbursementApiService } from './services/reimbursement.api.service';
+import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
+import { ReimbursementExpenseTypesService } from './services/reimbursement.expense-types.service';
+import { ReimbursementGetAllService } from './services/reimbursement.get-all.service';
+import { ReimbursementGetOneService } from './services/reimbursement.get-one.service';
+import { ReimbursementCreateService } from './services/reimbursement.create.service';
+import { ReimbursementForApprovalService } from './services/reimbursement.for-approval.service';
+import { ReimbursementRejectService } from './services/reimbursement.reject.service';
+import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
+import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
+import { ReimbursementApproveService } from './services/reimbursement.approve.service';
 
 @Controller('finance')
 export class FinanceController {
   constructor(
     private readonly financeReimbursementApiService: ReimbursementApiService,
+    private readonly reimbursementRequestTypesService: ReimbursementRequestTypesService,
+    private readonly reimbursementExpenseTypesService: ReimbursementExpenseTypesService,
+    private readonly reimbursementGetAllService: ReimbursementGetAllService,
+    private readonly reimbursementGetOneService: ReimbursementGetOneService,
+    private readonly reimbursementCreateService: ReimbursementCreateService,
+    private readonly reimbursementForApprovalService: ReimbursementForApprovalService,
+    private readonly reimbursementApproveService: ReimbursementApproveService,
+    private readonly reimbursementRejectService: ReimbursementRejectService,
+    private readonly reimbursementCancelService: ReimbursementCancelService,
+    private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
   ) {}
 
   @Get('/reimbursements/request-types')
   getRequestTypes() {
-    return this.financeReimbursementApiService.getRequestTypes();
+    return this.reimbursementRequestTypesService.get();
   }
 
   @Get('/reimbursements/expense-types')
   getExpenseTypes(@Query() query: ExpenseTypeDto) {
-    return this.financeReimbursementApiService.getExpenseTypes(
-      query.request_type_id,
-    );
+    return this.reimbursementExpenseTypesService.get(query.request_type_id);
   }
 
   @Get('/reimbursements/requests')
@@ -53,10 +71,7 @@ export class FinanceController {
   ) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.getAllReimbursementRequest(
-      user,
-      query,
-    );
+    return this.reimbursementGetAllService.get(user, query);
   }
 
   @Post('/reimbursements/requests')
@@ -66,10 +81,7 @@ export class FinanceController {
   ) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.createReimbursementRequest(
-      user,
-      body,
-    );
+    return this.reimbursementCreateService.create(user, body);
   }
 
   @Patch('/reimbursements/requests')
@@ -86,9 +98,7 @@ export class FinanceController {
   getAllForApprovalReimbursementRequest(@Req() req: Request) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.getAllForApprovalReimbursementRequest(
-      user,
-    );
+    return this.reimbursementForApprovalService.get(user);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -99,7 +109,7 @@ export class FinanceController {
   ) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.approveReimbursementRequest(
+    return this.reimbursementApproveService.approve(
       user,
       body.approval_matrix_ids,
     );
@@ -113,10 +123,7 @@ export class FinanceController {
   ) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.cancelReimbursementRequest(
-      user,
-      body,
-    );
+    return this.reimbursementCancelService.cancel(user, body);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -127,10 +134,7 @@ export class FinanceController {
   ) {
     const user = req['user'] as RequestUser;
 
-    return this.financeReimbursementApiService.rejectReimbursementRequest(
-      user,
-      body,
-    );
+    return this.reimbursementRejectService.reject(user, body);
   }
 
   @Get('/reimbursements/requests/dashboard/analytics')
@@ -154,16 +158,12 @@ export class FinanceController {
       throw new HttpException('File not found', HttpStatus.NOT_FOUND);
     }
 
-    return this.financeReimbursementApiService.createReimbursementRequestAttachments(
-      file,
-    );
+    return this.reimbursementCreateAttachmentService.upload(file);
   }
 
   // TODO: Be careful this query can return the reimbursement request of other users unless it's an approver or admin
   @Get('/reimbursements/requests/:reimbursement_request_id')
   getOneReimbursementRequest(@Param() params: GetOneReimbursementRequestDTO) {
-    return this.financeReimbursementApiService.getOneReimbursementRequest(
-      params,
-    );
+    return this.reimbursementGetOneService.get(params);
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { Reimbursement } from '../common/interface/reimbursement.interface';
+import { Reimbursement } from '../../common/interface/reimbursement.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import * as crypto from 'crypto';
@@ -11,7 +11,7 @@ import {
   GROUP_APPROVER_PAYABLES,
   SCHEDULED_REQUEST,
   UNSCHEDULED_REQUEST,
-} from '../common/constant';
+} from '../../common/constant';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';

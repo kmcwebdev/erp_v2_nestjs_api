@@ -1,15 +1,26 @@
 import { Module } from '@nestjs/common';
-import { ReimbursementApiService } from './services/reimbursement.api.service';
-import { FinanceController } from './finance.controller';
-import { ScheduleModule } from '@nestjs/schedule';
-import { ReimbursementCronService } from './services/reimbursement.cron.service';
-import { ReimbursementMemphisSendEmailService } from './services/reimbursement.memphis-send-email.service';
-import { ReimbursementMemphisNewRequestService } from './services/reimbursement.memphis.new-request.service';
 import { APP_GUARD } from '@nestjs/core';
-import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
+import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
+import { FinanceController } from './finance.controller';
+import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
 import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
-import { ReimbursementMemphisBulkApprovalService } from './services/reimbursement.memphis-bulk-approval.service';
+import { ReimbursementApiService } from './services/reimbursement.api.service';
+import { ReimbursementCronService } from './services/cron/reimbursement.cron.service';
+import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
+import { ReimbursementExpenseTypesService } from './services/reimbursement.expense-types.service';
+import { ReimbursementGetAllService } from './services/reimbursement.get-all.service';
+import { ReimbursementGetOneService } from './services/reimbursement.get-one.service';
+import { ReimbursementCreateService } from './services/reimbursement.create.service';
+import { ReimbursementForApprovalService } from './services/reimbursement.for-approval.service';
+import { ReimbursementAnalyticsService } from './services/reimbursement.analytics.service';
+import { ReimbursementApproveService } from './services/reimbursement.approve.service';
+import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
+import { ReimbursementRejectService } from './services/reimbursement.reject.service';
+import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
+import { ReimbursementMemphisSendEmailService } from './services/memphis/reimbursement.memphis-send-email.service';
+import { ReimbursementMemphisNewRequestService } from './services/memphis/reimbursement.memphis.new-request.service';
+import { ReimbursementMemphisBulkApprovalService } from './services/memphis/reimbursement.memphis-bulk-approval.service';
 
 @Module({
   imports: [ScheduleModule.forRoot(), HttpModule, MemphisDevModule],
@@ -21,14 +32,21 @@ import { ReimbursementMemphisBulkApprovalService } from './services/reimbursemen
     },
     ReimbursementApiService,
     ReimbursementCronService,
+    ReimbursementRequestTypesService,
+    ReimbursementExpenseTypesService,
+    ReimbursementGetAllService,
+    ReimbursementGetOneService,
+    ReimbursementCreateService,
+    ReimbursementForApprovalService,
+    ReimbursementAnalyticsService,
+    ReimbursementApproveService,
+    ReimbursementCancelService,
+    ReimbursementRejectService,
+    ReimbursementCreateAttachmentService,
     ReimbursementMemphisSendEmailService,
     ReimbursementMemphisNewRequestService,
     ReimbursementMemphisBulkApprovalService,
   ],
-  exports: [
-    ReimbursementMemphisSendEmailService,
-    ReimbursementMemphisNewRequestService,
-    ReimbursementMemphisBulkApprovalService,
-  ],
+  exports: [],
 })
 export class FinanceModule {}
