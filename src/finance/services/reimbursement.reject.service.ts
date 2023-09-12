@@ -4,6 +4,7 @@ import { RejectReimbursementRequestType } from '../common/dto/rejectReimbursemen
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
+import { REJECTED_REQUEST } from '../common/constant';
 
 @Injectable()
 export class ReimbursementRejectService {
@@ -83,8 +84,20 @@ export class ReimbursementRejectService {
             )
             .executeTakeFirst();
 
+          await trx
+            .updateTable('finance_reimbursement_requests')
+            .set({
+              request_status_id: REJECTED_REQUEST,
+            })
+            .where(
+              'finance_reimbursement_requests.reimbursement_request_id',
+              '=',
+              updatedReimbursementMatrix.reimbursement_request_id,
+            )
+            .execute();
+
           if (matrix) {
-            await this.pgsql
+            await trx
               .updateTable('finance_reimbursement_requests')
               .set({
                 next_approver_order: matrix.approver_order,
