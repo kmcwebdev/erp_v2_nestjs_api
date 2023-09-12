@@ -5,6 +5,7 @@ import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface'
 import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 import { ReimbursementRequestApprovalType } from '../common/dto/approveReimbursementRequest.dto';
+import { sql } from 'kysely';
 
 @Injectable()
 export class ReimbursementApproveService {
@@ -64,12 +65,13 @@ export class ReimbursementApproveService {
           };
         }
 
-        const matrix = await trx
+        const reimbursementRequestApprovalMatrix = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .select([
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             'finance_reimbursement_approval_matrix.approver_order',
+            'finance_reimbursement_approval_matrix.is_hrbp',
           ])
           .where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
@@ -92,11 +94,12 @@ export class ReimbursementApproveService {
           )
           .executeTakeFirst();
 
-        if (matrix) {
+        if (reimbursementRequestApprovalMatrix) {
           await trx
             .updateTable('finance_reimbursement_requests')
             .set({
-              next_approver_order: matrix.approver_order,
+              next_approver_order:
+                reimbursementRequestApprovalMatrix.approver_order,
             })
             .where(
               'finance_reimbursement_requests.reimbursement_request_id',
@@ -104,6 +107,20 @@ export class ReimbursementApproveService {
               updatedReimbursementMatrix.reimbursement_request_id,
             )
             .execute();
+
+          if (reimbursementRequestApprovalMatrix.is_hrbp) {
+            await sql`
+              UPDATE finance_reimbursement_requests 
+              SET payroll_date = 
+                  CASE 
+                      WHEN EXTRACT(DAY FROM payroll_date) BETWEEN 1 AND 15 THEN
+                          DATE_TRUNC('MONTH', payroll_date) + INTERVAL '24 days'
+                      ELSE 
+                          DATE_TRUNC('MONTH', payroll_date) + INTERVAL '9 days' + INTERVAL '1 month'
+                  END;
+              WHERE reimbursement_request_id = ${reimbursementRequestApprovalMatrix.reimbursement_request_id}
+            `.execute(this.pgsql);
+          }
 
           this.logger.log('Sending email to next approver');
         }
