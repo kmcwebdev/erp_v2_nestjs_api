@@ -418,6 +418,11 @@ export class ReimbursementApiService {
             '=',
             false,
           )
+          .where(
+            'finance_reimbursement_approval_matrix.has_rejected',
+            '=',
+            false,
+          )
           .where('finance_reimbursement_requests.is_cancelled', '=', false)
           .executeTakeFirst();
 
@@ -616,6 +621,7 @@ export class ReimbursementApiService {
         is_cancelled: true,
       })
       .returning(['finance_reimbursement_requests.reimbursement_request_id'])
+      .where('finance_reimbursement_requests.is_cancelled', '=', false)
       .where(
         'finance_reimbursement_requests.requestor_id',
         '=',
@@ -665,6 +671,11 @@ export class ReimbursementApiService {
           )
           .where(
             'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_rejected',
             '=',
             false,
           )
