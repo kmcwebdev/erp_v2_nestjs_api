@@ -127,7 +127,10 @@ export class FinanceController {
   ) {
     const user = req['user'] as RequestUser;
 
-    return user;
+    return this.financeReimbursementApiService.rejectReimbursementRequest(
+      user,
+      body,
+    );
   }
 
   @Get('/reimbursements/requests/dashboard/analytics')

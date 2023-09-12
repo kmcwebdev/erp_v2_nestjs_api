@@ -18,6 +18,7 @@ import { HttpService } from '@nestjs/axios';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ReimbursementRequest } from '../common/interface/getOneRequest.interface';
 import { CancelReimbursementRequestType } from '../common/dto/cancelReimbursementRequest.dto';
+import { RejectReimbursementRequestType } from '../common/dto/rejectReimbursementRequest.dto';
 
 @Injectable()
 export class ReimbursementApiService {
@@ -634,5 +635,96 @@ export class ReimbursementApiService {
     return cancellRequest;
   }
 
-  async rejectReimbursementRequest(user: RequestUser) {}
+  async rejectReimbursementRequest(
+    user: RequestUser,
+    data: RejectReimbursementRequestType,
+  ) {
+    const rejectReimbursementRequest = await this.pgsql
+      .transaction()
+      .execute(async (trx) => {
+        const updatedReimbursementMatrix = await trx
+          .updateTable('finance_reimbursement_approval_matrix')
+          .set({
+            has_rejected: true,
+            performed_by_user_id: user.original_user_id,
+            description: data.rejection_reason,
+            updated_at: new Date(),
+          })
+          .leftJoin(
+            'finance_reimbursement_requests',
+            'reimbursement_request_id',
+            'reimbursement_request_id',
+          )
+          .returning([
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          ])
+          .where(
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            '=',
+            data.approval_matrix_id,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          .where('finance_reimbursement_requests.is_cancelled', '=', false)
+          .executeTakeFirst();
+
+        if (!updatedReimbursementMatrix) {
+          return {
+            message: 'This request is already approved or cancelled',
+          };
+        }
+
+        const matrix = await trx
+          .selectFrom('finance_reimbursement_approval_matrix')
+          .select([
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            'finance_reimbursement_approval_matrix.approver_order',
+            'finance_reimbursement_approval_matrix.approver_id',
+          ])
+          .where(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            '=',
+            updatedReimbursementMatrix.reimbursement_request_id,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_rejected',
+            '=',
+            false,
+          )
+          .orderBy(
+            'finance_reimbursement_approval_matrix.approver_order',
+            'asc',
+          )
+          .executeTakeFirst();
+
+        if (matrix) {
+          await this.pgsql
+            .updateTable('finance_reimbursement_requests')
+            .set({
+              next_approver_order: matrix.approver_order,
+            })
+            .where(
+              'finance_reimbursement_requests.reimbursement_request_id',
+              '=',
+              updatedReimbursementMatrix.reimbursement_request_id,
+            )
+            .execute();
+
+          this.logger.log('Sending email to next approver');
+        }
+
+        const reimbursement = await this.getOneReimbursementRequest({
+          reimbursement_request_id:
+            updatedReimbursementMatrix.reimbursement_request_id,
+        });
+
+        return reimbursement;
+      });
+
+    return rejectReimbursementRequest;
+  }
 }
