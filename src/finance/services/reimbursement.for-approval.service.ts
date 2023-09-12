@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { sql } from 'kysely';
 import { InjectKysely } from 'nestjs-kysely';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
@@ -11,44 +11,43 @@ export class ReimbursementForApprovalService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async get(user: RequestUser) {
-    try {
-      const approverIds = [];
+    const approverIds = [];
 
-      const approvers = await this.pgsql.transaction().execute(async (trx) => {
-        const single = await trx
-          .selectFrom('finance_reimbursement_approvers')
-          .select('approver_id')
-          .where('signatory_id', '=', user.original_user_id)
-          .executeTakeFirst();
+    const approvers = await this.pgsql.transaction().execute(async (trx) => {
+      const single = await trx
+        .selectFrom('finance_reimbursement_approvers')
+        .select('approver_id')
+        .where('signatory_id', '=', user.original_user_id)
+        .executeTakeFirst();
 
-        const approverDepartment = await trx
-          .selectFrom('departments')
-          .select(['departments.group_id'])
-          .where('user_id', '=', user.original_user_id)
-          .executeTakeFirst();
+      const approverDepartment = await trx
+        .selectFrom('departments')
+        .select(['departments.group_id'])
+        .where('user_id', '=', user.original_user_id)
+        .executeTakeFirst();
 
-        const group = await trx
-          .selectFrom('groups')
-          .select(['groups.group_id'])
-          .where('groups.group_id', '=', approverDepartment?.group_id || null)
-          .executeTakeFirst();
+      const group = await trx
+        .selectFrom('groups')
+        .select(['groups.group_id'])
+        .where('groups.group_id', '=', approverDepartment?.group_id || null)
+        .executeTakeFirst();
 
-        return { single, group };
-      });
+      return { single, group };
+    });
 
-      if (approvers?.single) {
-        approverIds.push(approvers.single.approver_id);
-      }
+    if (approvers?.single) {
+      approverIds.push(approvers.single.approver_id);
+    }
 
-      if (approvers?.group) {
-        approverIds.push(approvers.group.group_id);
-      }
+    if (approvers?.group) {
+      approverIds.push(approvers.group.group_id);
+    }
 
-      if (approverIds.length === 0) {
-        return [];
-      }
+    if (approverIds.length === 0) {
+      return [];
+    }
 
-      const rawQuery = await sql`SELECT 
+    const rawQuery = await sql`SELECT 
           frr.reimbursement_request_id,
           fram.approval_matrix_id,
           frr.reference_no,
@@ -89,13 +88,6 @@ export class ReimbursementForApprovalService {
         AND frr.is_onhold = false
         ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
 
-      return rawQuery.rows;
-    } catch (error) {
-      this.logger.error(error?.message);
-      throw new HttpException(
-        'Internal query error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return rawQuery.rows;
   }
 }

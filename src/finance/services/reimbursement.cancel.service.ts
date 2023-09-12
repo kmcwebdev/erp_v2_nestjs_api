@@ -12,55 +12,47 @@ export class ReimbursementCancelService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async cancel(user: RequestUser, data: CancelReimbursementRequestType) {
-    try {
-      const cancelRequest = await this.pgsql
-        .transaction()
-        .execute(async (trx) => {
-          const request = await trx
-            .updateTable('finance_reimbursement_requests')
-            .set({
-              is_cancelled: true,
-              request_status_id: CANCELLED_REQUEST,
-            })
-            .returning([
-              'finance_reimbursement_requests.reimbursement_request_id',
-            ])
-            .where('finance_reimbursement_requests.is_cancelled', '=', false)
-            .where(
-              'finance_reimbursement_requests.requestor_id',
-              '=',
-              user.original_user_id,
-            )
-            .where(
-              'finance_reimbursement_requests.reimbursement_request_id',
-              '=',
-              data.reimbursement_request_id,
-            )
-            .executeTakeFirst();
+    const cancelRequest = await this.pgsql
+      .transaction()
+      .execute(async (trx) => {
+        const request = await trx
+          .updateTable('finance_reimbursement_requests')
+          .set({
+            is_cancelled: true,
+            request_status_id: CANCELLED_REQUEST,
+          })
+          .returning([
+            'finance_reimbursement_requests.reimbursement_request_id',
+          ])
+          .where('finance_reimbursement_requests.is_cancelled', '=', false)
+          .where(
+            'finance_reimbursement_requests.requestor_id',
+            '=',
+            user.original_user_id,
+          )
+          .where(
+            'finance_reimbursement_requests.reimbursement_request_id',
+            '=',
+            data.reimbursement_request_id,
+          )
+          .executeTakeFirst();
 
-          if (!request) {
-            throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
-          }
+        if (!request) {
+          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+        }
 
-          await trx
-            .insertInto('finance_reimbursement_approval_audit_logs')
-            .values({
-              reimbursement_request_id: request.reimbursement_request_id,
-              user_id: user.original_user_id,
-              description: `${user.email} cancelled this reimbursement request`,
-            })
-            .execute();
+        await trx
+          .insertInto('finance_reimbursement_approval_audit_logs')
+          .values({
+            reimbursement_request_id: request.reimbursement_request_id,
+            user_id: user.original_user_id,
+            description: `${user.email} cancelled this reimbursement request`,
+          })
+          .execute();
 
-          return request;
-        });
+        return request;
+      });
 
-      return cancelRequest;
-    } catch (error) {
-      this.logger.error(error?.message);
-      throw new HttpException(
-        'Internal query error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return cancelRequest;
   }
 }
