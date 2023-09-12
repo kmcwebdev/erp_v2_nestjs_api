@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { sql } from 'kysely';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
@@ -12,11 +12,10 @@ export class ReimbursementGetAllService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async get(user: RequestUser, data: GetAllReimbursementRequestType) {
-    try {
-      const { original_user_id } = user;
-      const default_page_limit = 20;
+    const { original_user_id } = user;
+    const default_page_limit = 20;
 
-      const rawQuery = sql`SELECT 
+    const rawQuery = sql`SELECT 
               frr.reimbursement_request_id,
               frr.reference_no,
               frrt.request_type,
@@ -102,15 +101,8 @@ export class ReimbursementGetAllService {
             } LIMIT ${data?.page_limit || default_page_limit}
             `;
 
-      const requests = await rawQuery.execute(this.pgsql);
+    const requests = await rawQuery.execute(this.pgsql);
 
-      return requests.rows;
-    } catch (error) {
-      this.logger.error(error?.message);
-      throw new HttpException(
-        'Internal query error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return requests.rows;
   }
 }

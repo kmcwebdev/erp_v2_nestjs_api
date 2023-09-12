@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { RejectReimbursementRequestType } from '../common/dto/rejectReimbursementRequest.dto';
 import { InjectKysely } from 'nestjs-kysely';
@@ -16,77 +16,69 @@ export class ReimbursementRejectService {
   ) {}
 
   async reject(user: RequestUser, data: RejectReimbursementRequestType) {
-    try {
-      const rejectReimbursementRequest = await this.pgsql
-        .transaction()
-        .execute(async (trx) => {
-          const updatedReimbursementMatrix = await trx
-            .updateTable('finance_reimbursement_approval_matrix')
-            .set({
-              has_rejected: true,
-              performed_by_user_id: user.original_user_id,
-              description: data.rejection_reason,
-              updated_at: new Date(),
-            })
-            .innerJoin(
-              'finance_reimbursement_requests',
-              'reimbursement_request_id',
-              'reimbursement_request_id',
-            )
-            .returning([
-              'finance_reimbursement_approval_matrix.reimbursement_request_id',
-            ])
-            .where(
-              'finance_reimbursement_approval_matrix.approval_matrix_id',
-              '=',
-              data.approval_matrix_id,
-            )
-            .where(
-              'finance_reimbursement_approval_matrix.has_approved',
-              '=',
-              false,
-            )
-            .where(
-              'finance_reimbursement_approval_matrix.has_rejected',
-              '=',
-              false,
-            )
-            .where('finance_reimbursement_requests.is_cancelled', '=', false)
-            .executeTakeFirst();
+    const rejectReimbursementRequest = await this.pgsql
+      .transaction()
+      .execute(async (trx) => {
+        const updatedReimbursementMatrix = await trx
+          .updateTable('finance_reimbursement_approval_matrix')
+          .set({
+            has_rejected: true,
+            performed_by_user_id: user.original_user_id,
+            description: data.rejection_reason,
+            updated_at: new Date(),
+          })
+          .innerJoin(
+            'finance_reimbursement_requests',
+            'reimbursement_request_id',
+            'reimbursement_request_id',
+          )
+          .returning([
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          ])
+          .where(
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            '=',
+            data.approval_matrix_id,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_rejected',
+            '=',
+            false,
+          )
+          .where('finance_reimbursement_requests.is_cancelled', '=', false)
+          .executeTakeFirst();
 
-          if (!updatedReimbursementMatrix) {
-            return {
-              message: 'This request is already approved or cancelled',
-            };
-          }
+        if (!updatedReimbursementMatrix) {
+          return {
+            message: 'This request is already approved or cancelled',
+          };
+        }
 
-          await trx
-            .updateTable('finance_reimbursement_requests')
-            .set({
-              request_status_id: REJECTED_REQUEST,
-            })
-            .where(
-              'finance_reimbursement_requests.reimbursement_request_id',
-              '=',
-              updatedReimbursementMatrix.reimbursement_request_id,
-            )
-            .execute();
+        await trx
+          .updateTable('finance_reimbursement_requests')
+          .set({
+            request_status_id: REJECTED_REQUEST,
+          })
+          .where(
+            'finance_reimbursement_requests.reimbursement_request_id',
+            '=',
+            updatedReimbursementMatrix.reimbursement_request_id,
+          )
+          .execute();
 
-          const reimbursement = await this.reimbursementGetOneService.get({
-            reimbursement_request_id:
-              updatedReimbursementMatrix.reimbursement_request_id,
-          });
-
-          return reimbursement;
+        const reimbursement = await this.reimbursementGetOneService.get({
+          reimbursement_request_id:
+            updatedReimbursementMatrix.reimbursement_request_id,
         });
 
-      return rejectReimbursementRequest;
-    } catch (error) {
-      this.logger.error(error?.message);
-      throw new HttpException(
-        'Internal query error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+        return reimbursement;
+      });
+
+    return rejectReimbursementRequest;
   }
 }

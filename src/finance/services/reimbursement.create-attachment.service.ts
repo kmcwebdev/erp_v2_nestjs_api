@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { filestackClient } from 'src/common/lib/filestack';
 
@@ -11,31 +11,23 @@ export class ReimbursementCreateAttachmentService {
   constructor(private readonly configService: ConfigService) {}
 
   async upload(file: Express.Multer.File) {
-    try {
-      const dateNumber = Date.now();
+    const dateNumber = Date.now();
 
-      const fileHandle = await filestackClient.upload(
-        file.buffer,
-        {
-          tags: {
-            search_query: file.originalname,
-          },
+    const fileHandle = await filestackClient.upload(
+      file.buffer,
+      {
+        tags: {
+          search_query: file.originalname,
         },
-        {
-          location: this.configService.get('UPLOAD_LOCATION'),
-          filename: `${file.originalname}_${dateNumber}`.toLowerCase(),
-          container: this.configService.get('UPLOAD_CONTAINER'),
-          access: this.configService.get('UPLOAD_ACCESS'),
-        },
-      );
+      },
+      {
+        location: this.configService.get('UPLOAD_LOCATION'),
+        filename: `${file.originalname}_${dateNumber}`.toLowerCase(),
+        container: this.configService.get('UPLOAD_CONTAINER'),
+        access: this.configService.get('UPLOAD_ACCESS'),
+      },
+    );
 
-      return fileHandle;
-    } catch (error) {
-      this.logger.error(error?.message);
-      throw new HttpException(
-        'Internal query error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return fileHandle;
   }
 }

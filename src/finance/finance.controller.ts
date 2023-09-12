@@ -43,6 +43,8 @@ import { Readable } from 'stream';
 import { jsonToCsv } from 'src/common/utils/jsonToCsv.utils';
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
 import { OnHoldReimbursementRequestDTO } from './common/dto/onHoldReimbursementRequest.dto';
+import { GetAuditlogReimbursementRequestDTO } from './common/dto/getAuditlogReimbursementRequest.dto';
+import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
 
 @Controller('finance')
 export class FinanceController {
@@ -59,6 +61,7 @@ export class FinanceController {
     private readonly reimbursementOhHoldService: ReimbursementOhHoldService,
     private readonly reimbursementCancelService: ReimbursementCancelService,
     private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
+    private readonly reimbursementAuditlogService: ReimbursementAuditlogService,
   ) {}
 
   @Get('/reimbursements/request-types')
@@ -165,6 +168,11 @@ export class FinanceController {
     }
 
     return this.reimbursementCreateAttachmentService.upload(file);
+  }
+
+  @Get('/reimbursements/requests/auditlogs')
+  getAuditlogs(@Query() query: GetAuditlogReimbursementRequestDTO) {
+    return this.reimbursementAuditlogService.get(query);
   }
 
   @Get('/reimbursements/requests/reports/hrbp')

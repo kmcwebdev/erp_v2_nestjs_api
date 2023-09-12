@@ -12,8 +12,7 @@ export class ReimbursementGetOneService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async get(params: GetOneReimbursementRequestType) {
-    try {
-      const singleRequest = await sql<ReimbursementRequest>`
+    const singleRequest = await sql<ReimbursementRequest>`
           WITH ApproverAggregation AS (
           SELECT
               frr.reimbursement_request_id,
@@ -98,17 +97,10 @@ export class ReimbursementGetOneService {
         frr.reimbursement_request_id = ${params.reimbursement_request_id};
     `.execute(this.pgsql);
 
-      if (!singleRequest.rows.length) {
-        throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
-      }
-
-      return singleRequest.rows[0];
-    } catch (error) {
-      this.logger.error(error?.message);
-      throw new HttpException(
-        'Internal query error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (!singleRequest.rows.length) {
+      throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
     }
+
+    return singleRequest.rows[0];
   }
 }
