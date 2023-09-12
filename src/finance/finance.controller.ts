@@ -26,6 +26,7 @@ import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface'
 import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
 import { ReimbursementRequestApprovalDTO } from './common/dto/reimbursementRequestApproval.dto';
 import { CancelReimbursementRequestDTO } from './common/dto/cancelReimbursementRequest.dto';
+import { RejectReimbursementRequestDTO } from './common/dto/rejectReimbursementRequest.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -116,6 +117,17 @@ export class FinanceController {
       user,
       body,
     );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/reject')
+  rejectReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: RejectReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as RequestUser;
+
+    return user;
   }
 
   @Get('/reimbursements/requests/dashboard/analytics')

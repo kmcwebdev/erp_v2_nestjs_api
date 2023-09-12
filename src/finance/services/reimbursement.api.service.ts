@@ -325,6 +325,58 @@ export class ReimbursementApiService {
     return rawQuery.rows;
   }
 
+  async getReimbursementRequestsAnalyticsForFinance() {
+    const [scheduledRequestCount, unScheduledRequestCount, onHoldRequestCount] =
+      await Promise.all([
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE reimbursement_request_type_id = ${SCHEDULED_REQUEST}`.execute(
+          this.pgsql,
+        ),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE reimbursement_request_type_id = ${UNSCHEDULED_REQUEST}`.execute(
+          this.pgsql,
+        ),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests
+        WHERE request_status_id = ${ONHOLD_REQUEST}`.execute(this.pgsql),
+      ]);
+
+    return {
+      totalScheduledRequest: scheduledRequestCount.rows.length
+        ? scheduledRequestCount.rows[0]
+        : 0,
+      totalUnScheduledRequest: unScheduledRequestCount.rows.length
+        ? unScheduledRequestCount.rows[0]
+        : 0,
+      totalOnholdRequest: onHoldRequestCount.rows.length
+        ? onHoldRequestCount.rows[0]
+        : 0,
+    };
+  }
+
+  async getReimbursementRequestsAnalytics(user: RequestUser) {
+    const { original_user_id, user_assigned_role } = user;
+
+    const [financeAnalytics, pendingRequestCount, overallRequestCount] =
+      await Promise.all([
+        this.getReimbursementRequestsAnalyticsForFinance(),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE requestor_id = ${original_user_id}
+        AND request_status_id = ${PENDING_REQUEST}`.execute(this.pgsql),
+        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+        WHERE requestor_id = ${original_user_id}`.execute(this.pgsql),
+      ]);
+
+    return {
+      myPendingRequest: pendingRequestCount.rows.length
+        ? pendingRequestCount.rows[0]
+        : 0,
+      myTotalRequest: overallRequestCount.rows.length
+        ? overallRequestCount.rows[0]
+        : 0,
+      others: user_assigned_role === 'finance' ? financeAnalytics : null,
+    };
+  }
+
   async approveReimbursementRequest(user: RequestUser, matrixIds: string[]) {
     if (matrixIds.length > 1) {
       this.eventEmitter.emit('reimbursement-request-bulk-approval', {
@@ -423,58 +475,6 @@ export class ReimbursementApiService {
       });
 
     return approveReimbursementRequest;
-  }
-
-  async getReimbursementRequestsAnalyticsForFinance() {
-    const [scheduledRequestCount, unScheduledRequestCount, onHoldRequestCount] =
-      await Promise.all([
-        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
-        WHERE reimbursement_request_type_id = ${SCHEDULED_REQUEST}`.execute(
-          this.pgsql,
-        ),
-        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
-        WHERE reimbursement_request_type_id = ${UNSCHEDULED_REQUEST}`.execute(
-          this.pgsql,
-        ),
-        sql`SELECT COUNT(*) FROM finance_reimbursement_requests
-        WHERE request_status_id = ${ONHOLD_REQUEST}`.execute(this.pgsql),
-      ]);
-
-    return {
-      totalScheduledRequest: scheduledRequestCount.rows.length
-        ? scheduledRequestCount.rows[0]
-        : 0,
-      totalUnScheduledRequest: unScheduledRequestCount.rows.length
-        ? unScheduledRequestCount.rows[0]
-        : 0,
-      totalOnholdRequest: onHoldRequestCount.rows.length
-        ? onHoldRequestCount.rows[0]
-        : 0,
-    };
-  }
-
-  async getReimbursementRequestsAnalytics(user: RequestUser) {
-    const { original_user_id, user_assigned_role } = user;
-
-    const [financeAnalytics, pendingRequestCount, overallRequestCount] =
-      await Promise.all([
-        this.getReimbursementRequestsAnalyticsForFinance(),
-        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
-        WHERE requestor_id = ${original_user_id}
-        AND request_status_id = ${PENDING_REQUEST}`.execute(this.pgsql),
-        sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
-        WHERE requestor_id = ${original_user_id}`.execute(this.pgsql),
-      ]);
-
-    return {
-      myPendingRequest: pendingRequestCount.rows.length
-        ? pendingRequestCount.rows[0]
-        : 0,
-      myTotalRequest: overallRequestCount.rows.length
-        ? overallRequestCount.rows[0]
-        : 0,
-      others: user_assigned_role === 'finance' ? financeAnalytics : null,
-    };
   }
 
   async createReimbursementRequest(
@@ -633,4 +633,6 @@ export class ReimbursementApiService {
 
     return cancellRequest;
   }
+
+  async rejectReimbursementRequest(user: RequestUser) {}
 }
