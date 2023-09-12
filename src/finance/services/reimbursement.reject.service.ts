@@ -68,6 +68,7 @@ export class ReimbursementRejectService {
           reimbursement_request_id:
             reimbursementRequest.reimbursement_request_id,
           request_status: 'Rejected',
+          rejection_reason: data.rejection_reason,
         };
       });
 
