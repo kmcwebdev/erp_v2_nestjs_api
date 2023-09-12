@@ -1,10 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { User } from '../common/interface/user.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { propelauth } from 'src/auth/common/lib/propelauth';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 
 @Injectable()
 export class NewUserMemphisService implements OnModuleInit {
@@ -50,7 +50,9 @@ export class NewUserMemphisService implements OnModuleInit {
       });
 
       this.consumer.on('message', async (message: Message) => {
-        const data: User = JSON.parse(message.getData().toString() || '{}');
+        const data: RequestUser = JSON.parse(
+          message.getData().toString() || '{}',
+        );
 
         const propelauthUser = await propelauth.fetchUserMetadataByEmail(
           data.email,
