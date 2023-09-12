@@ -38,7 +38,7 @@ export class ReimbursementApproveService {
               performed_by_user_id: user.original_user_id,
               updated_at: new Date(),
             })
-            .leftJoin(
+            .innerJoin(
               'finance_reimbursement_requests',
               'reimbursement_request_id',
               'reimbursement_request_id',
