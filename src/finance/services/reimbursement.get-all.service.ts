@@ -32,6 +32,7 @@ export class ReimbursementGetAllService {
               u.hrbp_approver_email,
               frr.date_approve,
               frr.is_cancelled,
+              frr.is_onhold,
               frr.created_at,
               frr.cursor_id::TEXT
               ${

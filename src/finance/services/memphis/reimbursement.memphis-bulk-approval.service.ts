@@ -31,7 +31,7 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
 
   async approveRequest(
     user: RequestUser,
-    matrixId: string,
+    approval_matrix_id: string,
   ): Promise<MyUnionType> {
     const approveReimbursementRequest = await this.pgsql
       .transaction()
@@ -43,16 +43,29 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
+          .leftJoin(
+            'finance_reimbursement_requests',
+            'reimbursement_request_id',
+            'reimbursement_request_id',
+          )
           .returning([
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           ])
+          .where('finance_reimbursement_requests.is_cancelled', '=', false)
+          .where('finance_reimbursement_requests.is_onhold', '=', false)
+          .where('finance_reimbursement_requests.date_approve', 'is', null)
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
-            matrixId,
+            approval_matrix_id,
           )
           .where(
             'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_rejected',
             '=',
             false,
           )
@@ -70,7 +83,6 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             'finance_reimbursement_approval_matrix.approver_order',
-            'finance_reimbursement_approval_matrix.approver_id',
           ])
           .where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
@@ -79,6 +91,11 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
           )
           .where(
             'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_rejected',
             '=',
             false,
           )

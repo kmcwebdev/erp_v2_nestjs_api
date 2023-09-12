@@ -46,6 +46,9 @@ export class ReimbursementApproveService {
             .returning([
               'finance_reimbursement_approval_matrix.reimbursement_request_id',
             ])
+            .where('finance_reimbursement_requests.is_cancelled', '=', false)
+            .where('finance_reimbursement_requests.is_onhold', '=', false)
+            .where('finance_reimbursement_requests.date_approve', 'is', null)
             .where(
               'finance_reimbursement_approval_matrix.approval_matrix_id',
               '=',
@@ -61,7 +64,6 @@ export class ReimbursementApproveService {
               '=',
               false,
             )
-            .where('finance_reimbursement_requests.is_cancelled', '=', false)
             .executeTakeFirst();
 
           if (!updatedReimbursementMatrix) {
@@ -76,7 +78,6 @@ export class ReimbursementApproveService {
               'finance_reimbursement_approval_matrix.approval_matrix_id',
               'finance_reimbursement_approval_matrix.reimbursement_request_id',
               'finance_reimbursement_approval_matrix.approver_order',
-              'finance_reimbursement_approval_matrix.approver_id',
             ])
             .where(
               'finance_reimbursement_approval_matrix.reimbursement_request_id',
@@ -85,6 +86,11 @@ export class ReimbursementApproveService {
             )
             .where(
               'finance_reimbursement_approval_matrix.has_approved',
+              '=',
+              false,
+            )
+            .where(
+              'finance_reimbursement_approval_matrix.has_rejected',
               '=',
               false,
             )

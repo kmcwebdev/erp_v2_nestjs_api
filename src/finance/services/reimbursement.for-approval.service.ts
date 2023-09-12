@@ -70,6 +70,7 @@ export class ReimbursementForApprovalService {
           u.client_name,
           u.hrbp_approver_email,
           frr.is_cancelled,
+          frr.is_onhold,
           frr.created_at
         FROM finance_reimbursement_approval_matrix AS fram
         INNER JOIN finance_reimbursement_requests AS frr
@@ -85,6 +86,7 @@ export class ReimbursementForApprovalService {
         WHERE fram.approver_id IN (${approverIds.join(',')})
         AND fram.has_approved = false
         AND frr.is_cancelled = false
+        AND frr.is_onhold = false
         ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
 
       return rawQuery.rows;
