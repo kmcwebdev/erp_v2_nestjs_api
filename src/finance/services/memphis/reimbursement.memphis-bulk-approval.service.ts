@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
+import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { HttpService } from '@nestjs/axios';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { ReimbursementApiService } from './reimbursement.api.service';
-import { ReimbursementRequest } from '../common/interface/getOneRequest.interface';
+import { ReimbursementRequest } from '../../common/interface/getOneRequest.interface';
+import { ReimbursementGetOneService } from '../reimbursement.get-one.service';
 
 type MyUnionType = ReimbursementRequest | { message: string };
 
@@ -21,7 +21,7 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
   producer: Producer;
 
   constructor(
-    private readonly reimbursementApiService: ReimbursementApiService,
+    private readonly reimbursementGetOneService: ReimbursementGetOneService,
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
     private readonly httpService: HttpService,
@@ -104,11 +104,10 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
           this.logger.log('Sending email to next approver');
         }
 
-        const reimbursement =
-          await this.reimbursementApiService.getOneReimbursementRequest({
-            reimbursement_request_id:
-              updatedReimbursementMatrix.reimbursement_request_id,
-          });
+        const reimbursement = await this.reimbursementGetOneService.get({
+          reimbursement_request_id:
+            updatedReimbursementMatrix.reimbursement_request_id,
+        });
 
         return reimbursement;
       });
