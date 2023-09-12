@@ -2,9 +2,9 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { CdcRequestEnvelope } from './common/interface/requestEnvelope.interface';
 import { USERS_TABLE } from 'src/users/common/constant';
-import { User } from 'src/users/common/interface/user.interface';
 import { FINANCE_REIMBURSEMENT_REQUESTS_TABLE } from './common/constant';
 import { Reimbursement } from 'src/finance/common/interface/reimbursement.interface';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 
 @Injectable()
 export class MemphisCdcService implements OnModuleInit {
@@ -37,14 +37,14 @@ export class MemphisCdcService implements OnModuleInit {
 
         // New user created
         if (table === USERS_TABLE && before === null) {
-          const newUser = after as User;
+          const newUser = after as RequestUser;
 
           console.log(JSON.stringify(Object.assign(newUser, { new: true })));
         }
 
         // User updated
         if (table === USERS_TABLE && before !== null && after !== null) {
-          const updatedUser = after as User;
+          const updatedUser = after as RequestUser;
 
           console.log(
             JSON.stringify(Object.assign(updatedUser, { updated: true })),
@@ -53,7 +53,7 @@ export class MemphisCdcService implements OnModuleInit {
 
         // User deleted
         if (table === USERS_TABLE && after === null) {
-          const deletedUser = before as User;
+          const deletedUser = before as RequestUser;
 
           console.log(Object.assign(deletedUser, { deleted: true }));
         }

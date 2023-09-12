@@ -1,6 +1,6 @@
 export interface ERPHRV1User {
   employeeID: string;
-  id: string;
+  name: string;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -8,23 +8,26 @@ export interface ERPHRV1User {
   personalEmail: string;
   workEmail: string;
   contactNumber: string;
+  position: string;
+  group: string;
+  groupId: number;
   client: string;
   clientId: string;
-  position: string;
-  address: {
-    line1: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
-  }[];
-  account_Manager: string;
-  billing_POC: string;
-  poC_Email: string;
-  poC_FirstName: string | null;
-  poC_MiddleName: string | null;
-  poC_LastName: string | null;
-  poC_NameSuffix: string | null;
-  poC_Position: string | null;
-  poC_ContactNumber: string | null;
+  hrbpEmail: string;
+  employeeCompensation: Compensation;
+}
+
+interface Compensation {
+  basicMonthlySalary: number;
+  deminimis: number;
+  reimbursable: number;
+  taxableAllowance: number;
+  transpoAllowance: number;
+  parkingAllowance: number;
+  other: number;
+  discretionaryFirmBonus: number;
+  communicationAllowance: number;
+  medicalAllowance: number;
+  nightWorkIncentive: number;
+  phoneAllowance: number;
 }
