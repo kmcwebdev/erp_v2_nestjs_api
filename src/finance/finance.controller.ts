@@ -11,10 +11,12 @@ import {
   Post,
   Query,
   Req,
+  Res,
+  StreamableFile,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import type { Request, Express } from 'express';
+import type { Request, Response, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ExpenseTypeDto } from 'src/finance/common/dto/expenseType.dto';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
@@ -37,6 +39,8 @@ import { ReimbursementRejectService } from './services/reimbursement.reject.serv
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
 import { ReimbursementApproveService } from './services/reimbursement.approve.service';
+import { Readable } from 'stream';
+import { jsonToCsv } from 'src/common/utils/jsonToCsv.utils';
 
 @Controller('finance')
 export class FinanceController {
@@ -137,15 +141,6 @@ export class FinanceController {
     return this.reimbursementRejectService.reject(user, body);
   }
 
-  @Get('/reimbursements/requests/dashboard/analytics')
-  getReimbursementRequestsAnalytics(@Req() req: Request) {
-    const user = req['user'] as RequestUser;
-
-    return this.financeReimbursementApiService.getReimbursementRequestsAnalytics(
-      user,
-    );
-  }
-
   @HttpCode(HttpStatus.OK)
   @Post('/reimbursements/requests/attachments')
   @UseInterceptors(
@@ -159,6 +154,61 @@ export class FinanceController {
     }
 
     return this.reimbursementCreateAttachmentService.upload(file);
+  }
+
+  @Get('/reimbursements/requests/reports/hrbp')
+  getHrbpReport(@Res({ passthrough: true }) res: Response): StreamableFile {
+    // Your provided JSON data
+    const data = { name: 'hrbp', age: 14 };
+
+    // Convert JSON to CSV
+    const csvString = jsonToCsv(data);
+
+    // Create a Readable stream and push the CSV string to it
+    const csvStream = new Readable();
+    csvStream.push(csvString);
+    csvStream.push(null); // indicates end of the data
+
+    // Set headers
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': 'attachment; filename="data.csv"',
+    });
+
+    // Return the streamable file
+    return new StreamableFile(csvStream);
+  }
+
+  @Get('/reimbursements/requests/reports/finance')
+  getFinanceReport(@Res({ passthrough: true }) res: Response): StreamableFile {
+    // Your provided JSON data
+    const data = { name: 'finance', age: 14 };
+
+    // Convert JSON to CSV
+    const csvString = jsonToCsv(data);
+
+    // Create a Readable stream and push the CSV string to it
+    const csvStream = new Readable();
+    csvStream.push(csvString);
+    csvStream.push(null); // indicates end of the data
+
+    // Set headers
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': 'attachment; filename="data.csv"',
+    });
+
+    // Return the streamable file
+    return new StreamableFile(csvStream);
+  }
+
+  @Get('/reimbursements/requests/dashboard/analytics')
+  getReimbursementRequestsAnalytics(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return this.financeReimbursementApiService.getReimbursementRequestsAnalytics(
+      user,
+    );
   }
 
   // TODO: Be careful this query can return the reimbursement request of other users unless it's an approver or admin

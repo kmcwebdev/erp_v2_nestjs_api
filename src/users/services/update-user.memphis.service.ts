@@ -1,10 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { User } from '../common/interface/user.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { ERPHRV1User } from '../common/interface/erpHrV1User.dto';
 import { DB } from 'src/common/types';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 
 @Injectable()
 export class UpdateUserMemphisService implements OnModuleInit {
@@ -19,20 +19,6 @@ export class UpdateUserMemphisService implements OnModuleInit {
     private readonly memphisService: MemphisService,
   ) {}
 
-  private async fetchUserByEmailInERPV2(email: string) {
-    try {
-      const user = await this.pgsql
-        .selectFrom('users')
-        .select('user_id')
-        .where('users.email', '=', email)
-        .executeTakeFirst();
-
-      return user;
-    } catch (error) {
-      this.logger.error(error);
-    }
-  }
-
   private async fetchUserVisaApplicationDetailsByEmailInERPHrV1(
     email: string,
   ): Promise<ERPHRV1User> {
@@ -45,7 +31,7 @@ export class UpdateUserMemphisService implements OnModuleInit {
           : this.configService.get('ERP_HR_V1_PROD_BASE_URL');
 
       const response = await fetch(
-        `${BASE_URL}/api/employees/visa-application-details?email=${email}`,
+        `${BASE_URL}/api/employees/details?email=${email}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -68,12 +54,23 @@ export class UpdateUserMemphisService implements OnModuleInit {
 
   private async updateUserUsingERPHrV1(data: ERPHRV1User) {
     try {
-      const { employeeID, clientId, client, position } = data;
+      const {
+        employeeID,
+        name,
+        firstName,
+        lastName,
+        clientId,
+        client,
+        position,
+      } = data;
 
       const updatedUser = await this.pgsql
         .updateTable('users')
         .set({
           employee_id: employeeID,
+          full_name: name,
+          first_name: firstName,
+          last_name: lastName,
           client_id: clientId,
           client_name: client,
           position,
@@ -95,7 +92,9 @@ export class UpdateUserMemphisService implements OnModuleInit {
       });
 
       this.consumer.on('message', async (message: Message) => {
-        const data: User = JSON.parse(message.getData().toString() || '{}');
+        const data: RequestUser = JSON.parse(
+          message.getData().toString() || '{}',
+        );
 
         console.log(data);
 
