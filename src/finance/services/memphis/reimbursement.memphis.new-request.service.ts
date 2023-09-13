@@ -58,12 +58,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
         const newRequest = data;
 
-        this.logger.log('New request received:' + data.reference_no);
-
-        if (newRequest?.dynamic_approvers?.length) {
-          this.logger.log("Request has dynamic approvers, let's add them");
-        }
-
         await this.pgsql
           .updateTable('finance_reimbursement_requests')
           .set({
@@ -121,31 +115,29 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         }
 
         if (newRequest.request_type_id === SCHEDULED_REQUEST) {
-          const hrbpInUsers = await this.pgsql
+          const hrbp = await this.pgsql
             .selectFrom('users')
-            .select([
+            .innerJoin(
+              'finance_reimbursement_approvers',
+              'finance_reimbursement_approvers.signatory_id',
               'users.user_id',
-              'users.employee_id',
-              'users.full_name',
+            )
+            .select([
+              'finance_reimbursement_approvers.approver_id',
+              'users.user_id',
               'users.email',
+              'users.full_name',
             ])
-            .where('email', '=', newRequest.hrbp_approver_email)
+            .where(
+              'finance_reimbursement_approvers.table_reference',
+              '=',
+              'users',
+            )
+            .where('users.email', '=', newRequest.hrbp_approver_email)
             .executeTakeFirst();
 
-          if (!hrbpInUsers) {
+          if (!hrbp) {
             this.logger.error('HRBP is not a user of the system');
-
-            return message.ack();
-          }
-
-          const hrbpInApprovers = await this.pgsql
-            .selectFrom('finance_reimbursement_approvers')
-            .select(['finance_reimbursement_approvers.approver_id'])
-            .where('signatory_id', '=', hrbpInUsers.user_id)
-            .executeTakeFirst();
-
-          if (!hrbpInApprovers) {
-            this.logger.log('HRBP is not an approver');
 
             return message.ack();
           }
@@ -172,7 +164,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .values([
               {
                 reimbursement_request_id: newRequest.reimbursement_request_id,
-                approver_id: hrbpInApprovers.approver_id,
+                approver_id: hrbp.approver_id,
                 approver_order: 1,
                 is_hrbp: true,
                 approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
@@ -196,7 +188,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 approver_verifier: `${newRequest.reimbursement_request_id}<->4`,
               },
             ])
-            .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
           await firstValueFrom(
@@ -239,7 +230,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 '/api/email/hrbp-approval',
                 {
                   to: [newRequest.hrbp_approver_email],
-                  fullName: hrbpInUsers?.full_name || 'No name set',
+                  fullName: hrbp?.full_name || 'No name set',
                   employeeId: newRequest?.employee_id || 'No employee id set',
                   expenseType: newRequest.expense_type,
                   expenseDate: newRequest.created_at,
@@ -269,6 +260,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
+          if (newRequest?.dynamic_approvers?.length) {
+            this.logger.log("Request has dynamic approvers, let's add them");
+          }
         }
 
         message.ack();
