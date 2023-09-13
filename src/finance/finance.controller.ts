@@ -20,6 +20,8 @@ import type { Request, Response, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ExpenseTypeDto } from 'src/finance/common/dto/expenseType.dto';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { Readable } from 'stream';
+import { jsonToCsv } from 'src/common/utils/jsonToCsv.utils';
 import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
 import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
 import { CancelReimbursementRequestDTO } from './common/dto/cancelReimbursementRequest.dto';
@@ -28,6 +30,9 @@ import { ReimbursementRequestApprovalDTO } from './common/dto/approveReimburseme
 import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/updateReimbursementRequest.dto';
 import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReimbursementRequest.dto';
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
+import { OnHoldReimbursementRequestDTO } from './common/dto/onHoldReimbursementRequest.dto';
+import { PendingReimbursementRequestDTO } from './common/dto/pendingReimbursementRequest.dto';
+import { GetAuditlogReimbursementRequestDTO } from './common/dto/getAuditlogReimbursementRequest.dto';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
 import { ReimbursementExpenseTypesService } from './services/reimbursement.expense-types.service';
@@ -39,11 +44,8 @@ import { ReimbursementRejectService } from './services/reimbursement.reject.serv
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
 import { ReimbursementApproveService } from './services/reimbursement.approve.service';
-import { Readable } from 'stream';
-import { jsonToCsv } from 'src/common/utils/jsonToCsv.utils';
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
-import { OnHoldReimbursementRequestDTO } from './common/dto/onHoldReimbursementRequest.dto';
-import { GetAuditlogReimbursementRequestDTO } from './common/dto/getAuditlogReimbursementRequest.dto';
+import { ReimbursementpPendingService } from './services/reimbursement.pending.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
 
 @Controller('finance')
@@ -59,6 +61,7 @@ export class FinanceController {
     private readonly reimbursementApproveService: ReimbursementApproveService,
     private readonly reimbursementRejectService: ReimbursementRejectService,
     private readonly reimbursementOhHoldService: ReimbursementOhHoldService,
+    private readonly reimbursementpPendingService: ReimbursementpPendingService,
     private readonly reimbursementCancelService: ReimbursementCancelService,
     private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
     private readonly reimbursementAuditlogService: ReimbursementAuditlogService,
@@ -131,6 +134,17 @@ export class FinanceController {
     const user = req['user'] as RequestUser;
 
     return this.reimbursementOhHoldService.onhold(user, body);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/pending')
+  pendingReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: PendingReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementpPendingService.pending(user, body);
   }
 
   @HttpCode(HttpStatus.OK)

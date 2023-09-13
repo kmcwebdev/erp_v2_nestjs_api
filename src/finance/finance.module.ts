@@ -16,6 +16,7 @@ import { ReimbursementForApprovalService } from './services/reimbursement.for-ap
 import { ReimbursementAnalyticsService } from './services/reimbursement.analytics.service';
 import { ReimbursementApproveService } from './services/reimbursement.approve.service';
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
+import { ReimbursementpPendingService } from './services/reimbursement.pending.service';
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
 import { ReimbursementRejectService } from './services/reimbursement.reject.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
@@ -43,6 +44,7 @@ import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.
     ReimbursementAnalyticsService,
     ReimbursementApproveService,
     ReimbursementOhHoldService,
+    ReimbursementpPendingService,
     ReimbursementCancelService,
     ReimbursementRejectService,
     ReimbursementAuditlogService,
