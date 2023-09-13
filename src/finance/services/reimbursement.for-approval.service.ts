@@ -45,7 +45,7 @@ export class ReimbursementForApprovalService {
         )
         .executeTakeFirst();
 
-      this.logger.log(JSON.stringify({ single: approver, group }));
+      this.logger.log(JSON.stringify({ approver, group }));
 
       return { approver, group };
     });
