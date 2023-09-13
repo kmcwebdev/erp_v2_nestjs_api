@@ -23,7 +23,7 @@ export class ReimbursementForApprovalService {
       const group = await trx
         .selectFrom('groups')
         .select(['group_id'])
-        .where('group_id', '=', department.group_id)
+        .where('group_id', '=', department?.group_id || null) //TODO: Dangerous move here.
         .executeTakeFirst();
 
       const approver = await trx
