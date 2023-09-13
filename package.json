@@ -51,6 +51,7 @@
     "nestjs-kysely": "^0.1.5",
     "nestjs-zod": "^3.0.0",
     "pg": "^8.11.3",
+    "postgresjs": "^1.1.2",
     "pusher": "^5.1.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
