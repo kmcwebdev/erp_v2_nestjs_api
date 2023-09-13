@@ -49,6 +49,8 @@ import { ReimbursementOhHoldService } from './services/reimbursement.onhold.serv
 import { ReimbursementpPendingService } from './services/reimbursement.pending.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
 import { ReimbursementpApproveRequestStatusService } from './services/reimbursement.approve-request-status.service';
+import { ReimbursementpProcessingRequestStatusService } from './services/reimbursement.processing-request-status.service';
+import { ProcessingStatusReimbursementRequestDTO } from './common/dto/processingStatusReimbursementRequest.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -65,6 +67,7 @@ export class FinanceController {
     private readonly reimbursementOhHoldService: ReimbursementOhHoldService,
     private readonly reimbursementpPendingService: ReimbursementpPendingService,
     private readonly reimbursementpApproveRequestStatusService: ReimbursementpApproveRequestStatusService,
+    private readonly reimbursementpProcessingRequestStatusService: ReimbursementpProcessingRequestStatusService,
     private readonly reimbursementCancelService: ReimbursementCancelService,
     private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
     private readonly reimbursementAuditlogService: ReimbursementAuditlogService,
@@ -159,6 +162,20 @@ export class FinanceController {
     const user = req['user'] as RequestUser;
 
     return this.reimbursementpApproveRequestStatusService.approveStatus(
+      user,
+      body,
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/processing')
+  processingStatusReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: ProcessingStatusReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementpProcessingRequestStatusService.processing(
       user,
       body,
     );
