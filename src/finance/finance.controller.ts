@@ -32,6 +32,7 @@ import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReim
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
 import { OnHoldReimbursementRequestDTO } from './common/dto/onHoldReimbursementRequest.dto';
 import { PendingReimbursementRequestDTO } from './common/dto/pendingReimbursementRequest.dto';
+import { ApproveStatusReimbursementRequestDTO } from './common/dto/approveStatusReimbursementRequest.dto';
 import { GetAuditlogReimbursementRequestDTO } from './common/dto/getAuditlogReimbursementRequest.dto';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
@@ -47,6 +48,7 @@ import { ReimbursementApproveService } from './services/reimbursement.approve.se
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
 import { ReimbursementpPendingService } from './services/reimbursement.pending.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
+import { ReimbursementpApproveRequestStatusService } from './services/reimbursement.approve-request-status.service';
 
 @Controller('finance')
 export class FinanceController {
@@ -62,6 +64,7 @@ export class FinanceController {
     private readonly reimbursementRejectService: ReimbursementRejectService,
     private readonly reimbursementOhHoldService: ReimbursementOhHoldService,
     private readonly reimbursementpPendingService: ReimbursementpPendingService,
+    private readonly reimbursementpApproveRequestStatusService: ReimbursementpApproveRequestStatusService,
     private readonly reimbursementCancelService: ReimbursementCancelService,
     private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
     private readonly reimbursementAuditlogService: ReimbursementAuditlogService,
@@ -145,6 +148,20 @@ export class FinanceController {
     const user = req['user'] as RequestUser;
 
     return this.reimbursementpPendingService.pending(user, body);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/approve-status')
+  approveStatusReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: ApproveStatusReimbursementRequestDTO,
+  ) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementpApproveRequestStatusService.approveStatus(
+      user,
+      body,
+    );
   }
 
   @HttpCode(HttpStatus.OK)
