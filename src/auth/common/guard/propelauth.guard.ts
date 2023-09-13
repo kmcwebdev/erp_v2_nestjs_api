@@ -72,7 +72,11 @@ export class PropelauthGuard implements CanActivate {
 
       const userFromDb = await this.pgsql
         .selectFrom('users')
-        .select(['users.user_id', 'users.hrbp_approver_email'])
+        .select([
+          'users.user_id',
+          'users.full_name',
+          'users.hrbp_approver_email',
+        ])
         .where('users.propelauth_user_id', '=', payload.userId)
         .executeTakeFirst();
 
@@ -81,6 +85,7 @@ export class PropelauthGuard implements CanActivate {
       if (userFromDb) {
         request.user.original_user_id = userFromDb.user_id;
         request.user.hrbp_approver_email = userFromDb.hrbp_approver_email;
+        request.user.full_name = userFromDb.full_name;
       }
 
       if (result.length) {
