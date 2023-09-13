@@ -84,9 +84,11 @@ export class PropelauthGuard implements CanActivate {
       }
 
       if (result.length) {
-        request.user.user_assigned_role =
-          result[0].userAssignedRole.toLowerCase();
-        request.user.permissions = result[0].usersPermission;
+        const assigned_role = result[0].userAssignedRole.toLowerCase();
+        const assigned_permissions = result[0].usersPermission;
+
+        request.user.user_assigned_role = assigned_role;
+        request.user.permissions = assigned_permissions;
       }
     } catch (error: any) {
       this.logger.error(error);
