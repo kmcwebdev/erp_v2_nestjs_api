@@ -92,7 +92,7 @@ export class ReimbursementForApprovalService {
         'users.full_name',
         'users.email',
         'users.employee_id',
-        'users.client_id',
+        'users.client_name',
         'users.hrbp_approver_email',
         'users.payroll_account',
         'finance_reimbursement_requests.created_at',
