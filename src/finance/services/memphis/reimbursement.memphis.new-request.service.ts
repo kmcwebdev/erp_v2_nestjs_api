@@ -62,7 +62,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           .updateTable('finance_reimbursement_requests')
           .set({
             attachment_mask_name: `${
-              newRequest?.full_name ? newRequest.full_name : 'no_name'
+              newRequest?.full_name
+                ? newRequest.full_name.replace(' ', '_')
+                : 'no_name'
             }_${newRequest?.reference_no}`.toUpperCase(),
           })
           .where(
