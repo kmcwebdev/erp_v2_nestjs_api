@@ -13,6 +13,7 @@ export class ReimbursementForApprovalService {
   async get(user: RequestUser) {
     const approverIds = [];
 
+    // TODO: Delete this after debuging
     console.log(user);
 
     const approvers = await this.pgsql.transaction().execute(async (trx) => {
