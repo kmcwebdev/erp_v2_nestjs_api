@@ -7,7 +7,6 @@ import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { UsersModule } from './users/users.module';
-import { MemphisCdcModule } from './memphis-cdc/memphis-cdc.module';
 import { PostgresModule } from './common/database/postgres.module';
 import { AuthModule } from './auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -32,7 +31,6 @@ import { MemphisDevModule } from './memphis-dev/memphis-dev.module';
     UsersModule,
     FinanceModule,
     LegalAndComplianceModule,
-    MemphisCdcModule,
   ],
   providers: [
     {
