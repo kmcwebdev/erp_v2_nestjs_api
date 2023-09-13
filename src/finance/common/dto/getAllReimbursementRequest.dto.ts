@@ -27,14 +27,16 @@ const GetAllReimbursementRequestSchema = z
       .uuid({
         message: 'requestor_id must be a valid uuid',
       }),
-    request_status_id: z
-      .string({
-        description: 'request_status_id',
-        invalid_type_error: 'request_status_id must be a string',
-      })
-      .uuid({
-        message: 'request_status_id must be a valid uuid',
-      }),
+    request_status_id: z.array(
+      z
+        .string({
+          description: 'request_status_id',
+          invalid_type_error: 'request_status_id must be a string',
+        })
+        .uuid({
+          message: 'request_status_id must be a valid uuid',
+        }),
+    ),
     reference_no: z
       .string({
         description: 'reference_no',
