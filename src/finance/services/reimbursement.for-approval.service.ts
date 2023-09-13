@@ -91,6 +91,7 @@ export class ReimbursementForApprovalService {
         'users.employee_id',
         'users.client_id',
         'users.hrbp_approver_email',
+        'users.payroll_account',
         'finance_reimbursement_requests.created_at',
       ])
       .where(
