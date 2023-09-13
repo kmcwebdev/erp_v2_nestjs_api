@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { sql } from 'kysely';
 import { InjectKysely } from 'nestjs-kysely';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { DB } from 'src/common/types';
+import { CANCELLED_REQUEST, REJECTED_REQUEST } from '../common/constant';
 
 @Injectable()
 export class ReimbursementForApprovalService {
@@ -23,7 +23,7 @@ export class ReimbursementForApprovalService {
       const group = await trx
         .selectFrom('groups')
         .select(['group_id'])
-        .where('group_id', '=', department?.group_id || null)
+        .where('group_id', '=', department.group_id)
         .executeTakeFirst();
 
       const approver = await trx
@@ -35,53 +35,77 @@ export class ReimbursementForApprovalService {
         ])
         .execute();
 
-      this.logger.log(JSON.stringify({ approver }));
-
       return approver;
     });
 
     if (approvers.length) {
-      approverIds.push(approvers.forEach((ap) => ap.approver_id));
+      approvers.forEach((ap) => approverIds.push(ap.approver_id));
     }
 
     if (approverIds.length === 0) {
       return [];
     }
 
-    const rawQuery = await sql`SELECT 
-          frr.reimbursement_request_id,
-          fram.approval_matrix_id,
-          frr.reference_no,
-          frrt.request_type,
-          fret.expense_type,
-          frrs.request_status,
-          frr.amount,
-          frr.attachment,
-          frr.attachment_mask_name,
-          frr.remarks,
-          u.full_name,
-          u.email,
-          u.employee_id,
-          u.client_id,
-          u.client_name,
-          u.hrbp_approver_email,
-          frr.created_at
-        FROM finance_reimbursement_approval_matrix AS fram
-        INNER JOIN finance_reimbursement_requests AS frr
-          ON frr.reimbursement_request_id = fram.reimbursement_request_id
-        INNER JOIN finance_reimbursement_request_types AS frrt
-          ON frrt.reimbursement_request_type_id = frr.reimbursement_request_type_id
-        INNER JOIN finance_reimbursement_expense_types AS fret
-          ON frr.expense_type_id = fret.expense_type_id
-        INNER JOIN finance_reimbursement_request_status AS frrs
-          ON frrs.request_status_id = frr.request_status_id
-        INNER JOIN users AS u
-          ON u.user_id = frr.requestor_id
-        WHERE fram.approver_id IN (${approverIds.join(',')})
-        AND fram.has_approved = false
-        AND frr.is_cancelled = false
-        ORDER BY created_at DESC LIMIT 10`.execute(this.pgsql);
+    console.log(approverIds.join(','));
 
-    return rawQuery.rows;
+    const reimbursementRequests = await this.pgsql
+      .selectFrom('finance_reimbursement_approval_matrix')
+      .innerJoin(
+        'finance_reimbursement_requests',
+        'finance_reimbursement_requests.reimbursement_request_id',
+        'finance_reimbursement_approval_matrix.reimbursement_request_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_types',
+        'finance_reimbursement_request_types.reimbursement_request_type_id',
+        'finance_reimbursement_requests.reimbursement_request_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_expense_types',
+        'finance_reimbursement_expense_types.expense_type_id',
+        'finance_reimbursement_requests.expense_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_status',
+        'finance_reimbursement_request_status.request_status_id',
+        'finance_reimbursement_requests.request_status_id',
+      )
+      .innerJoin(
+        'users',
+        'users.user_id',
+        'finance_reimbursement_requests.requestor_id',
+      )
+      .select([
+        'finance_reimbursement_requests.reimbursement_request_id',
+        'finance_reimbursement_approval_matrix.approval_matrix_id',
+        'finance_reimbursement_requests.reference_no',
+        'finance_reimbursement_request_types.request_type',
+        'finance_reimbursement_expense_types.expense_type',
+        'finance_reimbursement_request_status.request_status',
+        'finance_reimbursement_requests.amount',
+        'finance_reimbursement_requests.attachment',
+        'finance_reimbursement_requests.attachment_mask_name',
+        'finance_reimbursement_requests.remarks',
+        'users.full_name',
+        'users.email',
+        'users.employee_id',
+        'users.client_id',
+        'users.hrbp_approver_email',
+        'finance_reimbursement_requests.created_at',
+      ])
+      .where(
+        'finance_reimbursement_approval_matrix.approver_id',
+        'in',
+        approverIds,
+      )
+      .where('finance_reimbursement_requests.request_status_id', 'not in', [
+        REJECTED_REQUEST,
+        CANCELLED_REQUEST,
+      ])
+      .orderBy('finance_reimbursement_requests.created_at', 'desc')
+      .limit(10)
+      .execute();
+
+    return reimbursementRequests;
   }
 }
