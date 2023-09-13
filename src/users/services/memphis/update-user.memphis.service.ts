@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { InjectKysely } from 'nestjs-kysely';
-import { ERPHRV1User } from '../common/interface/erpHrV1User.dto';
+import { ERPHRV1User } from '../../common/interface/erpHrV1User.dto';
 import { DB } from 'src/common/types';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 
@@ -54,20 +54,13 @@ export class UpdateUserMemphisService implements OnModuleInit {
 
   private async updateUserUsingERPHrV1(data: ERPHRV1User) {
     try {
-      const {
-        employeeID,
-        name,
-        firstName,
-        lastName,
-        clientId,
-        client,
-        position,
-      } = data;
+      const { sr, name, firstName, lastName, clientId, client, position } =
+        data;
 
       const updatedUser = await this.pgsql
         .updateTable('users')
         .set({
-          employee_id: employeeID,
+          employee_id: sr || 'Not set in erp hr',
           full_name: name,
           first_name: firstName,
           last_name: lastName,
@@ -86,9 +79,9 @@ export class UpdateUserMemphisService implements OnModuleInit {
   async onModuleInit() {
     try {
       this.consumer = await this.memphisService.consumer({
-        stationName: 'erp.update-user',
-        consumerName: 'erp.update-user.consumer-name',
-        consumerGroup: 'erp.update-user.consumer-group',
+        stationName: 'erp.reimbursement.update-user',
+        consumerName: 'erp.reimbursement.update-user.consumer-name',
+        consumerGroup: 'erp.reimbursement.update-user.consumer-group',
       });
 
       this.consumer.on('message', async (message: Message) => {
@@ -102,8 +95,8 @@ export class UpdateUserMemphisService implements OnModuleInit {
       });
 
       this.producer = await this.memphisService.producer({
-        stationName: 'erp.update-user',
-        producerName: 'erp.update-user.producer-name',
+        stationName: 'erp.reimbursement.update-user',
+        producerName: 'erp.reimbursement.update-user.producer-name',
       });
 
       this.logger.log('Memphis user update station is ready');
