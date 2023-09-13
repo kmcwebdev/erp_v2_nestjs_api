@@ -230,7 +230,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 '/api/email/hrbp-approval',
                 {
                   to: [newRequest.hrbp_approver_email],
-                  hrbpFullName: hrbp.full_name || 'HRBP',
+                  approverFullName: hrbp.full_name || 'HRBP',
                   fullName: newRequest?.full_name || 'No name set',
                   employeeId: newRequest?.employee_id || 'No employee id set',
                   expenseType: newRequest.expense_type,
