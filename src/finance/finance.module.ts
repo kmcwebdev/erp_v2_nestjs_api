@@ -22,7 +22,6 @@ import { ReimbursementpProcessingRequestStatusService } from './services/reimbur
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
 import { ReimbursementRejectService } from './services/reimbursement.reject.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
-import { ReimbursementMemphisSendEmailService } from './services/memphis/reimbursement.memphis-send-email.service';
 import { ReimbursementMemphisNewRequestService } from './services/memphis/reimbursement.memphis.new-request.service';
 import { ReimbursementMemphisBulkApprovalService } from './services/memphis/reimbursement.memphis-bulk-approval.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
@@ -53,7 +52,6 @@ import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.
     ReimbursementRejectService,
     ReimbursementAuditlogService,
     ReimbursementCreateAttachmentService,
-    ReimbursementMemphisSendEmailService,
     ReimbursementMemphisNewRequestService,
     ReimbursementMemphisBulkApprovalService,
   ],
