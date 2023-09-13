@@ -64,6 +64,8 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
           ])
           .executeTakeFirst();
 
+        console.log(updatedReimbursementMatrix);
+
         if (!updatedReimbursementMatrix) {
           return {
             message: 'This request is already approved or rejected',

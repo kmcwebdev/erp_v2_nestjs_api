@@ -117,7 +117,7 @@ export class ReimbursementApproveService {
                           DATE_TRUNC('MONTH', payroll_date) + INTERVAL '24 days'
                       ELSE 
                           DATE_TRUNC('MONTH', payroll_date) + INTERVAL '9 days' + INTERVAL '1 month'
-                  END;
+                  END
               WHERE reimbursement_request_id = ${reimbursementRequestApprovalMatrix.reimbursement_request_id}
             `.execute(this.pgsql);
           }

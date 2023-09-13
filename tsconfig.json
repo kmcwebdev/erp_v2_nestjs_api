@@ -35,6 +35,12 @@
       ],
       "@app/filestack/*": [
         "libs/filestack/src/*"
+      ],
+      "@app/postgresjs": [
+        "libs/postgresjs/src"
+      ],
+      "@app/postgresjs/*": [
+        "libs/postgresjs/src/*"
       ]
     }
   }
