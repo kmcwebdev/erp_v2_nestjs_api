@@ -33,6 +33,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/filestack/tsconfig.lib.json"
       }
+    },
+    "postgresjs": {
+      "type": "library",
+      "root": "libs/postgresjs",
+      "entryFile": "index",
+      "sourceRoot": "libs/postgresjs/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/postgresjs/tsconfig.lib.json"
+      }
     }
   }
 }

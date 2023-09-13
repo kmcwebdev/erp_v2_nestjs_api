@@ -109,7 +109,8 @@
       "^@app/lib(|/.*)$": "<rootDir>/libs/lib/src/$1",
       "^@app/propelauth(|/.*)$": "<rootDir>/libs/propelauth/src/$1",
       "^@app/kysely-pg(|/.*)$": "<rootDir>/libs/kysely-pg/src/$1",
-      "^@app/filestack(|/.*)$": "<rootDir>/libs/filestack/src/$1"
+      "^@app/filestack(|/.*)$": "<rootDir>/libs/filestack/src/$1",
+      "^@app/postgresjs(|/.*)$": "<rootDir>/libs/postgresjs/src/$1"
     }
   }
 }
