@@ -15,6 +15,41 @@ export class ReimbursementGetAllService {
     const { original_user_id } = user;
     const default_page_limit = 20;
 
+    let query = this.pgsql
+      .selectFrom('finance_reimbursement_requests')
+      .innerJoin(
+        'finance_reimbursement_request_types',
+        'finance_reimbursement_request_types.reimbursement_request_type_id',
+        'finance_reimbursement_requests.reimbursement_request_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_expense_types',
+        'finance_reimbursement_expense_types.expense_type_id',
+        'finance_reimbursement_requests.expense_type_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_status',
+        'finance_reimbursement_request_status.request_status_id',
+        'finance_reimbursement_requests.request_status_id',
+      )
+      .innerJoin(
+        'users',
+        'users.user_id',
+        'finance_reimbursement_requests.requestor_id',
+      )
+      .select([
+        'finance_reimbursement_requests.reimbursement_request_id',
+        'finance_reimbursement_requests.reference_no',
+        'finance_reimbursement_request_types.request_type',
+        'finance_reimbursement_expense_types.expense_type',
+        'finance_reimbursement_request_status.request_status',
+        'users.full_name',
+        'users.email',
+        'users.employee_id',
+        'users.client_name',
+        'users.hrbp_approver_email',
+      ]);
+
     const rawQuery = sql`SELECT 
               frr.reimbursement_request_id,
               frr.reference_no,
