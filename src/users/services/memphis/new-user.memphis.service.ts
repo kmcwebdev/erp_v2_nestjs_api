@@ -44,9 +44,9 @@ export class NewUserMemphisService implements OnModuleInit {
   async onModuleInit() {
     try {
       this.consumer = await this.memphisService.consumer({
-        stationName: 'erp.new-user',
-        consumerName: 'erp.new-user.consumer-name',
-        consumerGroup: 'erp.new-user.consumer-group',
+        stationName: 'erp.reimbursement.new-user',
+        consumerName: 'erp.reimbursement.new-user.consumer-name',
+        consumerGroup: 'erp.reimbursement.new-user.consumer-group',
       });
 
       this.consumer.on('message', async (message: Message) => {
@@ -101,8 +101,8 @@ export class NewUserMemphisService implements OnModuleInit {
       });
 
       this.producer = await this.memphisService.producer({
-        stationName: 'erp.new-user',
-        producerName: 'erp.new-user.producer-name',
+        stationName: 'erp.reimbursement.new-user',
+        producerName: 'erp.reimbursement.new-user.producer-name',
       });
 
       this.logger.log('Memphis user created station is ready');

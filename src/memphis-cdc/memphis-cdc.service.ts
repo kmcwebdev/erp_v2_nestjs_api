@@ -16,11 +16,6 @@ export class MemphisCdcService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     try {
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.cdc-events',
-        producerName: 'erp.cdc-events.producer-name',
-      });
-
       this.consumer = await this.memphisService.consumer({
         stationName: 'erp.cdc-events',
         consumerName: 'erp.cdc-events.consumer',
@@ -73,6 +68,11 @@ export class MemphisCdcService implements OnModuleInit {
         }
 
         message.ack();
+      });
+
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.cdc-events',
+        producerName: 'erp.cdc-events.producer-name',
       });
 
       this.logger.log('Memphis cdc station is ready');
