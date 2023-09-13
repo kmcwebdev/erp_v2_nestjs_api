@@ -5,13 +5,7 @@ import { Reimbursement } from '../../common/interface/reimbursement.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import * as crypto from 'crypto';
-import {
-  GROUP_APPROVERS_BILLING,
-  GROUP_APPROVERS_TREASURY,
-  GROUP_APPROVER_PAYABLES,
-  SCHEDULED_REQUEST,
-  UNSCHEDULED_REQUEST,
-} from '../../common/constant';
+import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
@@ -170,24 +164,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 approver_order: 1,
                 is_hrbp: true,
                 approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
-              },
-              {
-                reimbursement_request_id: newRequest.reimbursement_request_id,
-                approver_id: GROUP_APPROVER_PAYABLES,
-                approver_order: 2,
-                approver_verifier: `${newRequest.reimbursement_request_id}<->2`,
-              },
-              {
-                reimbursement_request_id: newRequest.reimbursement_request_id,
-                approver_id: GROUP_APPROVERS_TREASURY,
-                approver_order: 3,
-                approver_verifier: `${newRequest.reimbursement_request_id}<->3`,
-              },
-              {
-                reimbursement_request_id: newRequest.reimbursement_request_id,
-                approver_id: GROUP_APPROVERS_BILLING,
-                approver_order: 4,
-                approver_verifier: `${newRequest.reimbursement_request_id}<->4`,
               },
             ])
             .execute();
