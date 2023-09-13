@@ -18,25 +18,17 @@ export class ReimbursementOhHoldService {
         const reimbursementRequest = await trx
           .updateTable('finance_reimbursement_requests')
           .set({
-            is_onhold: true,
             request_status_id: ONHOLD_REQUEST,
           })
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
           ])
-          .where('finance_reimbursement_requests.is_onhold', '=', false)
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
             '=',
             data.reimbursement_request_id,
           )
           .executeTakeFirst();
-
-        if (!reimbursementRequest) {
-          return {
-            message: 'Request is already put onhold',
-          };
-        }
 
         await trx
           .insertInto('finance_reimbursement_approval_audit_logs')

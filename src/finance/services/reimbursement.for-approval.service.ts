@@ -46,8 +46,6 @@ export class ReimbursementForApprovalService {
       return [];
     }
 
-    console.log(approverIds.join(','));
-
     const reimbursementRequests = await this.pgsql
       .selectFrom('finance_reimbursement_approval_matrix')
       .innerJoin(

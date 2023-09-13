@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { PROCESSING_REQUEST } from '../common/constant';
+import { APPROVED_REQUEST, PROCESSING_REQUEST } from '../common/constant';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { ProcessingStatusReimbursementRequestType } from '../common/dto/processingStatusReimbursementRequest.dto';
 
@@ -28,7 +28,11 @@ export class ReimbursementpProcessingRequestStatusService {
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
           ])
-          .where('finance_reimbursement_requests.is_onhold', '=', false)
+          .where(
+            'finance_reimbursement_requests.request_status_id',
+            '=',
+            APPROVED_REQUEST,
+          )
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
             '=',
@@ -38,7 +42,8 @@ export class ReimbursementpProcessingRequestStatusService {
 
         if (!reimbursementRequest) {
           return {
-            message: 'Request is already processed',
+            message:
+              'Request is already in processing or request is not yet approve',
           };
         }
 
