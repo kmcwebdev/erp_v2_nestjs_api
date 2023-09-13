@@ -31,10 +31,13 @@ export class ReimbursementForApprovalService {
       const approver = await trx
         .selectFrom('finance_reimbursement_approvers')
         .select(['approver_id'])
-        .where('finance_reimbursement_approvers.signatory_id', 'in', [
-          user.original_user_id,
-          group.group_id,
-        ])
+        .where(
+          'finance_reimbursement_approvers.signatory_id',
+          'in',
+          [user.original_user_id, group?.group_id ? group.group_id : ''].filter(
+            (str) => str !== '',
+          ),
+        )
         .execute();
 
       return approver;

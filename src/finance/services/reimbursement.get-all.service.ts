@@ -64,7 +64,7 @@ export class ReimbursementGetAllService {
               ${
                 data?.request_status_id
                   ? sql`
-              AND frr.request_status_id = ${data.request_status_id}`
+              AND frr.request_status_id = ${data.request_status_id[0]}`
                   : sql``
               }
               ${
