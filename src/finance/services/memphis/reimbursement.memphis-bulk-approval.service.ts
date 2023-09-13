@@ -153,11 +153,9 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
       const frontEndUrl = this.configService.get('FRONT_END_URL');
 
       this.consumer = await this.memphisService.consumer({
-        stationName: 'erp.finance-reimbursement-request-bulk-approval',
-        consumerName:
-          'erp.finance-reimbursement-request-bulk-approval.consumer-name',
-        consumerGroup:
-          'erp.finance-reimbursement-request-bulk-approval.consumer-group',
+        stationName: 'erp.reimbursement.bulk-approval',
+        consumerName: 'erp.reimbursement.bulk-approval.consumer-name',
+        consumerGroup: 'erp.reimbursement.bulk-approval.consumer-group',
       });
 
       this.consumer.on('message', async (message: Message) => {
@@ -185,9 +183,8 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
       });
 
       this.producer = await this.memphisService.producer({
-        stationName: 'erp.finance-reimbursement-request-bulk-approval',
-        producerName:
-          'erp.finance-reimbursement-request-bulk-approval.producer-name',
+        stationName: 'erp.reimbursement.bulk-approval',
+        producerName: 'erp.reimbursement.bulk-approval.producer-name',
       });
 
       this.logger.log('Memphis reimbursement bulk approval station is ready');

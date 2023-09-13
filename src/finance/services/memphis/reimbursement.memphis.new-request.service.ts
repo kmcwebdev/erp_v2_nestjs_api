@@ -46,9 +46,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
       const frontEndUrl = this.configService.get('FRONT_END_URL');
 
       this.consumer = await this.memphisService.consumer({
-        stationName: 'erp.finance-reimbursement-new-request',
-        consumerName: 'erp.finance-reimbursement-new-request.consumer-name',
-        consumerGroup: 'erp.finance-reimbursement-new-request.consumer-group',
+        stationName: 'erp.reimbursement.new-request',
+        consumerName: 'erp.reimbursement.new-request.consumer-name',
+        consumerGroup: 'erp.reimbursement.new-request.consumer-group',
       });
 
       this.consumer.on('message', async (message: Message) => {
@@ -269,8 +269,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
       });
 
       this.producer = await this.memphisService.producer({
-        stationName: 'erp.finance-reimbursement-new-request',
-        producerName: 'erp.finance-reimbursement-new-request.producer-name',
+        stationName: 'erp.reimbursement.new-request',
+        producerName: 'erp.reimbursement.new-request.producer-name',
       });
 
       this.logger.log('Memphis reimbursement new request station is ready');
