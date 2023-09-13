@@ -95,7 +95,9 @@ export class ReimbursementGetAllService {
               data?.text_search
                 ? sql`ORDER BY rank DESC`
                 : sql`${
-                    data?.last_id ? sql`ORDER BY frr.created_at DESC` : sql``
+                    data?.last_id
+                      ? sql`ORDER BY frr.last_id DESC`
+                      : sql`ORDER BY frr.created_at DESC`
                   }`
             } LIMIT ${data?.page_limit || default_page_limit}
             `;
