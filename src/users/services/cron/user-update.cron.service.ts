@@ -5,6 +5,8 @@ import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { ERPHRV1User } from 'src/users/common/interface/erpHrV1User.dto';
 
+const TEMPORARY_APPROVER = 'leanna.pedragosa@kmc.solutions';
+
 @Injectable()
 export class UserUpdateCronService {
   private readonly logger = new Logger(UserUpdateCronService.name);
@@ -79,8 +81,11 @@ export class UserUpdateCronService {
               last_name: lastName,
               client_id: clientId,
               client_name: client,
-              hrbp_approver_email: hrbpEmail,
-              position: position,
+              hrbp_approver_email:
+                hrbpEmail === 'people@kmc.solutions'
+                  ? TEMPORARY_APPROVER
+                  : hrbpEmail,
+              position,
               updated_via_cron_erp_hr: true,
             })
             .returning(['users.email'])
