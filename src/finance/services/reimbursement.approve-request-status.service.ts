@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { APPROVED_REQUEST } from '../common/constant';
@@ -28,7 +28,6 @@ export class ReimbursementpApproveRequestStatusService {
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
           ])
-          .where('finance_reimbursement_requests.is_onhold', '=', false)
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
             '=',
@@ -37,9 +36,7 @@ export class ReimbursementpApproveRequestStatusService {
           .executeTakeFirst();
 
         if (!reimbursementRequest) {
-          return {
-            message: 'Request is already approved',
-          };
+          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
         }
 
         await trx

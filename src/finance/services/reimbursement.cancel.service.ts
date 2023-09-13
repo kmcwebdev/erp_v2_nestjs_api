@@ -22,13 +22,11 @@ export class ReimbursementCancelService {
         const reimbursementRequest = await trx
           .updateTable('finance_reimbursement_requests')
           .set({
-            is_cancelled: true,
             request_status_id: CANCELLED_REQUEST,
           })
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
           ])
-          .where('finance_reimbursement_requests.is_cancelled', '=', false)
           .where(
             'finance_reimbursement_requests.requestor_id',
             '=',
