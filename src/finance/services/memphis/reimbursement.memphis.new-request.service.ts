@@ -174,6 +174,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 reimbursement_request_id: newRequest.reimbursement_request_id,
                 approver_id: hrbpInApprovers.approver_id,
                 approver_order: 1,
+                is_hrbp: true,
                 approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
               },
               {

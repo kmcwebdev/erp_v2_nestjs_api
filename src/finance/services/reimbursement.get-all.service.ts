@@ -29,6 +29,7 @@ export class ReimbursementGetAllService {
               u.email,
               u.employee_id,
               u.hrbp_approver_email,
+              frr.payroll_date,
               frr.date_approve,
               frr.created_at,
               frr.cursor_id::TEXT
