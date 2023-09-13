@@ -32,6 +32,8 @@ export class ReimbursementForApprovalService {
         .where('groups.group_id', '=', approverDepartment?.group_id || null)
         .executeTakeFirst();
 
+      this.logger.log(JSON.stringify({ single, group }));
+
       return { single, group };
     });
 
