@@ -42,7 +42,8 @@ export class ReimbursementpProcessingRequestStatusService {
 
         if (!reimbursementRequest) {
           return {
-            message: 'Request is already processed',
+            message:
+              'Request is already in processing or request is not yet approve',
           };
         }
 
