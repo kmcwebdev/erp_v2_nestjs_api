@@ -16,46 +16,32 @@ export class ReimbursementForApprovalService {
     const approvers = await this.pgsql.transaction().execute(async (trx) => {
       const department = await trx
         .selectFrom('departments')
-        .select(['departments.group_id'])
+        .select(['group_id'])
         .where('user_id', '=', user.original_user_id)
         .executeTakeFirst();
 
       const group = await trx
         .selectFrom('groups')
-        .select(['groups.group_id'])
-        .where('groups.group_id', '=', department?.group_id || null)
+        .select(['group_id'])
+        .where('group_id', '=', department?.group_id || null)
         .executeTakeFirst();
 
       const approver = await trx
         .selectFrom('finance_reimbursement_approvers')
-        .select('approver_id')
-        .where((eb) =>
-          eb.or([
-            eb(
-              'finance_reimbursement_approvers.signatory_id',
-              '=',
-              user.original_user_id,
-            ),
-            eb(
-              'finance_reimbursement_approvers.signatory_id',
-              '=',
-              group.group_id,
-            ),
-          ]),
-        )
-        .executeTakeFirst();
+        .select(['approver_id'])
+        .where('finance_reimbursement_approvers.signatory_id', 'in', [
+          user.original_user_id,
+          group.group_id,
+        ])
+        .execute();
 
-      this.logger.log(JSON.stringify({ single: approver, group }));
+      this.logger.log(JSON.stringify({ approver }));
 
-      return { approver, group };
+      return approver;
     });
 
-    if (approvers?.approver) {
-      approverIds.push(approvers.approver.approver_id);
-    }
-
-    if (approvers?.group) {
-      approverIds.push(approvers.group.group_id);
+    if (approvers.length) {
+      approverIds.push(approvers.forEach((ap) => ap.approver_id));
     }
 
     if (approverIds.length === 0) {
