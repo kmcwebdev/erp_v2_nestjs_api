@@ -6,6 +6,7 @@ import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 import { ReimbursementRequestApprovalType } from '../common/dto/approveReimbursementRequest.dto';
 import { sql } from 'kysely';
+import { APPROVED_REQUEST } from '../common/constant';
 
 @Injectable()
 export class ReimbursementApproveService {
@@ -32,16 +33,14 @@ export class ReimbursementApproveService {
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const updatedReimbursementMatrix = await trx
+        const reimbursementRequestApprovalMatrix = await trx
           .updateTable('finance_reimbursement_approval_matrix')
           .set({
             has_approved: true,
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
-          .returning([
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          ])
+
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
@@ -57,67 +56,40 @@ export class ReimbursementApproveService {
             '=',
             false,
           )
+          .returning([
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            'finance_reimbursement_approval_matrix.is_hrbp',
+          ])
           .executeTakeFirst();
 
-        if (!updatedReimbursementMatrix) {
+        if (!reimbursementRequestApprovalMatrix) {
           return {
             message: 'This request is already approved or cancelled',
           };
         }
 
-        const reimbursementRequestApprovalMatrix = await trx
-          .selectFrom('finance_reimbursement_approval_matrix')
-          .select([
-            'finance_reimbursement_approval_matrix.approval_matrix_id',
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-            'finance_reimbursement_approval_matrix.approver_order',
-            'finance_reimbursement_approval_matrix.is_hrbp',
-          ])
-          .where(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-            '=',
-            updatedReimbursementMatrix.reimbursement_request_id,
-          )
-          .where(
-            'finance_reimbursement_approval_matrix.has_approved',
-            '=',
-            false,
-          )
-          .where(
-            'finance_reimbursement_approval_matrix.has_rejected',
-            '=',
-            false,
-          )
-          .orderBy(
-            'finance_reimbursement_approval_matrix.approver_order',
-            'asc',
-          )
-          .executeTakeFirst();
-
         if (reimbursementRequestApprovalMatrix) {
-          await trx
-            .updateTable('finance_reimbursement_requests')
-            .set({
-              next_approver_order:
-                reimbursementRequestApprovalMatrix.approver_order,
-            })
-            .where(
-              'finance_reimbursement_requests.reimbursement_request_id',
-              '=',
-              updatedReimbursementMatrix.reimbursement_request_id,
-            )
-            .execute();
-
           if (reimbursementRequestApprovalMatrix.is_hrbp) {
             await sql`
               UPDATE finance_reimbursement_requests 
               SET payroll_date = 
                   CASE 
-                      WHEN EXTRACT(DAY FROM payroll_date) BETWEEN 1 AND 15 THEN
-                          DATE_TRUNC('MONTH', payroll_date) + INTERVAL '24 days'
-                      ELSE 
-                          DATE_TRUNC('MONTH', payroll_date) + INTERVAL '9 days' + INTERVAL '1 month'
-                  END
+                    WHEN EXTRACT(DAY FROM CURRENT_DATE) BETWEEN 1 AND 15 THEN
+                      CASE 
+                        WHEN EXTRACT(DOW FROM DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '24 days') IN (0, 6) THEN
+                            DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '23 days'
+                        ELSE
+                            DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '24 days'
+                      END
+                    ELSE 
+                      CASE 
+                        WHEN EXTRACT(DOW FROM DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '9 days' + INTERVAL '1 month') IN (0, 6) THEN
+                            DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '8 days' + INTERVAL '1 month'
+                        ELSE
+                            DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '9 days' + INTERVAL '1 month'
+                      END
+                  END,
+                  request_status_id = ${APPROVED_REQUEST}
               WHERE reimbursement_request_id = ${reimbursementRequestApprovalMatrix.reimbursement_request_id}
             `.execute(this.pgsql);
           }
@@ -127,7 +99,7 @@ export class ReimbursementApproveService {
 
         const reimbursement = await this.reimbursementGetOneService.get({
           reimbursement_request_id:
-            updatedReimbursementMatrix.reimbursement_request_id,
+            reimbursementRequestApprovalMatrix.reimbursement_request_id,
         });
 
         return reimbursement;
