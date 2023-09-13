@@ -45,41 +45,6 @@ export class UserUpdateCronService {
     }
   }
 
-  private async updateUserUsingERPHrV1(data: ERPHRV1User) {
-    try {
-      const {
-        sr,
-        name,
-        firstName,
-        lastName,
-        clientId,
-        client,
-        workEmail,
-        hrbpEmail,
-        position,
-      } = data;
-
-      const updatedUser = await this.pgsql
-        .updateTable('users')
-        .set({
-          employee_id: sr || 'Not set in erp hr',
-          full_name: name,
-          first_name: firstName,
-          last_name: lastName,
-          client_id: clientId,
-          client_name: client,
-          hrbp_approver_email: hrbpEmail,
-          position,
-        })
-        .where('users.email', '=', workEmail)
-        .executeTakeFirst();
-
-      return updatedUser;
-    } catch (error: unknown) {
-      this.logger.error(error);
-    }
-  }
-
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCron() {
     try {
@@ -116,6 +81,7 @@ export class UserUpdateCronService {
               client_name: client,
               hrbp_approver_email: hrbpEmail,
               position: position,
+              updated_via_cron_erp_hr: true,
             })
             .returning(['users.email'])
             .where('users.user_id', '=', u.user_id)
