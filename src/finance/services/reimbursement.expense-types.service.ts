@@ -25,6 +25,7 @@ export class ReimbursementExpenseTypesService {
         '=',
         requestTypeId,
       )
+      .orderBy('finance_reimbursement_expense_types.expense_type', 'asc')
       .execute();
   }
 }
