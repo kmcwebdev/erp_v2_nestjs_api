@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { ONHOLD_REQUEST } from '../common/constant';
@@ -29,6 +29,10 @@ export class ReimbursementOhHoldService {
             data.reimbursement_request_id,
           )
           .executeTakeFirst();
+
+        if (!reimbursementRequest) {
+          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+        }
 
         await trx
           .insertInto('finance_reimbursement_approval_audit_logs')
