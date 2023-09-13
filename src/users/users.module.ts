@@ -5,10 +5,16 @@ import { NewUserMemphisService } from './services/memphis/new-user.memphis.servi
 import { UpdateUserMemphisService } from './services/memphis/update-user.memphis.service';
 import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UserUpdateCronService } from './services/cron/user-update.cron.service';
 
 @Module({
   imports: [MemphisDevModule, ScheduleModule.forRoot()],
   controllers: [UsersController],
-  providers: [UsersApiService, NewUserMemphisService, UpdateUserMemphisService],
+  providers: [
+    UsersApiService,
+    NewUserMemphisService,
+    UpdateUserMemphisService,
+    UserUpdateCronService,
+  ],
 })
 export class UsersModule {}
