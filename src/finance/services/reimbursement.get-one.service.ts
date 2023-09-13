@@ -76,6 +76,7 @@ export class ReimbursementGetOneService {
         u.client_name,
         u.hrbp_approver_email,
         frr.dynamic_approvers,
+        frr.payroll_date,
         frr.date_approve,
         fram.approval_matrix_id AS next_approval_matrix_id,
         na.next_approver_order,
