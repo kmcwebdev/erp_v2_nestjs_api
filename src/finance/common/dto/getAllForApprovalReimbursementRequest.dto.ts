@@ -5,7 +5,7 @@ import { createZodDto } from 'nestjs-zod';
 const GetAllApprovalReimbursementRequestSchema = z
   .object({
     text_search: z.string().nonempty(),
-    expense_type_ids: z.array(z.string().uuid()).min(1),
+    expense_type_ids: z.string().nonempty(),
   })
   .partial();
 
