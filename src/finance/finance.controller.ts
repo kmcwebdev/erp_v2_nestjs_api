@@ -122,11 +122,11 @@ export class FinanceController {
   @Get('/reimbursements/requests/for-approvals')
   getAllForApprovalReimbursementRequest(
     @Req() req: Request,
-    @Body() body: GetAllApprovalReimbursementRequestDTO,
+    @Query() query: GetAllApprovalReimbursementRequestDTO,
   ) {
     const user = req['user'] as RequestUser;
 
-    return this.reimbursementForApprovalService.get(user, body);
+    return this.reimbursementForApprovalService.get(user, query);
   }
 
   @HttpCode(HttpStatus.OK)
