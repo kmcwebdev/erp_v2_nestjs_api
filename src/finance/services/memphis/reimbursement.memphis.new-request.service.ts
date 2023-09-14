@@ -1,15 +1,15 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { catchError, firstValueFrom } from 'rxjs';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { Reimbursement } from '../../common/interface/reimbursement.interface';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import * as crypto from 'crypto';
-import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
-import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
+import { ReimbursementRequest } from 'src/finance/common/interface/getOneRequest.interface';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -29,7 +29,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
   ) {}
 
   @OnEvent('reimbursement-request-created')
-  async test(data: Reimbursement) {
+  async test(data: ReimbursementRequest) {
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });
@@ -46,7 +46,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
       });
 
       this.consumer.on('message', async (message: Message) => {
-        const data: Reimbursement = JSON.parse(
+        const data: ReimbursementRequest = JSON.parse(
           message.getData().toString() || '{}',
         );
 

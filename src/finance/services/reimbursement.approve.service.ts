@@ -30,6 +30,13 @@ export class ReimbursementApproveService {
       };
     }
 
+    return this.approveReimbursementRequest(user, data.approval_matrix_ids[0]);
+  }
+
+  async approveReimbursementRequest(
+    user: RequestUser,
+    approval_matrix_ids: string,
+  ) {
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
@@ -44,7 +51,7 @@ export class ReimbursementApproveService {
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
-            data.approval_matrix_ids[0],
+            approval_matrix_ids,
           )
           .where(
             'finance_reimbursement_approval_matrix.has_approved',

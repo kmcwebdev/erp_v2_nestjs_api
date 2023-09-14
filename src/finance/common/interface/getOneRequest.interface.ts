@@ -1,5 +1,6 @@
 export interface ReimbursementRequest {
   reimbursement_request_id: string;
+  request_type_id: string;
   request_type: string;
   expense_type: string;
   reference_no: string;
@@ -32,6 +33,7 @@ interface Approver {
   approver_order: number;
   has_approved: boolean;
   has_rejected: boolean;
+  is_hrbp: boolean;
   performed_by_user_id: string | null;
   description: string | null;
   approver_name: string | null;

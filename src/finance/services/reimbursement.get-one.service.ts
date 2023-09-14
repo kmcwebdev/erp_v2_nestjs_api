@@ -61,6 +61,7 @@ export class ReimbursementGetOneService {
 
       SELECT
         frr.reimbursement_request_id,
+        frr.reimbursement_request_type_id as request_type_id,
         frrt.request_type,
         fret.expense_type,
         frr.reference_no,

@@ -4,6 +4,7 @@ import { InjectKysely } from 'nestjs-kysely';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { DB } from 'src/common/types';
 import { CreateReimbursementRequestType } from '../common/dto/createReimbursementRequest.dto';
+import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 
 @Injectable()
 export class ReimbursementCreateService {
@@ -12,6 +13,7 @@ export class ReimbursementCreateService {
   constructor(
     @InjectKysely() private readonly pgsql: DB,
     private readonly eventEmitter: EventEmitter2,
+    private readonly reimbursementGetOneService: ReimbursementGetOneService,
   ) {}
 
   async create(user: RequestUser, data: CreateReimbursementRequestType) {
@@ -56,65 +58,16 @@ export class ReimbursementCreateService {
             .execute();
         }
 
-        const queryNewReimbursementRequest = await trx
-          .selectFrom('finance_reimbursement_requests')
-          .innerJoin(
-            'finance_reimbursement_request_types',
-            'finance_reimbursement_request_types.reimbursement_request_type_id',
-            'finance_reimbursement_requests.reimbursement_request_type_id',
-          )
-          .innerJoin(
-            'finance_reimbursement_expense_types',
-            'finance_reimbursement_expense_types.expense_type_id',
-            'finance_reimbursement_requests.expense_type_id',
-          )
-          .innerJoin(
-            'users',
-            'users.user_id',
-            'finance_reimbursement_requests.requestor_id',
-          )
-          .innerJoin(
-            'finance_reimbursement_request_status',
-            'finance_reimbursement_request_status.request_status_id',
-            'finance_reimbursement_requests.request_status_id',
-          )
-          .select([
-            'finance_reimbursement_requests.reimbursement_request_id',
-            'finance_reimbursement_requests.reference_no',
-            'finance_reimbursement_request_types.reimbursement_request_type_id as request_type_id',
-            'finance_reimbursement_request_types.request_type',
-            'finance_reimbursement_expense_types.expense_type',
-            'finance_reimbursement_request_status.request_status_id',
-            'finance_reimbursement_request_status.request_status',
-            'finance_reimbursement_requests.attachment',
-            'finance_reimbursement_requests.amount',
-            'finance_reimbursement_requests.dynamic_approvers',
-            'users.user_id',
-            'users.full_name',
-            'users.client_name',
-            'users.email',
-            'users.hrbp_approver_email',
-            'date_approve',
-            'users.employee_id',
-            'finance_reimbursement_requests.date_approve',
-            'finance_reimbursement_requests.is_cancelled',
-            'finance_reimbursement_requests.created_at',
-          ])
-          .where(
-            'reimbursement_request_id',
-            '=',
-            newReimbursementRequest.reimbursement_request_id,
-          )
-          .executeTakeFirstOrThrow();
-
-        return queryNewReimbursementRequest;
+        return newReimbursementRequest;
       });
 
-    this.eventEmitter.emit(
-      'reimbursement-request-created',
-      newReimbursementRequest,
-    );
+    const request = await this.reimbursementGetOneService.get({
+      reimbursement_request_id:
+        newReimbursementRequest.reimbursement_request_id,
+    });
 
-    return newReimbursementRequest;
+    this.eventEmitter.emit('reimbursement-request-created', request);
+
+    return request;
   }
 }
