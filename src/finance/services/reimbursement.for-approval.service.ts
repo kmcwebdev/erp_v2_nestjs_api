@@ -94,7 +94,7 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_requests.reference_no',
         'finance_reimbursement_request_types.request_type',
         'finance_reimbursement_expense_types.expense_type',
-        'main_request_status.request_status',
+        'main_request_status.request_status as requestor_request_status',
         'hrbp_status.request_status as hrbp_request_status',
         'finance_status.request_status as finance_request_status',
         'finance_reimbursement_requests.amount',

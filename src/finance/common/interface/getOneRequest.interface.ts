@@ -6,7 +6,9 @@ export interface ReimbursementRequest {
   attachment: string;
   attachment_mask_name: string;
   amount: string;
-  request_status: string;
+  requestor_request_status: string;
+  hrbp_request_status: string;
+  finance_request_status: string;
   remarks: string | null;
   requestor_id: string;
   full_name: string | null;

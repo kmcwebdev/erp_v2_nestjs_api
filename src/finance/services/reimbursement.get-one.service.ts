@@ -67,7 +67,7 @@ export class ReimbursementGetOneService {
         frr.attachment,
         frr.attachment_mask_name,
         frr.amount,
-        frrs.request_status,
+        frrs.request_status as requestor_request_status,
         hrbp_status.request_status as hrbp_request_status,
         finance_status.request_status as finance_request_status,
         frr.remarks,
