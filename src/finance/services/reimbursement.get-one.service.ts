@@ -68,6 +68,8 @@ export class ReimbursementGetOneService {
         frr.attachment_mask_name,
         frr.amount,
         frrs.request_status,
+        hrbp_status.request_status as hrbp_request_status,
+        finance_status.request_status as finance_request_status,
         frr.remarks,
         frr.requestor_id,
         u.full_name,
@@ -89,6 +91,8 @@ export class ReimbursementGetOneService {
         LEFT JOIN finance_reimbursement_request_types frrt ON frr.reimbursement_request_type_id = frrt.reimbursement_request_type_id
         LEFT JOIN finance_reimbursement_expense_types fret ON frr.expense_type_id = fret.expense_type_id
         LEFT JOIN finance_reimbursement_request_status frrs ON frrs.request_status_id = frr.request_status_id
+        LEFT JOIN finance_reimbursement_request_status hrbp_status ON hrbp_status.request_status_id = frr.hrbp_request_status_id
+        LEFT JOIN finance_reimbursement_request_status finance_status ON finance_status.request_status_id = frr.finance_request_status_id
         LEFT JOIN ApproverAggregation aa ON frr.reimbursement_request_id = aa.reimbursement_request_id
         LEFT JOIN NextApprover na ON frr.reimbursement_request_id = na.reimbursement_request_id
         LEFT JOIN finance_reimbursement_approval_matrix fram ON frr.reimbursement_request_id = fram.reimbursement_request_id

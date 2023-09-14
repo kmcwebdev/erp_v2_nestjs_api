@@ -120,7 +120,9 @@ export class ReimbursementForApprovalService {
       ]);
 
     if (filter?.expense_type_ids) {
-      const arr = filter.expense_type_ids.split(',');
+      const arr = filter.expense_type_ids.replace(/"/g, '').split(',');
+
+      console.log(arr);
 
       // TODO: Do the check here if all items in array is a valid uuid
 
