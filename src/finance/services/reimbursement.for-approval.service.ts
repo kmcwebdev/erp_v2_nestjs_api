@@ -107,6 +107,14 @@ export class ReimbursementForApprovalService {
         CANCELLED_REQUEST,
       ]);
 
+    if (filter?.expense_type_ids) {
+      query = query.where(
+        'finance_reimbursement_requests.expense_type_id',
+        'in',
+        filter.expense_type_ids,
+      );
+    }
+
     if (filter?.text_search) {
       query = query.where(
         sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' || coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')) @@ websearch_to_tsquery(${filter.text_search})`,
