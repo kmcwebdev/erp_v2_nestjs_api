@@ -49,6 +49,5 @@ import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.
     ReimbursementMemphisNewRequestService,
     ReimbursementMemphisBulkApprovalService,
   ],
-  exports: [],
 })
 export class FinanceModule {}
