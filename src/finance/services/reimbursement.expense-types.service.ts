@@ -28,4 +28,15 @@ export class ReimbursementExpenseTypesService {
       .orderBy('finance_reimbursement_expense_types.sort_order_num')
       .execute();
   }
+
+  async all() {
+    return await this.pgsql
+      .selectFrom('finance_reimbursement_expense_types')
+      .select([
+        'finance_reimbursement_expense_types.expense_type_id',
+        'finance_reimbursement_expense_types.expense_type',
+      ])
+      .orderBy('finance_reimbursement_expense_types.sort_order_num')
+      .execute();
+  }
 }

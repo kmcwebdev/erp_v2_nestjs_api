@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { sql } from 'kysely';
 import { DB } from 'src/common/types';
 import { CANCELLED_REQUEST, REJECTED_REQUEST } from '../common/constant';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { GetAllApprovalReimbursementRequestType } from '../common/dto/getAllForApprovalReimbursementRequest.dto';
 
 @Injectable()
 export class ReimbursementForApprovalService {
@@ -10,7 +12,7 @@ export class ReimbursementForApprovalService {
 
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
-  async get(user: RequestUser) {
+  async get(user: RequestUser, filter: GetAllApprovalReimbursementRequestType) {
     const approverIds = [];
 
     const approvers = await this.pgsql.transaction().execute(async (trx) => {
@@ -49,7 +51,7 @@ export class ReimbursementForApprovalService {
       return [];
     }
 
-    const reimbursementRequests = await this.pgsql
+    let query = this.pgsql
       .selectFrom('finance_reimbursement_approval_matrix')
       .innerJoin(
         'finance_reimbursement_requests',
@@ -103,11 +105,17 @@ export class ReimbursementForApprovalService {
       .where('finance_reimbursement_requests.request_status_id', 'not in', [
         REJECTED_REQUEST,
         CANCELLED_REQUEST,
-      ])
+      ]);
+
+    if (filter?.text_search) {
+      query = query.where(
+        sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' || coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')) @@ websearch_to_tsquery(${filter.text_search})`,
+      );
+    }
+
+    return await query
       .orderBy('finance_reimbursement_requests.created_at', 'desc')
       .limit(10)
       .execute();
-
-    return reimbursementRequests;
   }
 }
