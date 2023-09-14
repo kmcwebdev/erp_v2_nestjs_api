@@ -74,6 +74,16 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_requests.request_status_id',
       )
       .innerJoin(
+        'finance_reimbursement_request_status as hrbp_status',
+        'finance_reimbursement_request_status.request_status_id',
+        'finance_reimbursement_requests.hrbp_request_status_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_status as finance_status',
+        'finance_reimbursement_request_status.request_status_id',
+        'finance_reimbursement_requests.finance_request_status_id',
+      )
+      .innerJoin(
         'users',
         'users.user_id',
         'finance_reimbursement_requests.requestor_id',
@@ -85,6 +95,8 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_request_types.request_type',
         'finance_reimbursement_expense_types.expense_type',
         'finance_reimbursement_request_status.request_status',
+        'hrbp_status.request_status as hrbp_request_status',
+        'finance_status.request_status as finance_request_status',
         'finance_reimbursement_requests.amount',
         'finance_reimbursement_requests.attachment',
         'finance_reimbursement_requests.attachment_mask_name',
@@ -108,10 +120,14 @@ export class ReimbursementForApprovalService {
       ]);
 
     if (filter?.expense_type_ids) {
+      const arr = filter.expense_type_ids.split(',');
+
+      // TODO: Do the check here if all items in array is a valid uuid
+
       query = query.where(
         'finance_reimbursement_requests.expense_type_id',
         'in',
-        filter.expense_type_ids,
+        arr,
       );
     }
 
