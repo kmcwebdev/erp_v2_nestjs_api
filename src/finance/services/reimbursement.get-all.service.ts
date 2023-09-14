@@ -28,9 +28,19 @@ export class ReimbursementGetAllService {
         'finance_reimbursement_requests.expense_type_id',
       )
       .innerJoin(
-        'finance_reimbursement_request_status',
-        'finance_reimbursement_request_status.request_status_id',
+        'finance_reimbursement_request_status as main_request_status',
+        'main_request_status.request_status_id',
         'finance_reimbursement_requests.request_status_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_status as hrbp_status',
+        'hrbp_status.request_status_id',
+        'finance_reimbursement_requests.hrbp_request_status_id',
+      )
+      .innerJoin(
+        'finance_reimbursement_request_status as finance_status',
+        'finance_status.request_status_id',
+        'finance_reimbursement_requests.finance_request_status_id',
       )
       .innerJoin(
         'users',
@@ -42,12 +52,17 @@ export class ReimbursementGetAllService {
         'finance_reimbursement_requests.reference_no',
         'finance_reimbursement_request_types.request_type',
         'finance_reimbursement_expense_types.expense_type',
-        'finance_reimbursement_request_status.request_status',
+        'main_request_status.request_status',
+        'hrbp_status.request_status as hrbp_request_status',
+        'finance_status.request_status as finance_request_status',
         'users.full_name',
         'users.email',
         'users.employee_id',
         'users.client_name',
         'users.hrbp_approver_email',
+        'finance_reimbursement_requests.payroll_date',
+        'finance_reimbursement_requests.date_approve',
+        'finance_reimbursement_requests.created_at',
       ]);
 
     const rawQuery = sql`SELECT 
