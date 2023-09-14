@@ -51,6 +51,7 @@ import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.
 import { ReimbursementpApproveRequestStatusService } from './services/reimbursement.approve-request-status.service';
 import { ReimbursementpProcessingRequestStatusService } from './services/reimbursement.processing-request-status.service';
 import { ProcessingStatusReimbursementRequestDTO } from './common/dto/processingStatusReimbursementRequest.dto';
+import { GetAllApprovalReimbursementRequestDTO } from './common/dto/getAllForApprovalReimbursementRequest.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -81,6 +82,11 @@ export class FinanceController {
   @Get('/reimbursements/expense-types')
   getExpenseTypes(@Query() query: ExpenseTypeDto) {
     return this.reimbursementExpenseTypesService.get(query.request_type_id);
+  }
+
+  @Get('/reimbursements/expense-types/all')
+  getAllExpenseTypes() {
+    return this.reimbursementExpenseTypesService.all();
   }
 
   @Get('/reimbursements/requests')
@@ -114,10 +120,13 @@ export class FinanceController {
   }
 
   @Get('/reimbursements/requests/for-approvals')
-  getAllForApprovalReimbursementRequest(@Req() req: Request) {
+  getAllForApprovalReimbursementRequest(
+    @Req() req: Request,
+    @Body() body: GetAllApprovalReimbursementRequestDTO,
+  ) {
     const user = req['user'] as RequestUser;
 
-    return this.reimbursementForApprovalService.get(user);
+    return this.reimbursementForApprovalService.get(user, body);
   }
 
   @HttpCode(HttpStatus.OK)
