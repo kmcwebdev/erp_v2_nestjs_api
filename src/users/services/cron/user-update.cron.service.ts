@@ -1,7 +1,10 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { AxiosError } from 'axios';
 import { InjectKysely } from 'nestjs-kysely';
+import { catchError, firstValueFrom } from 'rxjs';
 import { DB } from 'src/common/types';
 import { ERPHRV1User } from 'src/users/common/interface/erpHrV1User.dto';
 
@@ -14,37 +17,37 @@ export class UserUpdateCronService {
   constructor(
     @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
-  private async fetchUserByEmailInERPHrV1(email: string): Promise<ERPHRV1User> {
-    try {
-      const NODE_ENV = this.configService.get('NODE_ENV');
-      const API_KEY = this.configService.get('ERP_HR_V1_API_KEY');
-      const BASE_URL =
-        NODE_ENV === 'development'
-          ? this.configService.get('ERP_HR_V1_DEV_BASE_URL')
-          : this.configService.get('ERP_HR_V1_PROD_BASE_URL');
+  private async fetchUserByEmailInERPHrV1(email: string) {
+    const NODE_ENV = this.configService.get('NODE_ENV');
+    const API_KEY = this.configService.get('ERP_HR_V1_API_KEY');
+    const BASE_URL =
+      NODE_ENV === 'development'
+        ? this.configService.get('ERP_HR_V1_DEV_BASE_URL')
+        : this.configService.get('ERP_HR_V1_PROD_BASE_URL');
 
-      const response = await fetch(
-        `${BASE_URL}/api/employees/details?email=${email}`,
-        {
+    return await firstValueFrom(
+      this.httpService
+        .get<ERPHRV1User>('/api/employees/details', {
+          baseURL: BASE_URL,
           headers: {
             'Content-Type': 'application/json',
             'x-auth': API_KEY,
           },
-        },
-      );
+          params: {
+            email,
+          },
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error?.response?.data);
 
-      const user = await response.json();
-
-      if (!response.ok) {
-        throw new Error(user?.message || "Couldn't fetch user");
-      }
-
-      return user;
-    } catch (error: unknown) {
-      this.logger.error(error);
-    }
+            throw Error('Failed to get user in erp hr v1');
+          }),
+        ),
+    );
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
@@ -60,7 +63,7 @@ export class UserUpdateCronService {
       outdatedUsers.forEach(async (u) => {
         const userInErpHrV1 = await this.fetchUserByEmailInERPHrV1(u.email);
 
-        if (userInErpHrV1) {
+        if (userInErpHrV1.status === 200) {
           const {
             sr,
             name,
@@ -70,7 +73,7 @@ export class UserUpdateCronService {
             client,
             hrbpEmail,
             position,
-          } = userInErpHrV1;
+          } = userInErpHrV1.data;
 
           const updatedUser = await this.pgsql
             .updateTable('users')

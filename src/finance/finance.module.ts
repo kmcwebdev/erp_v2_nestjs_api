@@ -22,6 +22,7 @@ import { ReimbursementCreateAttachmentService } from './services/reimbursement.c
 import { ReimbursementMemphisNewRequestService } from './services/memphis/reimbursement.memphis.new-request.service';
 import { ReimbursementMemphisBulkApprovalService } from './services/memphis/reimbursement.memphis-bulk-approval.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
+import { ReimbursementMemphisEmailConfirmationService } from './services/memphis/reimbursement.memphis-email-confirmation.service';
 
 @Module({
   imports: [ScheduleModule.forRoot(), HttpModule, MemphisDevModule],
@@ -48,6 +49,7 @@ import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.
     ReimbursementCreateAttachmentService,
     ReimbursementMemphisNewRequestService,
     ReimbursementMemphisBulkApprovalService,
+    ReimbursementMemphisEmailConfirmationService,
   ],
 })
 export class FinanceModule {}

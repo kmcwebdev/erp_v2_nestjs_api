@@ -18,7 +18,7 @@ export interface ReimbursementRequest {
   client_id: string;
   client_name: string;
   hrbp_approver_email: string;
-  dynamic_approvers: string[] | null;
+  dynamic_approvers: string | null;
   date_approve: string | null;
   next_approval_matrix_id: string;
   next_approver_order: number;
