@@ -2,7 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { sql } from 'kysely';
 import { DB } from 'src/common/types';
-import { CANCELLED_REQUEST, REJECTED_REQUEST } from '../common/constant';
+import {
+  APPROVED_REQUEST,
+  CANCELLED_REQUEST,
+  PROCESSING_REQUEST,
+  REJECTED_REQUEST,
+} from '../common/constant';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { GetAllApprovalReimbursementRequestType } from '../common/dto/getAllForApprovalReimbursementRequest.dto';
 
@@ -49,6 +54,16 @@ export class ReimbursementForApprovalService {
 
     if (approverIds.length === 0) {
       return [];
+    }
+
+    const EXCLUDED_IN_LIST = [REJECTED_REQUEST, CANCELLED_REQUEST];
+
+    if (user.user_assigned_role === 'finance' && !filter?.text_search) {
+      EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
+    }
+
+    if (user.user_assigned_role === 'finance' && !filter?.text_search) {
+      EXCLUDED_IN_LIST.push(PROCESSING_REQUEST);
     }
 
     let query = this.pgsql
@@ -114,15 +129,22 @@ export class ReimbursementForApprovalService {
         'in',
         approverIds,
       )
-      .where('finance_reimbursement_requests.request_status_id', 'not in', [
-        REJECTED_REQUEST,
-        CANCELLED_REQUEST,
-      ]);
+      .where(
+        'finance_reimbursement_requests.request_status_id',
+        'not in',
+        EXCLUDED_IN_LIST,
+      );
+
+    if (user.user_assigned_role === 'finance' && !filter?.text_search) {
+      query = query.where(
+        'finance_reimbursement_requests.finance_request_status_id',
+        '=',
+        APPROVED_REQUEST,
+      );
+    }
 
     if (filter?.expense_type_ids) {
       const arr = filter.expense_type_ids.replace(/"/g, '').split(',');
-
-      console.log(arr);
 
       // TODO: Do the check here if all items in array is a valid uuid
 

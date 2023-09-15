@@ -40,7 +40,7 @@ export class ReimbursementApproveService {
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const reimbursementRequestApprovalMatrix = await trx
+        const reimbursementRequestApprovalApprover = await trx
           .updateTable('finance_reimbursement_approval_matrix')
           .set({
             has_approved: true,
@@ -69,15 +69,31 @@ export class ReimbursementApproveService {
           ])
           .executeTakeFirst();
 
-        if (!reimbursementRequestApprovalMatrix) {
+        if (!reimbursementRequestApprovalApprover) {
           return {
             message: 'This request is already approved or cancelled',
           };
         }
 
-        if (reimbursementRequestApprovalMatrix) {
-          if (reimbursementRequestApprovalMatrix.is_hrbp) {
-            await sql`
+        const nextReimbursementRequestApprovalApprover = await trx
+          .selectFrom('finance_reimbursement_approval_matrix')
+          .select(['finance_reimbursement_approval_matrix.approver_id'])
+          .where(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            '=',
+            reimbursementRequestApprovalApprover.reimbursement_request_id,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.has_approved',
+            '=',
+            false,
+          )
+          .orderBy('finance_reimbursement_approval_matrix.approver_order')
+          .limit(1)
+          .executeTakeFirst();
+
+        if (reimbursementRequestApprovalApprover.is_hrbp) {
+          await sql`
               UPDATE finance_reimbursement_requests 
               SET payroll_date = 
                   CASE 
@@ -96,18 +112,19 @@ export class ReimbursementApproveService {
                             DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '9 days' + INTERVAL '1 month'
                       END
                   END,
-                  request_status_id = ${APPROVED_REQUEST}
-              WHERE reimbursement_request_id = ${reimbursementRequestApprovalMatrix.reimbursement_request_id}
+                  hrbp_request_status_id = ${APPROVED_REQUEST}
+              WHERE reimbursement_request_id = ${reimbursementRequestApprovalApprover.reimbursement_request_id}
             `.execute(this.pgsql);
-          }
-
-          this.logger.log('Sending email to next approver');
         }
 
         const reimbursement = await this.reimbursementGetOneService.get({
           reimbursement_request_id:
-            reimbursementRequestApprovalMatrix.reimbursement_request_id,
+            reimbursementRequestApprovalApprover.reimbursement_request_id,
         });
+
+        if (nextReimbursementRequestApprovalApprover) {
+          this.logger.log('Sending email to next approver');
+        }
 
         return reimbursement;
       });

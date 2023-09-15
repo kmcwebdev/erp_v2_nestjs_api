@@ -48,12 +48,30 @@ export class AuthService {
     return response;
   }
 
+  async getRoles() {
+    return true;
+  }
+
+  async getPermissions() {
+    return true;
+  }
+
+  async createRole() {
+    return true;
+  }
+
+  async createPermission() {
+    return true;
+  }
+
+  async updatePermissionRole() {
+    return true;
+  }
+
   async changeUserRoleAccessInPropelauth(
     user: RequestUser,
     data: UpdatePropelauthUserRoleType,
   ) {
-    console.log(user.permissions);
-
     const updatedUserRole = await propelauth.changeUserRoleInOrg({
       orgId: data.org_id,
       userId: data?.user_id ? data.user_id : user.userId,

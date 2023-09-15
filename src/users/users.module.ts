@@ -6,9 +6,10 @@ import { UpdateUserMemphisService } from './services/memphis/update-user.memphis
 import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UserUpdateCronService } from './services/cron/user-update.cron.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [MemphisDevModule, ScheduleModule.forRoot()],
+  imports: [HttpModule, MemphisDevModule, ScheduleModule.forRoot()],
   controllers: [UsersController],
   providers: [
     UsersApiService,

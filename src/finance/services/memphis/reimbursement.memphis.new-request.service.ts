@@ -68,32 +68,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           )
           .execute();
 
-        const refNoWithoutTheLetterAndHypen = newRequest.reference_no
-          .match(/\d+-\d+/)[0]
-          .split('-');
-
-        await this.pgsql
-          .updateTable('finance_reimbursement_requests')
-          .set({
-            text_search_properties: `${
-              newRequest?.full_name ? newRequest.full_name : 'no_full_name'
-            } ${newRequest.email} ${
-              newRequest?.employee_id
-                ? newRequest.employee_id
-                : 'no_employee_id'
-            } ${newRequest.reference_no} ${refNoWithoutTheLetterAndHypen.join(
-              ' ',
-            )} ${newRequest.request_type} ${newRequest.expense_type} ${
-              newRequest.amount
-            } ${newRequest.attachment}`,
-          })
-          .where(
-            'reimbursement_request_id',
-            '=',
-            newRequest.reimbursement_request_id,
-          )
-          .execute();
-
         if (!newRequest.hrbp_approver_email) {
           await this.pgsql
             .updateTable('finance_reimbursement_requests')
@@ -239,8 +213,14 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
-          if (newRequest?.dynamic_approvers?.length) {
-            this.logger.log("Request has dynamic approvers, let's add them");
+          if (newRequest?.dynamic_approvers) {
+            const approvers = newRequest.dynamic_approvers.split(',');
+
+            // TODO: Check if all of the entries in approvers array is a valid email address
+
+            approvers.forEach(async (ap) => {
+              return ap;
+            });
           }
         }
 
