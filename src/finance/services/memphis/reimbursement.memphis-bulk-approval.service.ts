@@ -71,7 +71,6 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
       );
     } catch (error: any) {
       this.logger.error(error.message);
-      await this.memphisService.close();
     }
   }
 }
