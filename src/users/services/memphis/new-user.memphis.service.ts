@@ -48,6 +48,11 @@ export class NewUserMemphisService implements OnModuleInit {
         consumerGroup: 'erp.reimbursement.new-user.consumer-group',
       });
 
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.new-user',
+        producerName: 'erp.reimbursement.new-user.producer-name',
+      });
+
       this.consumer.on('message', async (message: Message) => {
         const data: RequestUser = JSON.parse(
           message.getData().toString() || '{}',
@@ -78,11 +83,6 @@ export class NewUserMemphisService implements OnModuleInit {
         });
 
         message.ack();
-      });
-
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.new-user',
-        producerName: 'erp.reimbursement.new-user.producer-name',
       });
 
       this.logger.log('Memphis user created station is ready 👨‍👨‍👦‍👦 🚀');
