@@ -3,7 +3,7 @@ import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { ONHOLD_REQUEST } from '../common/constant';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { OnHoldReimbursementRequestType } from '../common/dto/onHoldReimbursementRequest.dto';
+import { OnHoldReimbursementRequestType } from '../common/dto/onhold-reimbursement-request.dto';
 
 @Injectable()
 export class ReimbursementOhHoldService {

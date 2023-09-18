@@ -9,7 +9,7 @@ import {
   REJECTED_REQUEST,
 } from '../common/constant';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { GetAllApprovalReimbursementRequestType } from '../common/dto/getAllForApprovalReimbursementRequest.dto';
+import { GetAllApprovalReimbursementRequestType } from '../common/dto/get-all-for-approval-reimbursement-request.dto';
 
 @Injectable()
 export class ReimbursementForApprovalService {

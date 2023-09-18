@@ -18,20 +18,20 @@ import {
 } from '@nestjs/common';
 import type { Request, Response, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ExpenseTypeDto } from 'src/finance/common/dto/expenseType.dto';
+import { ExpenseTypeDto } from 'src/finance/common/dto/expense-type.dto';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { Readable } from 'stream';
 import { jsonToCsv } from 'src/common/utils/jsonToCsv.utils';
-import { GetAllReimbursementRequestDTO } from './common/dto/getAllReimbursementRequest.dto';
-import { GetOneReimbursementRequestDTO } from './common/dto/getOneReimbursementRequest.dto';
-import { CancelReimbursementRequestDTO } from './common/dto/cancelReimbursementRequest.dto';
-import { RejectReimbursementRequestDTO } from './common/dto/rejectReimbursementRequest.dto';
-import { ReimbursementRequestApprovalDTO } from './common/dto/approveReimbursementRequest.dto';
-import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/updateReimbursementRequest.dto';
-import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/createReimbursementRequest.dto';
-import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/deleteReimbursementRequest.dto';
-import { OnHoldReimbursementRequestDTO } from './common/dto/onHoldReimbursementRequest.dto';
-import { GetAuditlogReimbursementRequestDTO } from './common/dto/getAuditlogReimbursementRequest.dto';
+import { GetAllReimbursementRequestDTO } from './common/dto/get-all-reimbursement-request.dto';
+import { GetOneReimbursementRequestDTO } from './common/dto/get-one-reimbursement-request.dto';
+import { CancelReimbursementRequestDTO } from './common/dto/cancel-reimbursement-request.dto';
+import { RejectReimbursementRequestDTO } from './common/dto/reject-reimbursement-request.dto';
+import { ReimbursementRequestApprovalDTO } from './common/dto/approve-reimbursement-request.dto';
+import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/update-reimbursement-request.dto';
+import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/create-reimbursement-request.dto';
+import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/delete-reimbursement-request.dto';
+import { OnHoldReimbursementRequestDTO } from './common/dto/onhold-reimbursement-request.dto';
+import { GetAuditlogReimbursementRequestDTO } from './common/dto/get-auditlog-reimbursement-request.dto';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
 import { ReimbursementExpenseTypesService } from './services/reimbursement.expense-types.service';
@@ -45,7 +45,7 @@ import { ReimbursementCreateAttachmentService } from './services/reimbursement.c
 import { ReimbursementApproveService } from './services/reimbursement.approve.service';
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
-import { GetAllApprovalReimbursementRequestDTO } from './common/dto/getAllForApprovalReimbursementRequest.dto';
+import { GetAllApprovalReimbursementRequestDTO } from './common/dto/get-all-for-approval-reimbursement-request.dto';
 
 @Controller('finance')
 export class FinanceController {

@@ -2,10 +2,10 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { catchError, firstValueFrom } from 'rxjs';
-import { GeneratePropelauthLongliveAccessTokenType } from './common/dto/generatePropelauthLongliveAccessToken.dto';
+import { GeneratePropelauthLongliveAccessTokenType } from './common/dto/generate-propelauth-longlive-access-token.dto';
 import { propelauth } from './common/lib/propelauth';
 import { RequestUser } from './common/interface/propelauthUser.interface';
-import { UpdatePropelauthUserRoleType } from './common/dto/updatePropelauthUserRole.dto';
+import { UpdatePropelauthUserRoleType } from './common/dto/update-propelauth-user-role.dto';
 
 @Injectable()
 export class AuthService {

@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { sql } from 'kysely';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { GetOneReimbursementRequestType } from '../common/dto/getOneReimbursementRequest.dto';
+import { GetOneReimbursementRequestType } from '../common/dto/get-one-reimbursement-request.dto';
 import { ReimbursementRequest } from '../common/interface/getOneRequest.interface';
 
 @Injectable()

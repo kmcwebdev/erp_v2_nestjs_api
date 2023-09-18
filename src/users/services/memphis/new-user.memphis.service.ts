@@ -105,7 +105,7 @@ export class NewUserMemphisService implements OnModuleInit {
         producerName: 'erp.reimbursement.new-user.producer-name',
       });
 
-      this.logger.log('Memphis user created station is ready');
+      this.logger.log('Memphis user created station is ready 👨‍👨‍👦‍👦 🚀');
     } catch (error: unknown) {
       this.logger.error(error);
       this.memphisService.close();

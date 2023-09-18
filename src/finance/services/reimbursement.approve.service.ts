@@ -4,7 +4,7 @@ import { InjectKysely } from 'nestjs-kysely';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
-import { ReimbursementRequestApprovalType } from '../common/dto/approveReimbursementRequest.dto';
+import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimbursement-request.dto';
 import { sql } from 'kysely';
 import { APPROVED_REQUEST } from '../common/constant';
 

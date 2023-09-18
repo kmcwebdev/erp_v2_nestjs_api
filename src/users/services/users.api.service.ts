@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { CreateUserType } from 'src/users/common/dto/createUser.dto';
+import { CreateUserType } from 'src/users/common/dto/create-user.dto';
 
 @Injectable()
 export class UsersApiService {

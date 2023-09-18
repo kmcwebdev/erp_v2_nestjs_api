@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { RejectReimbursementRequestType } from '../common/dto/rejectReimbursementRequest.dto';
+import { RejectReimbursementRequestType } from '../common/dto/reject-reimbursement-request.dto';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { REJECTED_REQUEST } from '../common/constant';

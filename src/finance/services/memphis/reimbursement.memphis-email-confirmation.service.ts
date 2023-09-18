@@ -1,8 +1,14 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { InjectKysely } from 'nestjs-kysely';
-import { DB } from 'src/common/types';
-import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { HttpService } from '@nestjs/axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
+import {
+  ConfirmationEmailSchema,
+  ConfirmationEmailType,
+} from 'src/finance/common/zod-schema/confirmation-email.schema';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class ReimbursementMemphisEmailConfirmationService
@@ -16,9 +22,27 @@ export class ReimbursementMemphisEmailConfirmationService
   producer: Producer;
 
   constructor(
-    @InjectKysely() private readonly pgsql: DB,
+    private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly httpService: HttpService,
   ) {}
+
+  @OnEvent('reimbursement-request-send-email-confirmation')
+  async triggerMemphisEvent(data: ConfirmationEmailType) {
+    const validate = await ConfirmationEmailSchema.safeParseAsync(data);
+
+    if (!validate.success) {
+      return this.eventEmitter.emit(
+        'reimbursement-request-send-email-confirmation-error',
+        '[memphis-email-confirmation]: Schema error in request confirmation email',
+      );
+    }
+
+    return await this.producer.produce({
+      message: Buffer.from(JSON.stringify(data)),
+    });
+  }
 
   async onModuleInit() {
     try {
@@ -29,11 +53,27 @@ export class ReimbursementMemphisEmailConfirmationService
       });
 
       this.consumer.on('message', async (message: Message) => {
-        const data: RequestUser = JSON.parse(
+        const data: ConfirmationEmailType = JSON.parse(
           message.getData().toString() || '{}',
         );
 
-        console.log(data);
+        await firstValueFrom(
+          this.httpService
+            .post('/api/email/confirmation', data, {
+              baseURL: this.configService.get('FRONT_END_URL'),
+            })
+            .pipe(
+              catchError((error: AxiosError) => {
+                this.logger.log(
+                  '[memphis_new_request]: Failed to send confirmation email to requestor',
+                );
+
+                this.logger.error(error?.response?.data);
+
+                throw Error('Failed to send confirmation email to requestor');
+              }),
+            ),
+        );
 
         message.ack();
       });
@@ -44,7 +84,7 @@ export class ReimbursementMemphisEmailConfirmationService
       });
 
       this.logger.log(
-        'Memphis reimbursement request email confirmation station is ready',
+        'Memphis reimbursement request email confirmation station is ready 📧 🚀',
       );
     } catch (error: unknown) {
       this.logger.error(error);
