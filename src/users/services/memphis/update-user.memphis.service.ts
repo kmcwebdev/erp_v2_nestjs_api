@@ -24,6 +24,11 @@ export class UpdateUserMemphisService implements OnModuleInit {
         consumerGroup: 'erp.reimbursement.update-user.consumer-group',
       });
 
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.update-user',
+        producerName: 'erp.reimbursement.update-user.producer-name',
+      });
+
       this.consumer.on('message', async (message: Message) => {
         const data: RequestUser = JSON.parse(
           message.getData().toString() || '{}',
@@ -32,11 +37,6 @@ export class UpdateUserMemphisService implements OnModuleInit {
         console.log(data);
 
         message.ack();
-      });
-
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.update-user',
-        producerName: 'erp.reimbursement.update-user.producer-name',
       });
 
       this.logger.log('Memphis user update station is ready 👨‍👨‍👦‍👦 🚀');
