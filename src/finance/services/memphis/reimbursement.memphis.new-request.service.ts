@@ -155,28 +155,31 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           };
 
           this.eventEmitter.emit(
-            'reimbursement-request-send-email-confirmation',
+            'reimbursement-request-send-email-hrbp-approval',
             confirmationEmailData,
+          );
+
+          const hrbpApprovalEmailData = {
+            to: [newRequest.hrbp_approver_email],
+            approverFullName: hrbp.full_name || 'HRBP',
+            fullName: newRequest?.full_name || 'No name set',
+            employeeId: newRequest?.employee_id || 'No employee id set',
+            expenseType: newRequest.expense_type,
+            expenseDate: newRequest.created_at,
+            amount: newRequest.amount,
+            receiptsAttached: newRequest.attachment,
+          };
+
+          this.eventEmitter.emit(
+            'reimbursement-request-send-hrbp-approval-email',
+            hrbpApprovalEmailData,
           );
 
           await firstValueFrom(
             this.httpService
-              .post(
-                '/api/email/hrbp-approval',
-                {
-                  to: [newRequest.hrbp_approver_email],
-                  approverFullName: hrbp.full_name || 'HRBP',
-                  fullName: newRequest?.full_name || 'No name set',
-                  employeeId: newRequest?.employee_id || 'No employee id set',
-                  expenseType: newRequest.expense_type,
-                  expenseDate: newRequest.created_at,
-                  amount: newRequest.amount,
-                  receiptsAttached: newRequest.attachment,
-                },
-                {
-                  baseURL: frontEndUrl,
-                },
-              )
+              .post('/api/email/hrbp-approval', hrbpApprovalEmailData, {
+                baseURL: frontEndUrl,
+              })
               .pipe(
                 catchError((error: AxiosError) => {
                   this.logger.log(
