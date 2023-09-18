@@ -3,7 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectKysely } from 'nestjs-kysely';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { DB } from 'src/common/types';
-import { CreateReimbursementRequestType } from '../common/dto/createReimbursementRequest.dto';
+import { CreateReimbursementRequestType } from '../common/dto/create-reimbursement-request.dto';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 
 @Injectable()

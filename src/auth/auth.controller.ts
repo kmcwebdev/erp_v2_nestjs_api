@@ -1,8 +1,8 @@
 import { Body, Controller, Patch, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GeneratePropelauthLongliveAccessTokenDTO } from './common/dto/generatePropelauthLongliveAccessToken.dto';
+import { GeneratePropelauthLongliveAccessTokenDTO } from './common/dto/generate-propelauth-longlive-access-token.dto';
 import { Apikey } from './common/decorator/apiKey.decorator';
-import { UpdatePropelauthUserRoleDTO } from './common/dto/updatePropelauthUserRole.dto';
+import { UpdatePropelauthUserRoleDTO } from './common/dto/update-propelauth-user-role.dto';
 import { RequestUser } from './common/interface/propelauthUser.interface';
 
 @Controller('auth')

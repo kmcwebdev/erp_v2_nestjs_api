@@ -21,15 +21,15 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
   producer: Producer;
 
   constructor(
+    @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
     private readonly httpService: HttpService,
     private readonly eventEmitter: EventEmitter2,
-    @InjectKysely() private readonly pgsql: DB,
   ) {}
 
   @OnEvent('reimbursement-request-created')
-  async test(data: ReimbursementRequest) {
+  async triggerMemphisEvent(data: ReimbursementRequest) {
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });
@@ -142,38 +142,21 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             ])
             .execute();
 
-          await firstValueFrom(
-            this.httpService
-              .post(
-                '/api/email/confirmation',
-                {
-                  to: [newRequest.email],
-                  requestId: newRequest.reference_no,
-                  hrbpManagerName: hrbp?.full_name || 'No name set',
-                  fullName: newRequest?.full_name || 'No name set',
-                  employeeId: newRequest?.employee_id || 'No emp id set',
-                  expenseType: newRequest.expense_type,
-                  expenseDate: newRequest.created_at,
-                  amount: newRequest.amount,
-                  receiptsAttached: newRequest.attachment,
-                },
-                {
-                  baseURL: frontEndUrl,
-                },
-              )
-              .pipe(
-                catchError((error: AxiosError) => {
-                  this.logger.log(
-                    '[memphis_new_request]: Failed to send confirmation email to requestor',
-                  );
+          const confirmationEmailData = {
+            to: [newRequest.email],
+            referenceNo: newRequest.reference_no,
+            hrbpManagerName: hrbp?.full_name || 'No name set',
+            fullName: newRequest?.full_name || 'No name set',
+            employeeId: newRequest?.employee_id || 'No emp id set',
+            expenseType: newRequest.expense_type,
+            expenseDate: newRequest.created_at,
+            amount: newRequest.amount,
+            receiptsAttached: newRequest.attachment,
+          };
 
-                  console.log(error?.response?.data);
-
-                  message.ack();
-
-                  throw Error('Failed to send confirmation email to requestor');
-                }),
-              ),
+          this.eventEmitter.emit(
+            'reimbursement-request-send-email-confirmation',
+            confirmationEmailData,
           );
 
           await firstValueFrom(
@@ -219,7 +202,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             // TODO: Check if all of the entries in approvers array is a valid email address
 
             approvers.forEach(async (ap) => {
-              return ap;
+              console.log(ap);
             });
           }
         }
@@ -232,7 +215,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         producerName: 'erp.reimbursement.new-request.producer-name',
       });
 
-      this.logger.log('Memphis reimbursement new request station is ready');
+      this.logger.log(
+        'Memphis reimbursement new request station is ready 💵 🚀',
+      );
     } catch (error: any) {
       this.logger.error(error.message);
       this.memphisService.close();

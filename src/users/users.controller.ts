@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { UsersApiService } from './services/users.api.service';
-import { CreateUserDTO } from 'src/users/common/dto/createUser.dto';
+import { CreateUserDTO } from 'src/users/common/dto/create-user.dto';
 import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
 import { Apikey } from 'src/auth/common/decorator/apiKey.decorator';
 

@@ -66,7 +66,9 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
         producerName: 'erp.reimbursement.bulk-approval.producer-name',
       });
 
-      this.logger.log('Memphis reimbursement bulk approval station is ready');
+      this.logger.log(
+        'Memphis reimbursement bulk approval station is ready 🤙 🚀',
+      );
     } catch (error: any) {
       this.logger.error(error.message);
       this.memphisService.close();

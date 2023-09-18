@@ -3,7 +3,7 @@ import { sql } from 'kysely';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { GetAllReimbursementRequestType } from '../common/dto/getAllReimbursementRequest.dto';
+import { GetAllReimbursementRequestType } from '../common/dto/get-all-reimbursement-request.dto';
 
 @Injectable()
 export class ReimbursementGetAllService {

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { CancelReimbursementRequestType } from '../common/dto/cancelReimbursementRequest.dto';
+import { CancelReimbursementRequestType } from '../common/dto/cancel-reimbursement-request.dto';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { CANCELLED_REQUEST } from '../common/constant';
