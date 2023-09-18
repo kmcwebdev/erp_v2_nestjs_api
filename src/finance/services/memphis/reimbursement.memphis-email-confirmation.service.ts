@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { AxiosError } from 'axios';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
@@ -8,7 +9,6 @@ import {
   ConfirmationEmailSchema,
   ConfirmationEmailType,
 } from 'src/finance/common/zod-schema/confirmation-email.schema';
-import { AxiosError } from 'axios';
 
 @Injectable()
 export class ReimbursementMemphisEmailConfirmationService
@@ -24,8 +24,8 @@ export class ReimbursementMemphisEmailConfirmationService
   constructor(
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
-    private readonly eventEmitter: EventEmitter2,
     private readonly httpService: HttpService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @OnEvent('reimbursement-request-send-email-confirmation')
