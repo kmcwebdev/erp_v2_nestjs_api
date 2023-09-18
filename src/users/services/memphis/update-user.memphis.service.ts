@@ -42,7 +42,6 @@ export class UpdateUserMemphisService implements OnModuleInit {
       this.logger.log('Memphis user update station is ready 👨‍👨‍👦‍👦 🚀');
     } catch (error: unknown) {
       this.logger.error(error);
-      await this.memphisService.close();
     }
   }
 }

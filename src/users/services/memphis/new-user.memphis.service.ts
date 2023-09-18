@@ -88,7 +88,6 @@ export class NewUserMemphisService implements OnModuleInit {
       this.logger.log('Memphis user created station is ready 👨‍👨‍👦‍👦 🚀');
     } catch (error: unknown) {
       this.logger.error(error);
-      await this.memphisService.close();
     }
   }
 }
