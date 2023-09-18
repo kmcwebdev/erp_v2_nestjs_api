@@ -1,9 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { propelauth } from 'src/auth/common/lib/propelauth';
+import { UsersApiService } from '../users.api.service';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 
 @Injectable()
@@ -14,9 +13,9 @@ export class NewUserMemphisService implements OnModuleInit {
   producer: Producer;
 
   constructor(
-    private readonly configService: ConfigService,
-    @InjectKysely() private readonly pgsql: DB,
     private readonly memphisService: MemphisService,
+    private readonly usersApiService: UsersApiService,
+    @InjectKysely() private readonly pgsql: DB,
   ) {}
 
   private async updateUserPropelauthUserId(data: {
@@ -54,35 +53,16 @@ export class NewUserMemphisService implements OnModuleInit {
           message.getData().toString() || '{}',
         );
 
-        const propelauthUser = await propelauth.fetchUserMetadataByEmail(
-          data.email,
-        );
+        const propelauthUser =
+          await this.usersApiService.fetchUserInPropelauthByEmail(data.email);
 
         if (!propelauthUser) {
-          const temporaryPassword = String(new Date());
-
-          const isKmcSolutions = data.email.includes('@kmc.solutions');
-
-          const orgId = isKmcSolutions
-            ? this.configService.get('PROPELAUTH_SOLUTIONS_ORG_ID')
-            : this.configService.get('PROPELAUTH_EXTERNAL_ORG_ID');
-
-          const newPropelauthUser = await propelauth.createUser({
-            email: data.email,
-            password: temporaryPassword,
-            askUserToUpdatePasswordOnLogin: true,
-            sendEmailToConfirmEmailAddress: true,
-          });
-
-          await propelauth.addUserToOrg({
-            userId: newPropelauthUser.userId,
-            orgId,
-            role: 'user',
-          });
+          const newPropelauthUser =
+            await this.usersApiService.createUserInPropelauth(data.email);
 
           await this.updateUserPropelauthUserId({
             userId: newPropelauthUser.userId,
-            email: data.email,
+            email: newPropelauthUser.email,
           });
 
           // Send email to user with temporary password
@@ -108,7 +88,6 @@ export class NewUserMemphisService implements OnModuleInit {
       this.logger.log('Memphis user created station is ready 👨‍👨‍👦‍👦 🚀');
     } catch (error: unknown) {
       this.logger.error(error);
-      this.memphisService.close();
     }
   }
 }
