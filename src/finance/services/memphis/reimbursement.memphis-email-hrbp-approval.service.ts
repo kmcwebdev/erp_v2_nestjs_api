@@ -93,7 +93,6 @@ export class ReimbursementMemphisEmailHrbpApprovalService
       );
     } catch (error: unknown) {
       this.logger.error(error);
-      this.memphisService.close();
     }
   }
 }

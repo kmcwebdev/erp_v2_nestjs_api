@@ -10,8 +10,8 @@ export class UsersController {
 
   @Post()
   @UseGuards(PropelauthGuard)
-  createUser(@Body() body: CreateUserDTO) {
-    return this.usersService.createUser(body);
+  createUserInDatabase(@Body() body: CreateUserDTO) {
+    return this.usersService.createUserInDatabase(body);
   }
 
   @Apikey()

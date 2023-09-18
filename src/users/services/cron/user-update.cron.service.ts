@@ -1,12 +1,9 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { AxiosError } from 'axios';
 import { InjectKysely } from 'nestjs-kysely';
-import { catchError, firstValueFrom } from 'rxjs';
 import { DB } from 'src/common/types';
-import { ERPHRV1User } from 'src/users/common/interface/erpHrV1User.dto';
+import { UsersApiService } from '../users.api.service';
 
 const TEMPORARY_APPROVER = 'leanna.pedragosa@kmc.solutions';
 
@@ -15,40 +12,10 @@ export class UserUpdateCronService {
   private readonly logger = new Logger(UserUpdateCronService.name);
 
   constructor(
-    @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
+    private readonly usersApiService: UsersApiService,
+    @InjectKysely() private readonly pgsql: DB,
   ) {}
-
-  private async fetchUserByEmailInERPHrV1(email: string) {
-    const NODE_ENV = this.configService.get('NODE_ENV');
-    const API_KEY = this.configService.get('ERP_HR_V1_API_KEY');
-    const BASE_URL =
-      NODE_ENV === 'development'
-        ? this.configService.get('ERP_HR_V1_DEV_BASE_URL')
-        : this.configService.get('ERP_HR_V1_PROD_BASE_URL');
-
-    return await firstValueFrom(
-      this.httpService
-        .get<ERPHRV1User>('/api/employees/details', {
-          baseURL: BASE_URL,
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth': API_KEY,
-          },
-          params: {
-            email,
-          },
-        })
-        .pipe(
-          catchError((error: AxiosError) => {
-            this.logger.error(error?.response?.data);
-
-            throw Error('Failed to get user in erp hr v1');
-          }),
-        ),
-    );
-  }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCron() {
@@ -60,8 +27,13 @@ export class UserUpdateCronService {
         .limit(25)
         .execute();
 
+      const NODE_ENV = this.configService.get('NODE_ENV');
+
       outdatedUsers.forEach(async (u) => {
-        const userInErpHrV1 = await this.fetchUserByEmailInERPHrV1(u.email);
+        if (NODE_ENV === 'development') return;
+
+        const userInErpHrV1 =
+          await this.usersApiService.fetchUserByEmailInERPHrV1(u.email);
 
         if (userInErpHrV1.status === 200) {
           const {

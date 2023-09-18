@@ -17,5 +17,6 @@ import { HttpModule } from '@nestjs/axios';
     UpdateUserMemphisService,
     UserUpdateCronService,
   ],
+  exports: [UsersApiService],
 })
 export class UsersModule {}
