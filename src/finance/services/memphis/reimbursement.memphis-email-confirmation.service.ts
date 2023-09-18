@@ -88,6 +88,7 @@ export class ReimbursementMemphisEmailConfirmationService
       );
     } catch (error: unknown) {
       this.logger.error(error);
+      await this.memphisService.close();
     }
   }
 }
