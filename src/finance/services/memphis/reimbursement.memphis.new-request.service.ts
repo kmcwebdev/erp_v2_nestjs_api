@@ -1,13 +1,10 @@
 import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { catchError, firstValueFrom } from 'rxjs';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { AxiosError } from 'axios';
 import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
 import { ReimbursementRequest } from 'src/finance/common/interface/getOneRequest.interface';
 
@@ -24,7 +21,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
     @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
-    private readonly httpService: HttpService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -37,8 +33,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
   async onModuleInit() {
     try {
-      const frontEndUrl = this.configService.get('FRONT_END_URL');
-
       this.consumer = await this.memphisService.consumer({
         stationName: 'erp.reimbursement.new-request',
         consumerName: 'erp.reimbursement.new-request.consumer-name',
@@ -155,43 +149,24 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           };
 
           this.eventEmitter.emit(
-            'reimbursement-request-send-email-confirmation',
+            'reimbursement-request-send-email-hrbp-approval',
             confirmationEmailData,
           );
 
-          await firstValueFrom(
-            this.httpService
-              .post(
-                '/api/email/hrbp-approval',
-                {
-                  to: [newRequest.hrbp_approver_email],
-                  approverFullName: hrbp.full_name || 'HRBP',
-                  fullName: newRequest?.full_name || 'No name set',
-                  employeeId: newRequest?.employee_id || 'No employee id set',
-                  expenseType: newRequest.expense_type,
-                  expenseDate: newRequest.created_at,
-                  amount: newRequest.amount,
-                  receiptsAttached: newRequest.attachment,
-                },
-                {
-                  baseURL: frontEndUrl,
-                },
-              )
-              .pipe(
-                catchError((error: AxiosError) => {
-                  this.logger.log(
-                    '[memphis_new_request]: Failed to send confirmation email to requestor hrbp',
-                  );
+          const hrbpApprovalEmailData = {
+            to: [newRequest.hrbp_approver_email],
+            approverFullName: hrbp.full_name || 'HRBP',
+            fullName: newRequest?.full_name || 'No name set',
+            employeeId: newRequest?.employee_id || 'No employee id set',
+            expenseType: newRequest.expense_type,
+            expenseDate: newRequest.created_at,
+            amount: newRequest.amount,
+            receiptsAttached: newRequest.attachment,
+          };
 
-                  console.log(error?.response?.data);
-
-                  message.ack();
-
-                  throw Error(
-                    'Failed to send confirmation email to requestor hrbp',
-                  );
-                }),
-              ),
+          this.eventEmitter.emit(
+            'reimbursement-request-send-hrbp-approval-email',
+            hrbpApprovalEmailData,
           );
         }
 

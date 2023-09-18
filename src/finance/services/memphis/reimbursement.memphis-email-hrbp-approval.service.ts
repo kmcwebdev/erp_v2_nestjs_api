@@ -1,9 +1,15 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { InjectKysely } from 'nestjs-kysely';
-import { DB } from 'src/common/types';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import {
+  HrbpApprovalEmailSchema,
+  HrbpApprovalEmailType,
+} from 'src/finance/common/zod-schema/hrbp-approval-email.schema';
+import { HttpService } from '@nestjs/axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ReimbursementMemphisEmailHrbpApprovalService
@@ -17,12 +23,23 @@ export class ReimbursementMemphisEmailHrbpApprovalService
   producer: Producer;
 
   constructor(
-    @InjectKysely() private readonly pgsql: DB,
+    private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly httpService: HttpService,
   ) {}
 
   @OnEvent('reimbursement-request-send-email-hrbp-approval')
-  async triggerMemphisEvent(data: any) {
+  async triggerMemphisEvent(data: HrbpApprovalEmailType) {
+    const validate = await HrbpApprovalEmailSchema.safeParseAsync(data);
+
+    if (!validate.success) {
+      return this.eventEmitter.emit(
+        'reimbursement-request-send-email-confirmation-error',
+        '[memphis-email-confirmation]: Schema error in request confirmation email',
+      );
+    }
+
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });
@@ -33,7 +50,7 @@ export class ReimbursementMemphisEmailHrbpApprovalService
       this.consumer = await this.memphisService.consumer({
         stationName: 'erp.reimbursement.email-hrbp-approval',
         consumerName: 'erp.reimbursement.email-hrbp-approval.consumer-name',
-        consumerGroup: 'erp.reimbursement.email-hrbp-approva.consumer-group',
+        consumerGroup: 'erp.reimbursement.email-hrbp-approval.consumer-group',
       });
 
       this.consumer.on('message', async (message: Message) => {
@@ -41,14 +58,34 @@ export class ReimbursementMemphisEmailHrbpApprovalService
           message.getData().toString() || '{}',
         );
 
-        console.log(data);
+        await firstValueFrom(
+          this.httpService
+            .post('/api/email/hrbp-approval', data, {
+              baseURL: this.configService.get('FRONT_END_URL'),
+            })
+            .pipe(
+              catchError((error: AxiosError) => {
+                this.logger.log(
+                  '[memphis_new_request]: Failed to send confirmation email to requestor hrbp',
+                );
+
+                console.log(error?.response?.data);
+
+                message.ack();
+
+                throw Error(
+                  'Failed to send confirmation email to requestor hrbp',
+                );
+              }),
+            ),
+        );
 
         message.ack();
       });
 
       this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.email-hrbp-approva',
-        producerName: 'erp.reimbursement.email-hrbp-approva.producer-name',
+        stationName: 'erp.reimbursement.email-hrbp-approval',
+        producerName: 'erp.reimbursement.email-hrbp-approval.producer-name',
       });
 
       this.logger.log(
