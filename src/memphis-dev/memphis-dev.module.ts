@@ -20,6 +20,8 @@ export class MemphisDevModule implements OnModuleInit {
         accountId: Number(this.configService.get<string>('MEMPHIS_ACCOUNT_ID')),
         username: this.configService.get<string>('MEMPHIS_USERNAME'),
         password: this.configService.get<string>('MEMPHIS_PASSWORD'),
+        maxReconnect: 10,
+        reconnectIntervalMs: 2000,
       });
       this.logger.log('Connected to memphis.dev');
     } catch (error: unknown) {
