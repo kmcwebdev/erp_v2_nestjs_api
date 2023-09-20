@@ -5,8 +5,9 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
 import { ReimbursementRequest } from 'src/finance/common/interface/getOneRequest.interface';
+import { UsersApiService } from 'src/users/services/users.api.service';
+import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -22,6 +23,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly usersApiService: UsersApiService,
   ) {}
 
   @OnEvent('reimbursement-request-created')
@@ -178,11 +180,13 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
           if (newRequest?.dynamic_approvers) {
             const approvers = newRequest.dynamic_approvers.split(',');
+            approvers.forEach(async (email) => {
+              const propelauthUser =
+                await this.usersApiService.fetchUserInPropelauthByEmail(email);
 
-            // TODO: Check if all of the entries in approvers array is a valid email address
-
-            approvers.forEach(async (ap) => {
-              console.log(ap);
+              if (!propelauthUser) {
+                await this.usersApiService.createUserInPropelauth(email);
+              }
             });
           }
         }
