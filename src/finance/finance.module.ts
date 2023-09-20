@@ -24,9 +24,15 @@ import { ReimbursementMemphisBulkApprovalService } from './services/memphis/reim
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
 import { ReimbursementMemphisEmailConfirmationService } from './services/memphis/reimbursement.memphis-email-confirmation.service';
 import { ReimbursementMemphisEmailHrbpApprovalService } from './services/memphis/reimbursement.memphis-email-hrbp-approval.service';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), HttpModule, MemphisDevModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    UsersModule,
+    HttpModule,
+    MemphisDevModule,
+  ],
   controllers: [FinanceController],
   providers: [
     {

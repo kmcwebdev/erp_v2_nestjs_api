@@ -15,8 +15,18 @@ export class UsersController {
   }
 
   @Apikey()
+  @Post('/propelauth-webhook/create')
+  async propelauthCreateWebhook(@Body() body: unknown) {
+    console.log(body);
+
+    return {
+      message: 'ok',
+    };
+  }
+
+  @Apikey()
   @Post('/propelauth-webhook/update')
-  async propelauthWebhookTest(@Body() body: unknown) {
+  async propelauthUpdateWebhook(@Body() body: unknown) {
     console.log(body);
 
     return {
