@@ -156,7 +156,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           };
 
           this.eventEmitter.emit(
-            'reimbursement-request-send-email-hrbp-approval',
+            'reimbursement-request-send-email-confirmation',
             confirmationEmailData,
           );
 
@@ -172,7 +172,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           };
 
           this.eventEmitter.emit(
-            'reimbursement-request-send-hrbp-approval-email',
+            'reimbursement-request-send-email-hrbp-approval',
             hrbpApprovalEmailData,
           );
         }

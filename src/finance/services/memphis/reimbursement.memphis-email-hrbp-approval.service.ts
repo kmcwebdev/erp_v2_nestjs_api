@@ -35,7 +35,7 @@ export class ReimbursementMemphisEmailHrbpApprovalService
 
     if (!validate.success) {
       return this.eventEmitter.emit(
-        'reimbursement-request-send-email-confirmation-error',
+        'reimbursement-request-send-email-hrbp-approval-error',
         '[memphis-email-confirmation]: Schema error in request confirmation email',
       );
     }
