@@ -61,7 +61,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           .set({
             attachment_mask_name: `${
               newRequest?.full_name
-                ? newRequest.full_name.replace(' ', '_')
+                ? newRequest.full_name.replace(/\s+/g, '_')
                 : 'no_name'
             }_${newRequest?.reference_no}`.toUpperCase(),
           })
