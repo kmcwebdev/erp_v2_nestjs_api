@@ -124,7 +124,7 @@ export class ReimbursementApproveService {
 
         // TODO: Check this please
         if (nextReimbursementRequestApprovalApprover) {
-          console.log(nextReimbursementRequestApprovalApprover)
+          console.log(nextReimbursementRequestApprovalApprover);
           if (reimbursementRequestApprovalApprover.is_hrbp) {
             const hrbp = await this.pgsql
             .selectFrom('users')
