@@ -314,6 +314,23 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 .onConflict((oc) => oc.column('approver_verifier').doNothing())
                 .execute();
 
+              const confirmationEmailData: ConfirmationEmailType = {
+                to: [newRequest.email],
+                referenceNo: newRequest.reference_no,
+                hrbpManagerName: hrbp?.full_name || 'No name set',
+                fullName: newRequest?.full_name || 'No name set',
+                employeeId: newRequest?.employee_id || 'No emp id set',
+                expenseType: newRequest.expense_type,
+                expenseDate: newRequest.created_at,
+                amount: newRequest.amount,
+                receiptsAttached: newRequest.attachment,
+              };
+
+              this.eventEmitter.emit(
+                'reimbursement-request-send-email-confirmation',
+                confirmationEmailData,
+              );
+
               const managerApprovalEmailData: ManagerApprovalEmailType = {
                 to: [approverManager.email],
                 fullName: approverManager.full_name,
