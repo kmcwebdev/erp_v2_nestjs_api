@@ -40,13 +40,51 @@ export class UsersApiService {
       .executeTakeFirst();
 
     if (!newUser) {
-      const user = await this.pgsql
-        .selectFrom('users')
-        .select(['users.user_id', 'users.email', 'users.full_name'])
-        .where('users.email', '=', email)
-        .executeTakeFirst();
+      const userTransaction = await this.pgsql
+        .transaction()
+        .execute(async (trx) => {
+          const user = await trx
+            .selectFrom('users')
+            .select(['users.user_id', 'users.email', 'users.full_name'])
+            .where('users.email', '=', email)
+            .executeTakeFirst();
 
-      return user;
+          const erpV1User = await this.fetchUserByEmailInERPHrV1(user.email);
+
+          const {
+            sr,
+            name,
+            firstName,
+            lastName,
+            clientId,
+            client,
+            hrbpEmail,
+            position,
+          } = erpV1User.data;
+
+          await trx
+            .updateTable('users')
+            .set({
+              employee_id: sr || 'Not set in erp hr',
+              full_name: name,
+              first_name: firstName,
+              last_name: lastName,
+              client_id: clientId,
+              client_name: client,
+              hrbp_approver_email:
+                hrbpEmail === 'people@kmc.solutions'
+                  ? 'christian.sulit@kmc.solutions'
+                  : hrbpEmail,
+              position,
+              updated_via_cron_erp_hr: true,
+            })
+            .where('users.user_id', '=', user.user_id)
+            .execute();
+
+          return user;
+        });
+
+      return userTransaction;
     }
 
     return newUser;
