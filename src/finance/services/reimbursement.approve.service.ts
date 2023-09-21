@@ -127,25 +127,25 @@ export class ReimbursementApproveService {
           console.log(nextReimbursementRequestApprovalApprover);
           if (reimbursementRequestApprovalApprover.is_hrbp) {
             const hrbp = await this.pgsql
-            .selectFrom('users')
-            .innerJoin(
-              'finance_reimbursement_approvers',
-              'finance_reimbursement_approvers.signatory_id',
-              'users.user_id',
-            )
-            .select([
-              'finance_reimbursement_approvers.approver_id',
-              'users.user_id',
-              'users.email',
-              'users.full_name',
-            ])
-            .where(
-              'finance_reimbursement_approvers.table_reference',
-              '=',
-              'users',
-            )
-            .where('users.email', '=', reimbursement.hrbp_approver_email)
-            .executeTakeFirst();
+              .selectFrom('users')
+              .innerJoin(
+                'finance_reimbursement_approvers',
+                'finance_reimbursement_approvers.signatory_id',
+                'users.user_id',
+              )
+              .select([
+                'finance_reimbursement_approvers.approver_id',
+                'users.user_id',
+                'users.email',
+                'users.full_name',
+              ])
+              .where(
+                'finance_reimbursement_approvers.table_reference',
+                '=',
+                'users',
+              )
+              .where('users.email', '=', reimbursement.hrbp_approver_email)
+              .executeTakeFirst();
 
             const hrbpApprovalEmailData: HrbpApprovalEmailType = {
               to: [reimbursement.hrbp_approver_email],
