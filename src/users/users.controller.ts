@@ -16,8 +16,14 @@ export class UsersController {
 
   @Apikey()
   @Post('/propelauth-webhook/create')
-  async propelauthCreateWebhook(@Body() body: unknown) {
-    console.log(body);
+  // TODO: Create DTO for this
+  async propelauthCreateWebhook(
+    @Body() body: { user_id: string; email: string },
+  ) {
+    await this.usersService.createUserInDatabase({
+      propelauth_user_id: body.user_id,
+      email: body.email,
+    });
 
     return {
       message: 'ok',

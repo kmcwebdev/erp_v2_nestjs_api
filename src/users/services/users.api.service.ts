@@ -25,13 +25,15 @@ export class UsersApiService {
   }
 
   async createUserInDatabase(data: CreateUserType) {
-    const { email } = data;
+    const { email, propelauth_user_id } = data;
 
     const newUser = await this.pgsql
       .insertInto('users')
       .values({
         employee_id: email,
+        propelauth_user_id,
         email,
+        temporary_propelauth_user_id: false,
       })
       .returning('user_id')
       .onConflict((oc) => oc.column('email').doNothing())
