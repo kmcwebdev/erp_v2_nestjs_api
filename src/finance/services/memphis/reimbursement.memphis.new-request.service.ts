@@ -202,8 +202,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 );
               }
 
-              console.log(propelauthUser);
-
               let approverManager = await this.pgsql
                 .selectFrom('users')
                 .innerJoin(
