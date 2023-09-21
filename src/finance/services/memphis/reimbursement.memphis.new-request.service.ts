@@ -242,16 +242,17 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 .executeTakeFirst();
 
               if (!approverManager) {
-                const newUser = await this.pgsql
-                  .selectFrom('users')
-                  .select(['users.user_id', 'users.email', 'users.full_name'])
-                  .where('users.email', '=', propelauthUser.email)
-                  .executeTakeFirst();
+                const dbUser =
+                  await this.usersApiService.createOrGetUserInDatabase({
+                    email: propelauthUser.email,
+                  });
+
+                console.log(dbUser);
 
                 const newApprover = await this.pgsql
                   .insertInto('finance_reimbursement_approvers')
                   .values({
-                    signatory_id: newUser.user_id,
+                    signatory_id: dbUser.user_id,
                     table_reference: 'users',
                     is_group_of_approvers: false,
                   })
@@ -260,9 +261,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
                 approverManager = {
                   approver_id: newApprover.approver_id,
-                  user_id: newUser.user_id,
-                  email: newUser.email,
-                  full_name: newUser.full_name,
+                  user_id: dbUser.user_id,
+                  email: dbUser.email,
+                  full_name: dbUser.full_name,
                 };
               }
 

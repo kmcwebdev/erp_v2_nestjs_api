@@ -11,7 +11,7 @@ export class UsersController {
   @Post()
   @UseGuards(PropelauthGuard)
   createUserInDatabase(@Body() body: CreateUserDTO) {
-    return this.usersService.createUserInDatabase(body);
+    return this.usersService.createOrGetUserInDatabase(body);
   }
 
   @Apikey()
@@ -20,7 +20,7 @@ export class UsersController {
   async propelauthCreateWebhook(
     @Body() body: { user_id: string; email: string },
   ) {
-    await this.usersService.createUserInDatabase({
+    await this.usersService.createOrGetUserInDatabase({
       propelauth_user_id: body.user_id,
       email: body.email,
     });

@@ -24,7 +24,7 @@ export class UsersApiService {
     ``;
   }
 
-  async createUserInDatabase(data: CreateUserType) {
+  async createOrGetUserInDatabase(data: CreateUserType) {
     const { email, propelauth_user_id } = data;
 
     const newUser = await this.pgsql
@@ -35,14 +35,14 @@ export class UsersApiService {
         email,
         temporary_propelauth_user_id: false,
       })
-      .returning('user_id')
+      .returning(['users.user_id', 'users.email', 'users.full_name'])
       .onConflict((oc) => oc.column('email').doNothing())
       .executeTakeFirst();
 
     if (!newUser) {
       const user = await this.pgsql
         .selectFrom('users')
-        .select('user_id')
+        .select(['users.user_id', 'users.email', 'users.full_name'])
         .where('users.email', '=', email)
         .executeTakeFirst();
 
