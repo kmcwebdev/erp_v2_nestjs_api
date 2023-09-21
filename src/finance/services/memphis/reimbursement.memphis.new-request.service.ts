@@ -199,7 +199,10 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
               if (!propelauthUser) {
                 propelauthUser =
-                  await this.usersApiService.createUserInPropelauth(email);
+                  await this.usersApiService.createUserInPropelauth(
+                    email,
+                    'External Reimbursement Approver Manager',
+                  );
 
                 this.eventEmitter.emit(
                   'reimbursement-request-send-email-new-user',
