@@ -12,7 +12,6 @@ import { HrbpApprovalEmailType } from 'src/finance/common/zod-schema/hrbp-approv
 import { ManagerApprovalEmailType } from 'src/finance/common/zod-schema/manager-approval-email.schema';
 import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
 
-
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
   private readonly logger = new Logger(
@@ -325,11 +324,11 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 'reimbursement-request-send-email-manager-approval',
                 managerApprovalEmailData,
               );
-  
+
               const generatedLink = `${this.configService.get(
                 'FRONT_END_URL',
               )}/sessionless-approval-link?token=${hexToken}`;
-    
+
               await this.pgsql
                 .insertInto('finance_reimbursement_approval_links')
                 .values({
@@ -339,7 +338,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   link_expired: false,
                 })
                 .execute();
-
             });
           }
         }

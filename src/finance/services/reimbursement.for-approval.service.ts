@@ -52,7 +52,7 @@ export class ReimbursementForApprovalService {
       //       ORDER BY approver_order
       //       LIMIT 1
       //     )
-      
+
       //     SELECT fram.approval_matrix_id
       //     FROM finance_reimbursement_approval_matrix fram
       //     JOIN OrderedApprovals oa ON fram.approver_order = oa.approver_order
@@ -61,9 +61,14 @@ export class ReimbursementForApprovalService {
       //     AND fram.has_rejected = false
       // `.execute(trx);
 
-      const matrix = await trx.selectFrom('finance_reimbursement_approval_matrix')
+      const matrix = await trx
+        .selectFrom('finance_reimbursement_approval_matrix')
         .select(['approval_matrix_id', 'approver_order'])
-        .where('approver_id', 'in', approver.map(ap => ap.approver_id))
+        .where(
+          'approver_id',
+          'in',
+          approver.map((ap) => ap.approver_id),
+        )
         .where('has_approved', '=', false)
         .where('has_rejected', '=', false)
         .execute();
@@ -72,18 +77,21 @@ export class ReimbursementForApprovalService {
     });
 
     if (approvers.length) {
-      approvers.forEach((ap) => forMyApprovalRequestIds.push(ap.approval_matrix_id));
+      approvers.forEach((ap) =>
+        forMyApprovalRequestIds.push(ap.approval_matrix_id),
+      );
     }
 
     if (forMyApprovalRequestIds.length === 0) {
       return [];
     }
 
-    const manager = user.user_assigned_role === "external reimbursement approver manager";
+    const manager =
+      user.user_assigned_role === 'external reimbursement approver manager';
     const hrbp = user.user_assigned_role === 'hrbp';
     const finance = user.user_assigned_role === 'finance';
 
-    const EXCLUDED_IN_LIST = [];
+    const EXCLUDED_IN_LIST = [REJECTED_REQUEST];
 
     if (finance && !filter?.text_search) {
       EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
@@ -171,14 +179,16 @@ export class ReimbursementForApprovalService {
     }
 
     if (filter?.expense_type_ids) {
-      const arr = filter.expense_type_ids.replace(/"/g, '').split(',');
+      const expenseTypeIds = filter.expense_type_ids
+        .replace(/"/g, '')
+        .split(',');
 
       // TODO: Do the check here if all items in array is a valid uuid
 
       query = query.where(
         'finance_reimbursement_requests.expense_type_id',
         'in',
-        arr,
+        expenseTypeIds,
       );
     }
 
