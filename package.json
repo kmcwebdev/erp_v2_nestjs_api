@@ -10,7 +10,7 @@
     "npm": ">=9.6.7"
   },
   "scripts": {
-    "build": "nest build && kysely-codegen",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
