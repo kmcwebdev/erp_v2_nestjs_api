@@ -86,14 +86,6 @@ export class ReimbursementForApprovalService {
 
     const EXCLUDED_IN_LIST = [REJECTED_REQUEST, CANCELLED_REQUEST];
 
-    if (manager) {
-      EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
-    }
-
-    if (hrbp) {
-      EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
-    }
-
     if (finance && !filter?.text_search) {
       EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
     }
