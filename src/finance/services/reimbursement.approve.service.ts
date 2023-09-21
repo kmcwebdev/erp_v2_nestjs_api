@@ -92,18 +92,6 @@ export class ReimbursementApproveService {
           .limit(1)
           .executeTakeFirst();
 
-        if (!reimbursementRequestApprovalApprover.is_hrbp) {
-          await this.pgsql
-            .updateTable('finance_reimbursement_requests')
-            .set({ request_status_id: APPROVED_REQUEST })
-            .where(
-              'finance_reimbursement_requests.reimbursement_request_id',
-              '=',
-              reimbursementRequestApprovalApprover.reimbursement_request_id,
-            )
-            .execute();
-        }
-
         if (reimbursementRequestApprovalApprover.is_hrbp) {
           await sql`
               UPDATE finance_reimbursement_requests 
@@ -135,45 +123,48 @@ export class ReimbursementApproveService {
         });
 
         // TODO: Check this please
-        if (nextReimbursementRequestApprovalApprover && reimbursementRequestApprovalApprover.is_hrbp) {
-          const hrbp = await this.pgsql
-          .selectFrom('users')
-          .innerJoin(
-            'finance_reimbursement_approvers',
-            'finance_reimbursement_approvers.signatory_id',
-            'users.user_id',
-          )
-          .select([
-            'finance_reimbursement_approvers.approver_id',
-            'users.user_id',
-            'users.email',
-            'users.full_name',
-          ])
-          .where(
-            'finance_reimbursement_approvers.table_reference',
-            '=',
-            'users',
-          )
-          .where('users.email', '=', reimbursement.hrbp_approver_email)
-          .executeTakeFirst();
+        if (nextReimbursementRequestApprovalApprover) {
+          console.log(nextReimbursementRequestApprovalApprover)
+          if (reimbursementRequestApprovalApprover.is_hrbp) {
+            const hrbp = await this.pgsql
+            .selectFrom('users')
+            .innerJoin(
+              'finance_reimbursement_approvers',
+              'finance_reimbursement_approvers.signatory_id',
+              'users.user_id',
+            )
+            .select([
+              'finance_reimbursement_approvers.approver_id',
+              'users.user_id',
+              'users.email',
+              'users.full_name',
+            ])
+            .where(
+              'finance_reimbursement_approvers.table_reference',
+              '=',
+              'users',
+            )
+            .where('users.email', '=', reimbursement.hrbp_approver_email)
+            .executeTakeFirst();
 
-          const hrbpApprovalEmailData: HrbpApprovalEmailType = {
-            to: [reimbursement.hrbp_approver_email],
-            approverFullName: hrbp.full_name || 'HRBP',
-            fullName: reimbursement?.full_name || 'No name set',
-            employeeId: reimbursement?.employee_id || 'No employee id set',
-            expenseType: reimbursement.expense_type,
-            expenseDate: reimbursement.created_at,
-            amount: reimbursement.amount,
-            receiptsAttached: reimbursement.attachment,
-          };
+            const hrbpApprovalEmailData: HrbpApprovalEmailType = {
+              to: [reimbursement.hrbp_approver_email],
+              approverFullName: hrbp.full_name || 'HRBP',
+              fullName: reimbursement?.full_name || 'No name set',
+              employeeId: reimbursement?.employee_id || 'No employee id set',
+              expenseType: reimbursement.expense_type,
+              expenseDate: reimbursement.created_at,
+              amount: reimbursement.amount,
+              receiptsAttached: reimbursement.attachment,
+            };
 
-          this.eventEmitter.emit(
-            'reimbursement-request-send-email-hrbp-approval',
-            hrbpApprovalEmailData,
-          );
+            this.eventEmitter.emit(
+              'reimbursement-request-send-email-hrbp-approval',
+              hrbpApprovalEmailData,
+            );
 
-          this.logger.log('Sending email to next approver');
+            this.logger.log('Sending email to next approver');
+          }
         }
 
         return reimbursement;
