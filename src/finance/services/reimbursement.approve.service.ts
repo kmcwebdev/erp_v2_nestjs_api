@@ -7,6 +7,7 @@ import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimbursement-request.dto';
 import { APPROVED_REQUEST } from '../common/constant';
+import { HrbpApprovalEmailType } from '../common/zod-schema/hrbp-approval-email.schema';
 
 @Injectable()
 export class ReimbursementApproveService {
@@ -133,7 +134,45 @@ export class ReimbursementApproveService {
             reimbursementRequestApprovalApprover.reimbursement_request_id,
         });
 
-        if (nextReimbursementRequestApprovalApprover) {
+        // TODO: Check this might be a bug someday
+        if (nextReimbursementRequestApprovalApprover && reimbursementRequestApprovalApprover.is_hrbp) {
+          const hrbp = await this.pgsql
+          .selectFrom('users')
+          .innerJoin(
+            'finance_reimbursement_approvers',
+            'finance_reimbursement_approvers.signatory_id',
+            'users.user_id',
+          )
+          .select([
+            'finance_reimbursement_approvers.approver_id',
+            'users.user_id',
+            'users.email',
+            'users.full_name',
+          ])
+          .where(
+            'finance_reimbursement_approvers.table_reference',
+            '=',
+            'users',
+          )
+          .where('users.email', '=', reimbursement.hrbp_approver_email)
+          .executeTakeFirst();
+
+          const hrbpApprovalEmailData: HrbpApprovalEmailType = {
+            to: [reimbursement.hrbp_approver_email],
+            approverFullName: hrbp.full_name || 'HRBP',
+            fullName: reimbursement?.full_name || 'No name set',
+            employeeId: reimbursement?.employee_id || 'No employee id set',
+            expenseType: reimbursement.expense_type,
+            expenseDate: reimbursement.created_at,
+            amount: reimbursement.amount,
+            receiptsAttached: reimbursement.attachment,
+          };
+
+          this.eventEmitter.emit(
+            'reimbursement-request-send-email-hrbp-approval',
+            hrbpApprovalEmailData,
+          );
+
           this.logger.log('Sending email to next approver');
         }
 
