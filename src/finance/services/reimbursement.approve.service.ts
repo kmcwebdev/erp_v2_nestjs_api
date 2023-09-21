@@ -134,7 +134,7 @@ export class ReimbursementApproveService {
             reimbursementRequestApprovalApprover.reimbursement_request_id,
         });
 
-        // TODO: Check this might be a bug someday
+        // TODO: Check this please
         if (nextReimbursementRequestApprovalApprover && reimbursementRequestApprovalApprover.is_hrbp) {
           const hrbp = await this.pgsql
           .selectFrom('users')

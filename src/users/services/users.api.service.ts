@@ -142,11 +142,11 @@ export class UsersApiService {
           },
         })
         .pipe(
-          // catchError((error: AxiosError) => {
-          //   this.logger.error(error?.response?.data);
+          catchError((error: AxiosError) => {
+            this.logger.error(error?.response?.data);
 
-          //   throw Error('Failed to get user in erp hr v1');
-          // }),
+            throw Error('Failed to get user in erp hr v1');
+          }),
         ),
     );
   }
