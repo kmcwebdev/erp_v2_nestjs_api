@@ -92,6 +92,18 @@ export class ReimbursementApproveService {
           .limit(1)
           .executeTakeFirst();
 
+        if (!reimbursementRequestApprovalApprover.is_hrbp) {
+          await this.pgsql
+            .updateTable('finance_reimbursement_requests')
+            .set({ request_status_id: APPROVED_REQUEST })
+            .where(
+              'finance_reimbursement_requests.reimbursement_request_id',
+              '=',
+              reimbursementRequestApprovalApprover.reimbursement_request_id,
+            )
+            .execute();
+        }
+
         if (reimbursementRequestApprovalApprover.is_hrbp) {
           await sql`
               UPDATE finance_reimbursement_requests 
