@@ -248,7 +248,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 const newApprover = await this.pgsql
                   .insertInto('finance_reimbursement_approvers')
                   .values({
-                    signatory_id: '',
+                    signatory_id: newUser.user_id,
                     table_reference: 'users',
                     is_group_of_approvers: false,
                   })
