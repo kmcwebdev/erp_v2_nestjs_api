@@ -75,8 +75,6 @@ export class ReimbursementMemphisEmailHrbpApprovalService
 
                 console.log(error?.response?.data);
 
-                message.ack();
-
                 throw Error('Failed to send approval email to hrbp');
               }),
             ),
