@@ -56,7 +56,9 @@ export class UsersApiService {
     return await propelauth.fetchUserMetadataByEmail(email);
   }
 
-  async createUserInPropelauth(email: string) {
+  async createUserInPropelauth(email: string, role?: string) {
+    if (!role) role = 'Member';
+
     const temporaryPassword = String(new Date());
 
     const isKmcSolutions = email.includes('@kmc.solutions');
@@ -75,7 +77,7 @@ export class UsersApiService {
     await propelauth.addUserToOrg({
       userId: newPropelauthUser.userId,
       orgId,
-      role: 'user',
+      role,
     });
 
     return Object.assign(newPropelauthUser, { temporaryPassword });

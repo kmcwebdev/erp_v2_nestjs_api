@@ -181,6 +181,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
           if (newRequest?.dynamic_approvers) {
             const approvers = newRequest.dynamic_approvers.split(',');
+
             approvers.forEach(async (email) => {
               let propelauthUser = await this.usersApiService
                 .fetchUserInPropelauthByEmail(email)
@@ -193,12 +194,15 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     };
                   }
 
-                  return undefined;
+                  return null;
                 });
 
               if (!propelauthUser) {
                 propelauthUser =
-                  await this.usersApiService.createUserInPropelauth(email);
+                  await this.usersApiService.createUserInPropelauth(
+                    email,
+                    'External Reimbursement Approver Manager',
+                  );
 
                 this.eventEmitter.emit(
                   'reimbursement-request-send-email-new-user',
@@ -210,6 +214,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   },
                 );
               }
+
+              console.log(propelauthUser);
 
               let approverManager = await this.pgsql
                 .selectFrom('users')
@@ -246,7 +252,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     table_reference: 'users',
                     is_group_of_approvers: false,
                   })
-                  .returning(['approver_id'])
+                  .returning(['finance_reimbursement_approvers.approver_id'])
                   .executeTakeFirst();
 
                 approverManager = {
@@ -256,6 +262,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   full_name: newUser.full_name,
                 };
               }
+
+              console.log(approverManager);
 
               const hrbp = await this.pgsql
                 .selectFrom('users')
@@ -277,6 +285,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 )
                 .where('users.email', '=', newRequest.hrbp_approver_email)
                 .executeTakeFirst();
+
+              console.log(hrbp);
 
               await this.pgsql
                 .insertInto('finance_reimbursement_approval_matrix')
