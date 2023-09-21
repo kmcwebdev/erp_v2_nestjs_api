@@ -64,7 +64,7 @@ export class ReimbursementForApprovalService {
 
       const matrix = await trx.selectFrom('finance_reimbursement_approval_matrix')
         .select(['approval_matrix_id', 'approver_order'])
-        .where('approver_id', '=', approver[0].approver_id)
+        .where('approver_id', 'in', approver.map(ap => ap.approver_id))
         .where('has_approved', '=', false)
         .where('has_rejected', '=', false)
         .execute();
