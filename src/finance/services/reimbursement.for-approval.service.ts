@@ -33,7 +33,6 @@ export class ReimbursementForApprovalService {
         .where('group_id', '=', department?.group_id || null) //TODO: Dangerous move here.
         .executeTakeFirst();
 
-
       const approver = await trx
         .selectFrom('finance_reimbursement_approvers')
         .select(['approver_id'])
