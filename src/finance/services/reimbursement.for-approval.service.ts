@@ -18,7 +18,7 @@ export class ReimbursementForApprovalService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async get(user: RequestUser, filter: GetAllApprovalReimbursementRequestType) {
-    const approverIds = [];
+    const forMyApprovalRequestIds = [];
 
     const approvers = await this.pgsql.transaction().execute(async (trx) => {
       const department = await trx
@@ -33,6 +33,7 @@ export class ReimbursementForApprovalService {
         .where('group_id', '=', department?.group_id || null) //TODO: Dangerous move here.
         .executeTakeFirst();
 
+
       const approver = await trx
         .selectFrom('finance_reimbursement_approvers')
         .select(['approver_id'])
@@ -45,24 +46,59 @@ export class ReimbursementForApprovalService {
         )
         .execute();
 
-      return approver;
+      //   const rawQueryMatrix = await sql<{ approval_matrix_id: string }>`
+      //     WITH OrderedApprovals AS (
+      //       SELECT approval_matrix_id, approver_order
+      //       FROM finance_reimbursement_approval_matrix
+      //       ORDER BY approver_order
+      //       LIMIT 1
+      //     )
+      
+      //     SELECT fram.approval_matrix_id
+      //     FROM finance_reimbursement_approval_matrix fram
+      //     JOIN OrderedApprovals oa ON fram.approver_order = oa.approver_order
+      //     WHERE fram.approver_id = ${approver[0].approver_id}
+      //     AND fram.has_approved = false
+      //     AND fram.has_rejected = false
+      // `.execute(trx);
+
+      const matrix = await trx.selectFrom('finance_reimbursement_approval_matrix')
+        .select(['approval_matrix_id', 'approver_order'])
+        .where('approver_id', '=', approver[0].approver_id)
+        .where('has_approved', '=', false)
+        .where('has_rejected', '=', false)
+        .execute();
+
+      return matrix;
     });
 
     if (approvers.length) {
-      approvers.forEach((ap) => approverIds.push(ap.approver_id));
+      approvers.forEach((ap) => forMyApprovalRequestIds.push(ap.approval_matrix_id));
     }
 
-    if (approverIds.length === 0) {
+    if (forMyApprovalRequestIds.length === 0) {
       return [];
     }
 
+    const manager = user.user_assigned_role === "external reimbursement approver manager";
+    const hrbp = user.user_assigned_role === 'hrbp';
+    const finance = user.user_assigned_role === 'finance';
+
     const EXCLUDED_IN_LIST = [REJECTED_REQUEST, CANCELLED_REQUEST];
 
-    if (user.user_assigned_role === 'finance' && !filter?.text_search) {
+    if (manager) {
       EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
     }
 
-    if (user.user_assigned_role === 'finance' && !filter?.text_search) {
+    if (hrbp) {
+      EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
+    }
+
+    if (finance && !filter?.text_search) {
+      EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
+    }
+
+    if (finance && !filter?.text_search) {
       EXCLUDED_IN_LIST.push(PROCESSING_REQUEST);
     }
 
@@ -125,19 +161,19 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_requests.created_at',
       ])
       .where(
-        'finance_reimbursement_approval_matrix.approver_id',
-        'in',
-        approverIds,
-      )
-      .where(
         'finance_reimbursement_requests.request_status_id',
         'not in',
         EXCLUDED_IN_LIST,
+      )
+      .where(
+        'finance_reimbursement_approval_matrix.approval_matrix_id',
+        'in',
+        forMyApprovalRequestIds,
       );
 
-    if (user.user_assigned_role === 'finance' && !filter?.text_search) {
+    if (finance) {
       query = query.where(
-        'finance_reimbursement_requests.finance_request_status_id',
+        'finance_reimbursement_requests.hrbp_request_status_id',
         '=',
         APPROVED_REQUEST,
       );
@@ -157,7 +193,8 @@ export class ReimbursementForApprovalService {
 
     if (filter?.text_search) {
       query = query.where(
-        sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' || coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')) @@ websearch_to_tsquery(${filter.text_search})`,
+        sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
+         coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')) @@ websearch_to_tsquery(${filter.text_search})`,
       );
     }
 

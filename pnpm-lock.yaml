@@ -7044,7 +7044,7 @@ packages:
     engines: {node: '>= 6.2.2'}
     dependencies:
       dictionaryjs: github.com/phanxgames/dictionaryjs/c9d88f4f889a35192fe66c337f0b71062635ac2c
-      pg: github.com/brianc/node-postgres/a84ebb3fe85edafb1b358965bdb5e3de58b12c5d
+      pg: github.com/brianc/node-postgres/b1a8947738ce0af004cb926f79829bb2abc64aa6
       suspend: github.com/jmar777/suspend/085b4a82c6eb4c3e0d8c4d96484c82bf1cf101cb
     dev: false
 
@@ -8374,8 +8374,8 @@ packages:
     resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
 
-  github.com/brianc/node-postgres/a84ebb3fe85edafb1b358965bdb5e3de58b12c5d:
-    resolution: {tarball: https://codeload.github.com/brianc/node-postgres/tar.gz/a84ebb3fe85edafb1b358965bdb5e3de58b12c5d}
+  github.com/brianc/node-postgres/b1a8947738ce0af004cb926f79829bb2abc64aa6:
+    resolution: {tarball: https://codeload.github.com/brianc/node-postgres/tar.gz/b1a8947738ce0af004cb926f79829bb2abc64aa6}
     name: node-postgres
     version: 0.0.0
     dev: false

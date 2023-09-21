@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectKysely } from 'nestjs-kysely';
-import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { sql } from 'kysely';
 import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
+import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimbursement-request.dto';
-import { sql } from 'kysely';
 import { APPROVED_REQUEST } from '../common/constant';
 
 @Injectable()
@@ -47,7 +47,6 @@ export class ReimbursementApproveService {
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
-
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
