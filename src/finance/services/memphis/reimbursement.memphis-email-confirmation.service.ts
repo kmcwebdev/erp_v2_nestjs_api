@@ -59,7 +59,7 @@ export class ReimbursementMemphisEmailConfirmationService
 
       this.consumer.on('message', async (message: Message) => {
         const data: ConfirmationEmailType = JSON.parse(
-          message.getData().toString() || '{}',
+          message.getData().toString(),
         );
 
         await firstValueFrom(

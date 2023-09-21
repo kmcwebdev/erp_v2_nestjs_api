@@ -11,6 +11,8 @@ const CreateUserSchema = z.object({
     .email({
       message: 'Email must be a valid email',
     }),
+  // TODO: Add description here as well.
+  propelauth_user_id: z.string().uuid(),
 });
 
 export type CreateUserType = z.infer<typeof CreateUserSchema>;

@@ -18,10 +18,11 @@ import { ReimbursementApproveService } from './services/reimbursement.approve.se
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
 import { ReimbursementRejectService } from './services/reimbursement.reject.service';
+import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
 import { ReimbursementMemphisNewRequestService } from './services/memphis/reimbursement.memphis.new-request.service';
 import { ReimbursementMemphisBulkApprovalService } from './services/memphis/reimbursement.memphis-bulk-approval.service';
-import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
+import { ReimbursementMemphisEmailNewUserService } from './services/memphis/reimbursement.memphis-email-new-user.service';
 import { ReimbursementMemphisEmailConfirmationService } from './services/memphis/reimbursement.memphis-email-confirmation.service';
 import { ReimbursementMemphisEmailHrbpApprovalService } from './services/memphis/reimbursement.memphis-email-hrbp-approval.service';
 import { UsersModule } from 'src/users/users.module';
@@ -55,6 +56,7 @@ import { UsersModule } from 'src/users/users.module';
     ReimbursementAuditlogService,
     ReimbursementCreateAttachmentService,
     ReimbursementMemphisNewRequestService,
+    ReimbursementMemphisEmailNewUserService,
     ReimbursementMemphisBulkApprovalService,
     ReimbursementMemphisEmailConfirmationService,
     ReimbursementMemphisEmailHrbpApprovalService,
