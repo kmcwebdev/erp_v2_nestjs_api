@@ -184,11 +184,17 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             approvers.forEach(async (email) => {
               let propelauthUser = await this.usersApiService
                 .fetchUserInPropelauthByEmail(email)
-                .then((u) => ({
-                  userId: u.userId,
-                  email: u.email,
-                  temporaryPassword: '',
-                }));
+                .then((u) => {
+                  if (u) {
+                    return {
+                      userId: u.userId,
+                      email: u.email,
+                      temporaryPassword: '',
+                    };
+                  }
+
+                  return undefined;
+                });
 
               if (!propelauthUser) {
                 propelauthUser =
