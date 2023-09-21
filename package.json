@@ -6,8 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "engines": {
-    "node": "18.16.0",
-    "npm": "9.5.1"
+    "node": ">=18.17.1",
+    "npm": ">=9.6.7"
   },
   "scripts": {
     "build": "nest build && kysely-codegen",
