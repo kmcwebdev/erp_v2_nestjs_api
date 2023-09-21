@@ -87,7 +87,7 @@ export class ReimbursementMemphisEmailManagerApprovalService
       });
 
       this.logger.log(
-        'Memphis reimbursement request email hrbp approval station is ready 📧 🚀',
+        'Memphis reimbursement request email manager approval station is ready 📧 🚀',
       );
     } catch (error: unknown) {
       this.logger.error(error);

@@ -26,6 +26,7 @@ import { ReimbursementMemphisEmailNewUserService } from './services/memphis/reim
 import { ReimbursementMemphisEmailConfirmationService } from './services/memphis/reimbursement.memphis-email-confirmation.service';
 import { ReimbursementMemphisEmailHrbpApprovalService } from './services/memphis/reimbursement.memphis-email-hrbp-approval.service';
 import { UsersModule } from 'src/users/users.module';
+import { ReimbursementMemphisEmailManagerApprovalService } from './services/memphis/reimbursement.memphis-email-manager-approval.service';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { UsersModule } from 'src/users/users.module';
     ReimbursementMemphisEmailNewUserService,
     ReimbursementMemphisBulkApprovalService,
     ReimbursementMemphisEmailConfirmationService,
+    ReimbursementMemphisEmailManagerApprovalService,
     ReimbursementMemphisEmailHrbpApprovalService,
   ],
 })
