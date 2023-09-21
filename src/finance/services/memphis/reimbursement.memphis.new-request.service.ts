@@ -117,23 +117,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             return message.ack();
           }
 
-          const randomBytes = crypto.randomBytes(16);
-          const hexToken = randomBytes.toString('hex');
-
-          const generatedLink = `${this.configService.get(
-            'FRONT_END_URL',
-          )}/sessionless-approval-link?token=${hexToken}`;
-
-          await this.pgsql
-            .insertInto('finance_reimbursement_approval_links')
-            .values({
-              reimbursement_request_id: newRequest.reimbursement_request_id,
-              approval_link: generatedLink,
-              token: hexToken,
-              link_expired: false,
-            })
-            .execute();
-
           await this.pgsql
             .insertInto('finance_reimbursement_approval_matrix')
             .values([
@@ -337,10 +320,28 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 receiptsAttached: newRequest.attachment,
               };
 
+              const randomBytes = crypto.randomBytes(16);
+              const hexToken = randomBytes.toString('hex');
+
               this.eventEmitter.emit(
                 'reimbursement-request-send-email-manager-approval',
                 managerApprovalEmailData,
               );
+  
+              const generatedLink = `${this.configService.get(
+                'FRONT_END_URL',
+              )}/sessionless-approval-link?token=${hexToken}`;
+    
+              await this.pgsql
+                .insertInto('finance_reimbursement_approval_links')
+                .values({
+                  reimbursement_request_id: newRequest.reimbursement_request_id,
+                  approval_link: generatedLink,
+                  token: hexToken,
+                  link_expired: false,
+                })
+                .execute();
+
             });
           }
         }
