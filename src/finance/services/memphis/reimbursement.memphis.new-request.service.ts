@@ -247,8 +247,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     email: propelauthUser.email,
                   });
 
-                console.log(dbUser);
-
                 const newApprover = await this.pgsql
                   .insertInto('finance_reimbursement_approvers')
                   .values({
@@ -266,8 +264,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   full_name: dbUser.full_name,
                 };
               }
-
-              console.log(approverManager);
 
               const hrbp = await this.pgsql
                 .selectFrom('users')
@@ -289,8 +285,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 )
                 .where('users.email', '=', newRequest.hrbp_approver_email)
                 .executeTakeFirst();
-
-              console.log(hrbp);
 
               await this.pgsql
                 .insertInto('finance_reimbursement_approval_matrix')
