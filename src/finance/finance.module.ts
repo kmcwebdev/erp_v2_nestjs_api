@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
+import { UsersModule } from 'src/users/users.module';
 import { FinanceController } from './finance.controller';
 import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
 import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
@@ -25,7 +26,6 @@ import { ReimbursementMemphisBulkApprovalService } from './services/memphis/reim
 import { ReimbursementMemphisEmailNewUserService } from './services/memphis/reimbursement.memphis-email-new-user.service';
 import { ReimbursementMemphisEmailConfirmationService } from './services/memphis/reimbursement.memphis-email-confirmation.service';
 import { ReimbursementMemphisEmailHrbpApprovalService } from './services/memphis/reimbursement.memphis-email-hrbp-approval.service';
-import { UsersModule } from 'src/users/users.module';
 import { ReimbursementMemphisEmailManagerApprovalService } from './services/memphis/reimbursement.memphis-email-manager-approval.service';
 
 @Module({
