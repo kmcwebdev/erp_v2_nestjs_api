@@ -83,7 +83,7 @@ export class ReimbursementForApprovalService {
     const hrbp = user.user_assigned_role === 'hrbp';
     const finance = user.user_assigned_role === 'finance';
 
-    const EXCLUDED_IN_LIST = [REJECTED_REQUEST, CANCELLED_REQUEST];
+    const EXCLUDED_IN_LIST = [];
 
     if (finance && !filter?.text_search) {
       EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
