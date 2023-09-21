@@ -6,16 +6,16 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import {
-  HrbpApprovalEmailSchema,
-  HrbpApprovalEmailType,
-} from 'src/finance/common/zod-schema/hrbp-approval-email.schema';
+  ManagerApprovalEmailSchema,
+  ManagerApprovalEmailType,
+} from 'src/finance/common/zod-schema/manager-approval-email.schema';
 
 @Injectable()
-export class ReimbursementMemphisEmailHrbpApprovalService
+export class ReimbursementMemphisEmailManagerApprovalService
   implements OnModuleInit
 {
   private readonly logger = new Logger(
-    ReimbursementMemphisEmailHrbpApprovalService.name,
+    ReimbursementMemphisEmailManagerApprovalService.name,
   );
 
   consumer: Consumer;
@@ -28,14 +28,14 @@ export class ReimbursementMemphisEmailHrbpApprovalService
     private readonly httpService: HttpService,
   ) {}
 
-  @OnEvent('reimbursement-request-send-email-hrbp-approval')
-  async triggerMemphisEvent(data: HrbpApprovalEmailType) {
-    const validate = await HrbpApprovalEmailSchema.safeParseAsync(data);
+  @OnEvent('reimbursement-request-send-email-manager-approval')
+  async triggerMemphisEvent(data: ManagerApprovalEmailType) {
+    const validate = await ManagerApprovalEmailSchema.safeParseAsync(data);
 
     if (!validate.success) {
       return this.eventEmitter.emit(
-        'reimbursement-request-send-email-hrbp-approval-error',
-        '[memphis-hrbp-approval-email]: Schema error in request hrbp approval email',
+        'reimbursement-request-send-email-manager-approval-error',
+        '[memphis-manager-approval-email]: Schema error in request manager approval email',
       );
     }
 
@@ -47,37 +47,38 @@ export class ReimbursementMemphisEmailHrbpApprovalService
   async onModuleInit() {
     try {
       this.consumer = await this.memphisService.consumer({
-        stationName: 'erp.reimbursement.email-hrbp-approval',
-        consumerName: 'erp.reimbursement.email-hrbp-approval.consumer-name',
-        consumerGroup: 'erp.reimbursement.email-hrbp-approval.consumer-group',
+        stationName: 'erp.reimbursement.email-manager-approval',
+        consumerName: 'erp.reimbursement.email-manager-approval.consumer-name',
+        consumerGroup:
+          'erp.reimbursement.email-manager-approval.consumer-group',
       });
 
       this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.email-hrbp-approval',
-        producerName: 'erp.reimbursement.email-hrbp-approval.producer-name',
+        stationName: 'erp.reimbursement.email-manager-approval',
+        producerName: 'erp.reimbursement.email-manager-approval.producer-name',
       });
 
       this.consumer.on('message', async (message: Message) => {
-        const data: HrbpApprovalEmailType = JSON.parse(
+        const data: ManagerApprovalEmailType = JSON.parse(
           message.getData().toString(),
         );
 
         await firstValueFrom(
           this.httpService
-            .post('/api/email/hrbp-approval', data, {
+            .post('/api/email/manager-approval', data, {
               baseURL: this.configService.get('FRONT_END_URL'),
             })
             .pipe(
               catchError((error: AxiosError) => {
                 this.logger.log(
-                  '[memphis_new_request]: Failed to send approval email to hrbp',
+                  '[memphis_new_request]: Failed to send approval email to manager',
                 );
 
                 console.log(error?.response?.data);
 
                 message.ack();
 
-                throw Error('Failed to send approval email to hrbp');
+                throw Error('Failed to send approval email to manager');
               }),
             ),
         );

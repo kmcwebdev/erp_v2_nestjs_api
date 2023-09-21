@@ -40,7 +40,7 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
 
       this.consumer.on('message', async (message: Message) => {
         const data: { user: RequestUser; matrixIds: string[] } = JSON.parse(
-          message.getData().toString() || '{}',
+          message.getData().toString(),
         );
 
         const promises = data.matrixIds.map(async (matrixId) => {

@@ -7,7 +7,10 @@ import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { ReimbursementRequest } from 'src/finance/common/interface/getOneRequest.interface';
 import { UsersApiService } from 'src/users/services/users.api.service';
+import { ConfirmationEmailType } from 'src/finance/common/zod-schema/confirmation-email.schema';
+import { HrbpApprovalEmailType } from 'src/finance/common/zod-schema/hrbp-approval-email.schema';
 import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
+import { ManagerApprovalEmailType } from 'src/finance/common/zod-schema/manager-approval-email.schema';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -48,7 +51,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
       this.consumer.on('message', async (message: Message) => {
         const data: ReimbursementRequest = JSON.parse(
-          message.getData().toString() || '{}',
+          message.getData().toString(),
         );
 
         const newRequest = data;
@@ -144,7 +147,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
-          const confirmationEmailData = {
+          const confirmationEmailData: ConfirmationEmailType = {
             to: [newRequest.email],
             referenceNo: newRequest.reference_no,
             hrbpManagerName: hrbp?.full_name || 'No name set',
@@ -161,7 +164,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             confirmationEmailData,
           );
 
-          const hrbpApprovalEmailData = {
+          const hrbpApprovalEmailData: HrbpApprovalEmailType = {
             to: [newRequest.hrbp_approver_email],
             approverFullName: hrbp.full_name || 'HRBP',
             fullName: newRequest?.full_name || 'No name set',
@@ -310,6 +313,21 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 ])
                 .onConflict((oc) => oc.column('approver_verifier').doNothing())
                 .execute();
+
+              const managerApprovalEmailData: ManagerApprovalEmailType = {
+                to: [approverManager.email],
+                fullName: approverManager.full_name,
+                employeeId: newRequest.employee_id,
+                expenseType: newRequest.expense_type,
+                expenseDate: newRequest.created_at,
+                amount: newRequest.amount,
+                receiptsAttached: newRequest.attachment,
+              };
+
+              this.eventEmitter.emit(
+                'reimbursement-request-send-email-manager-approval',
+                managerApprovalEmailData,
+              );
             });
           }
         }
