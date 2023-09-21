@@ -5,10 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
-import {
-  ManagerApprovalEmailSchema,
-  ManagerApprovalEmailType,
-} from 'src/finance/common/zod-schema/manager-approval-email.schema';
+import { ManagerApprovalEmailType } from 'src/finance/common/zod-schema/manager-approval-email.schema';
 
 @Injectable()
 export class ReimbursementMemphisEmailManagerApprovalService
@@ -30,15 +27,6 @@ export class ReimbursementMemphisEmailManagerApprovalService
 
   @OnEvent('reimbursement-request-send-email-manager-approval')
   async triggerMemphisEvent(data: ManagerApprovalEmailType) {
-    const validate = await ManagerApprovalEmailSchema.safeParseAsync(data);
-
-    if (!validate.success) {
-      return this.eventEmitter.emit(
-        'reimbursement-request-send-email-manager-approval-error',
-        '[memphis-manager-approval-email]: Schema error in request manager approval email',
-      );
-    }
-
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });

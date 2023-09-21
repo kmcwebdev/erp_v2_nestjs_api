@@ -174,7 +174,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 .then((u) => {
                   if (u) {
                     return {
-                      userId: u.userId,
                       email: u.email,
                       temporaryPassword: '',
                     };
@@ -255,7 +254,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 )
                 .select([
                   'finance_reimbursement_approvers.approver_id',
-                  'users.user_id',
                   'users.email',
                   'users.full_name',
                 ])
@@ -308,8 +306,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               );
 
               const managerApprovalEmailData: ManagerApprovalEmailType = {
-                to: [approverManager.email],
-                fullName: approverManager.full_name,
+                to: [propelauthUser.email],
+                approverFullName: propelauthUser.email,
+                fullName: newRequest.full_name,
                 employeeId: newRequest.employee_id,
                 expenseType: newRequest.expense_type,
                 expenseDate: newRequest.created_at,
@@ -317,13 +316,13 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 receiptsAttached: newRequest.attachment,
               };
 
-              const randomBytes = crypto.randomBytes(16);
-              const hexToken = randomBytes.toString('hex');
-
               this.eventEmitter.emit(
                 'reimbursement-request-send-email-manager-approval',
                 managerApprovalEmailData,
               );
+
+              const randomBytes = crypto.randomBytes(16);
+              const hexToken = randomBytes.toString('hex');
 
               const generatedLink = `${this.configService.get(
                 'FRONT_END_URL',

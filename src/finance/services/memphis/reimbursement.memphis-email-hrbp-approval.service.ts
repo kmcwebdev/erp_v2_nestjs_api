@@ -5,10 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
-import {
-  HrbpApprovalEmailSchema,
-  HrbpApprovalEmailType,
-} from 'src/finance/common/zod-schema/hrbp-approval-email.schema';
+import { HrbpApprovalEmailType } from 'src/finance/common/zod-schema/hrbp-approval-email.schema';
 
 @Injectable()
 export class ReimbursementMemphisEmailHrbpApprovalService
@@ -30,15 +27,6 @@ export class ReimbursementMemphisEmailHrbpApprovalService
 
   @OnEvent('reimbursement-request-send-email-hrbp-approval')
   async triggerMemphisEvent(data: HrbpApprovalEmailType) {
-    const validate = await HrbpApprovalEmailSchema.safeParseAsync(data);
-
-    if (!validate.success) {
-      return this.eventEmitter.emit(
-        'reimbursement-request-send-email-hrbp-approval-error',
-        '[memphis-hrbp-approval-email]: Schema error in request hrbp approval email',
-      );
-    }
-
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });

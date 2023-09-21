@@ -77,7 +77,10 @@ export class ReimbursementApproveService {
 
         const nextReimbursementRequestApprovalApprover = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
-          .select(['finance_reimbursement_approval_matrix.approver_id'])
+          .select([
+            'finance_reimbursement_approval_matrix.approver_id',
+            'finance_reimbursement_approval_matrix.is_hrbp',
+          ])
           .where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             '=',
@@ -124,31 +127,15 @@ export class ReimbursementApproveService {
 
         // TODO: Check this please
         if (nextReimbursementRequestApprovalApprover) {
-          console.log(nextReimbursementRequestApprovalApprover);
-          if (reimbursementRequestApprovalApprover.is_hrbp) {
+          if (nextReimbursementRequestApprovalApprover.is_hrbp) {
             const hrbp = await this.pgsql
               .selectFrom('users')
-              .innerJoin(
-                'finance_reimbursement_approvers',
-                'finance_reimbursement_approvers.signatory_id',
-                'users.user_id',
-              )
-              .select([
-                'finance_reimbursement_approvers.approver_id',
-                'users.user_id',
-                'users.email',
-                'users.full_name',
-              ])
-              .where(
-                'finance_reimbursement_approvers.table_reference',
-                '=',
-                'users',
-              )
+              .select(['users.email', 'users.full_name'])
               .where('users.email', '=', reimbursement.hrbp_approver_email)
               .executeTakeFirst();
 
             const hrbpApprovalEmailData: HrbpApprovalEmailType = {
-              to: [reimbursement.hrbp_approver_email],
+              to: [hrbp.email],
               approverFullName: hrbp.full_name || 'HRBP',
               fullName: reimbursement?.full_name || 'No name set',
               employeeId: reimbursement?.employee_id || 'No employee id set',
