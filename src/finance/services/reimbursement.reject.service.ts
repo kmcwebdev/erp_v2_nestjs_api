@@ -12,6 +12,54 @@ export class ReimbursementRejectService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async reject(user: RequestUser, data: RejectReimbursementRequestType) {
+    const finance = user.user_assigned_role === 'finance';
+
+    if (finance) {
+      // TODO: If the view is finance dashboard the UI is still passing
+      // the approval_matrix_id property along with the reimbursement_request_id
+      const reimbursement_request_id_placeholder = data.approval_matrix_id;
+
+      const rejectByReimbursementRequestId = await this.pgsql
+        .transaction()
+        .execute(async (trx) => {
+          const reimbursementRequest = await trx
+            .updateTable('finance_reimbursement_requests')
+            .set({
+              request_status_id: REJECTED_REQUEST,
+              hrbp_request_status_id: REJECTED_REQUEST,
+              finance_request_status_id: REJECTED_REQUEST,
+            })
+            .returning([
+              'finance_reimbursement_requests.reimbursement_request_id',
+            ])
+            .where(
+              'finance_reimbursement_requests.reimbursement_request_id',
+              '=',
+              reimbursement_request_id_placeholder,
+            )
+            .executeTakeFirst();
+
+          await trx
+            .insertInto('finance_reimbursement_approval_audit_logs')
+            .values({
+              reimbursement_request_id:
+                reimbursementRequest.reimbursement_request_id,
+              user_id: user.original_user_id,
+              description: `[REJECTED]: ${data.rejection_reason}`,
+            })
+            .execute();
+
+          return reimbursementRequest;
+        });
+
+      return {
+        reimbursement_request_id:
+          rejectByReimbursementRequestId.reimbursement_request_id,
+        finance_request_status: 'Rejected',
+        rejection_reason: data.rejection_reason,
+      };
+    }
+
     const rejectReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
@@ -53,6 +101,8 @@ export class ReimbursementRejectService {
           .updateTable('finance_reimbursement_requests')
           .set({
             request_status_id: REJECTED_REQUEST,
+            hrbp_request_status_id: REJECTED_REQUEST,
+            finance_request_status_id: REJECTED_REQUEST,
           })
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',

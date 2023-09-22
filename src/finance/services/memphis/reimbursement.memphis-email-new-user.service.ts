@@ -2,11 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import {
-  NewUserEmailSchema,
-  NewUserEmailType,
-} from 'src/finance/common/zod-schema/new-user-email.schema';
+import { OnEvent } from '@nestjs/event-emitter';
+import { NewUserEmailType } from 'src/finance/common/zod-schema/new-user-email.schema';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 
@@ -23,20 +20,10 @@ export class ReimbursementMemphisEmailNewUserService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
     private readonly httpService: HttpService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @OnEvent('reimbursement-request-send-email-new-user')
   async triggerMemphisEvent(data: NewUserEmailType) {
-    const validate = await NewUserEmailSchema.safeParseAsync(data);
-
-    if (!validate.success) {
-      return this.eventEmitter.emit(
-        'reimbursement-request-send-email-new-user-error',
-        '[memphis-email-new-user]: Schema error in new user email',
-      );
-    }
-
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });

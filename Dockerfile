@@ -1,72 +1,54 @@
-# Dockerfile
+# Base image with shared setup
+FROM node:18-alpine as base
+
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat python3 make g++
+ENV PYTHON /usr/bin/python3
+
+# Create a non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 #
 # 🧑‍💻 Development
 #
-FROM node:18-alpine as dev
-# add the missing shared libraries from alpine base image
-RUN apk add --no-cache libc6-compat
-# Create app folder
-WORKDIR /app
-
-# Set to dev environment
+FROM base as dev
 ENV NODE_ENV dev
-
 ARG DATABASE_URL
-
-# Install pnpm
-RUN npm install -g pnpm@8.7.5
 
 # Copy source code into app folder
 COPY . .
-
 # Install dependencies
-RUN pnpm install --frozen-lockfile
-
-RUN pnpm run kysely-codegen
+RUN npm ci
+RUN npm run kysely-codegen
 
 #
 # 🏡 Production Build
 #
-FROM node:18-alpine as build
-
-WORKDIR /app
-RUN apk add --no-cache libc6-compat
-
-# Set to production environment
+FROM base as build
 ENV NODE_ENV production
-
-# Set the database url (for kysely-codegen)
 ARG DATABASE_URL
-
-# Install pnpm
-RUN npm install -g pnpm@8.7.5
 
 # Copy only the necessary files
 COPY --from=dev /app/node_modules ./node_modules
 COPY . .
-
-# Generate the production build. The build script runs "nest build" to compile the application.
-RUN pnpm build
-
-# Install only the production dependencies and clean cache to optimize image size.
-RUN pnpm install --prod
+# Corrected build script command
+RUN npm run build
+# Prune development dependencies to leave only production ones
+RUN npm prune --production
 
 #
 # 🚀 Production Server
 #
-FROM node:18-alpine as prod
-
-WORKDIR /app
-RUN apk add --no-cache libc6-compat
-
-# Set to production environment
+FROM base as prod
 ENV NODE_ENV production
+
+# Switch to the non-root user
+USER appuser
 
 # Copy only the necessary files
 COPY --from=build /app/dist dist
 COPY --from=build /app/node_modules node_modules
 
 EXPOSE 4000
-
 CMD ["node", "dist/main.js"]

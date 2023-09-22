@@ -6,6 +6,9 @@ const GetAllApprovalReimbursementRequestSchema = z
   .object({
     text_search: z.string().nonempty(),
     expense_type_ids: z.string().nonempty(),
+    request_status_ids: z.string().nonempty(),
+    from: z.string().datetime(),
+    to: z.string().datetime(),
   })
   .partial();
 

@@ -28,6 +28,6 @@ export class ReimbursementAuditlogService {
       throw new HttpException('Request id not found', HttpStatus.NOT_FOUND);
     }
 
-    return auditlogs.rows[0];
+    return auditlogs.rows;
   }
 }

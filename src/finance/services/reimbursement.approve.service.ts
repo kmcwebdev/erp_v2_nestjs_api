@@ -27,7 +27,7 @@ export class ReimbursementApproveService {
       });
 
       return {
-        message: 'Request approval queue started.',
+        message: 'Request approval queue started',
       };
     }
 
@@ -77,7 +77,10 @@ export class ReimbursementApproveService {
 
         const nextReimbursementRequestApprovalApprover = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
-          .select(['finance_reimbursement_approval_matrix.approver_id'])
+          .select([
+            'finance_reimbursement_approval_matrix.approver_id',
+            'finance_reimbursement_approval_matrix.is_hrbp',
+          ])
           .where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             '=',
@@ -91,6 +94,20 @@ export class ReimbursementApproveService {
           .orderBy('finance_reimbursement_approval_matrix.approver_order')
           .limit(1)
           .executeTakeFirst();
+
+        if (!reimbursementRequestApprovalApprover.is_hrbp) {
+          await this.pgsql
+            .updateTable('finance_reimbursement_requests')
+            .set({
+              request_status_id: APPROVED_REQUEST,
+            })
+            .where(
+              'finance_reimbursement_requests.reimbursement_request_id',
+              '=',
+              reimbursementRequestApprovalApprover.reimbursement_request_id,
+            )
+            .execute();
+        }
 
         if (reimbursementRequestApprovalApprover.is_hrbp) {
           await sql`
@@ -112,7 +129,8 @@ export class ReimbursementApproveService {
                             DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '9 days' + INTERVAL '1 month'
                       END
                   END,
-                  hrbp_request_status_id = ${APPROVED_REQUEST}
+                  hrbp_request_status_id = ${APPROVED_REQUEST},
+                  date_approve = CURRENT_TIMESTAMP
               WHERE reimbursement_request_id = ${reimbursementRequestApprovalApprover.reimbursement_request_id}
             `.execute(this.pgsql);
         }
@@ -122,33 +140,17 @@ export class ReimbursementApproveService {
             reimbursementRequestApprovalApprover.reimbursement_request_id,
         });
 
-        // TODO: Check this please
+        // TODO: Check this please (Valid for unscheduled use only)
         if (nextReimbursementRequestApprovalApprover) {
-          console.log(nextReimbursementRequestApprovalApprover);
-          if (reimbursementRequestApprovalApprover.is_hrbp) {
+          if (nextReimbursementRequestApprovalApprover.is_hrbp) {
             const hrbp = await this.pgsql
-            .selectFrom('users')
-            .innerJoin(
-              'finance_reimbursement_approvers',
-              'finance_reimbursement_approvers.signatory_id',
-              'users.user_id',
-            )
-            .select([
-              'finance_reimbursement_approvers.approver_id',
-              'users.user_id',
-              'users.email',
-              'users.full_name',
-            ])
-            .where(
-              'finance_reimbursement_approvers.table_reference',
-              '=',
-              'users',
-            )
-            .where('users.email', '=', reimbursement.hrbp_approver_email)
-            .executeTakeFirst();
+              .selectFrom('users')
+              .select(['users.email', 'users.full_name'])
+              .where('users.email', '=', reimbursement.hrbp_approver_email)
+              .executeTakeFirst();
 
             const hrbpApprovalEmailData: HrbpApprovalEmailType = {
-              to: [reimbursement.hrbp_approver_email],
+              to: [hrbp.email],
               approverFullName: hrbp.full_name || 'HRBP',
               fullName: reimbursement?.full_name || 'No name set',
               employeeId: reimbursement?.employee_id || 'No employee id set',
@@ -162,8 +164,6 @@ export class ReimbursementApproveService {
               'reimbursement-request-send-email-hrbp-approval',
               hrbpApprovalEmailData,
             );
-
-            this.logger.log('Sending email to next approver');
           }
         }
 

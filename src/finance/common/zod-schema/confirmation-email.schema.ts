@@ -3,8 +3,9 @@ import { z } from 'zod';
 // TODO: Add description to zod types
 export const ConfirmationEmailSchema = z.object({
   to: z.array(z.string().email()),
+  requestType: z.enum(['scheduled', 'unscheduled']),
   referenceNo: z.string().nonempty(),
-  hrbpManagerName: z.string().nonempty(),
+  approverName: z.string().nonempty(),
   fullName: z.string().nonempty(),
   employeeId: z.string().nonempty(),
   expenseType: z.string().nonempty(),

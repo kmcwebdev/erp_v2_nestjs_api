@@ -20,6 +20,7 @@ import { ReimbursementOhHoldService } from './services/reimbursement.onhold.serv
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
 import { ReimbursementRejectService } from './services/reimbursement.reject.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
+import { ReimbursementStreamFileService } from './services/reimbursement.stream-file.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
 import { ReimbursementMemphisNewRequestService } from './services/memphis/reimbursement.memphis.new-request.service';
 import { ReimbursementMemphisBulkApprovalService } from './services/memphis/reimbursement.memphis-bulk-approval.service';
@@ -55,6 +56,7 @@ import { ReimbursementMemphisEmailManagerApprovalService } from './services/memp
     ReimbursementCancelService,
     ReimbursementRejectService,
     ReimbursementAuditlogService,
+    ReimbursementStreamFileService,
     ReimbursementCreateAttachmentService,
     ReimbursementMemphisNewRequestService,
     ReimbursementMemphisEmailNewUserService,
