@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { FinanceReimbursementRequestReportType } from '../common/dto/finance-reimbursement-request-report.dto';
 import { PROCESSING_REQUEST } from '../common/constant';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
+import { FinanceReimbursementRequestReportType } from '../common/dto/finance-reimbursement-request-report.dto';
 
 @Injectable()
 export class ReimbursementStreamFileService {
@@ -11,14 +11,6 @@ export class ReimbursementStreamFileService {
 
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
-  // Date approve by HRBP
-  // Reimbursement Type
-  // Reference No.
-  // Client Name
-  // Employee Name
-  // Employee ID
-  // Amount
-  // Remarks Description
   async financeReport(
     user: RequestUser,
     data: FinanceReimbursementRequestReportType,
@@ -40,7 +32,7 @@ export class ReimbursementStreamFileService {
           )
           .select([
             'finance_reimbursement_requests.reimbursement_request_id',
-            'finance_reimbursement_requests.created_at',
+            'finance_reimbursement_requests.date_approve',
             'finance_reimbursement_request_types.request_type',
             'finance_reimbursement_requests.reference_no',
             'users.client_name',

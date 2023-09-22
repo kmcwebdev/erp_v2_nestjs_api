@@ -78,12 +78,6 @@ export class ReimbursementForApprovalService {
           'finance_reimbursement_requests.created_at',
         ]);
 
-      query = query.where(
-        'finance_reimbursement_requests.hrbp_request_status_id',
-        '=',
-        APPROVED_REQUEST,
-      );
-
       if (EXCLUDED_IN_LIST.length) {
         query = query.where(
           'finance_reimbursement_requests.request_status_id',
@@ -91,6 +85,18 @@ export class ReimbursementForApprovalService {
           EXCLUDED_IN_LIST,
         );
       }
+
+      query = query.where(
+        'finance_reimbursement_requests.hrbp_request_status_id',
+        '=',
+        APPROVED_REQUEST,
+      );
+
+      query = query.where(
+        'finance_reimbursement_requests.finance_request_status_id',
+        '!=',
+        PROCESSING_REQUEST,
+      );
 
       if (filter?.expense_type_ids) {
         const expenseTypeIds = filter.expense_type_ids

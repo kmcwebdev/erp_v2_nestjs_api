@@ -22,7 +22,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "kysely-codegen": "kysely-codegen"
+    "kysely-codegen": "kysely-codegen",
+    "docker:build:push": "teller run docker-compose build && docker tag erp-v2-nestjs-api:latest registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest && docker push registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest"
   },
   "dependencies": {
     "@highlight-run/nest": "^3.2.0",

@@ -129,7 +129,8 @@ export class ReimbursementApproveService {
                             DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '9 days' + INTERVAL '1 month'
                       END
                   END,
-                  hrbp_request_status_id = ${APPROVED_REQUEST}
+                  hrbp_request_status_id = ${APPROVED_REQUEST},
+                  date_approve = CURRENT_TIMESTAMP
               WHERE reimbursement_request_id = ${reimbursementRequestApprovalApprover.reimbursement_request_id}
             `.execute(this.pgsql);
         }
