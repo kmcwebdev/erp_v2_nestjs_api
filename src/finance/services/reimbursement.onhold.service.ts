@@ -18,7 +18,7 @@ export class ReimbursementOhHoldService {
         const reimbursementRequest = await trx
           .updateTable('finance_reimbursement_requests')
           .set({
-            request_status_id: ONHOLD_REQUEST,
+            finance_request_status_id: ONHOLD_REQUEST,
           })
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
@@ -47,7 +47,7 @@ export class ReimbursementOhHoldService {
         return {
           reimbursement_request_id:
             reimbursementRequest.reimbursement_request_id,
-          request_status: 'On-hold',
+          finance_request_status: 'On-hold',
           onhold_reason: data.onhold_reason,
         };
       });

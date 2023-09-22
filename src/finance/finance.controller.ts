@@ -22,6 +22,7 @@ import { ExpenseTypeDto } from 'src/finance/common/dto/expense-type.dto';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { Readable } from 'stream';
 import { jsonToCsv } from 'src/common/utils/jsonToCsv.utils';
+import { GetAllApprovalReimbursementRequestDTO } from './common/dto/get-all-for-approval-reimbursement-request.dto';
 import { GetAllReimbursementRequestDTO } from './common/dto/get-all-reimbursement-request.dto';
 import { GetOneReimbursementRequestDTO } from './common/dto/get-one-reimbursement-request.dto';
 import { CancelReimbursementRequestDTO } from './common/dto/cancel-reimbursement-request.dto';
@@ -30,8 +31,9 @@ import { ReimbursementRequestApprovalDTO } from './common/dto/approve-reimbursem
 import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/update-reimbursement-request.dto';
 import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/create-reimbursement-request.dto';
 import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/delete-reimbursement-request.dto';
-import { OnHoldReimbursementRequestDTO } from './common/dto/onhold-reimbursement-request.dto';
 import { GetAuditlogReimbursementRequestDTO } from './common/dto/get-auditlog-reimbursement-request.dto';
+import { FinanceReimbursementRequestReportDTO } from './common/dto/finance-reimbursement-request-report.dto';
+import { OnHoldReimbursementRequestDTO } from './common/dto/onhold-reimbursement-request.dto';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
 import { ReimbursementExpenseTypesService } from './services/reimbursement.expense-types.service';
@@ -45,7 +47,7 @@ import { ReimbursementCreateAttachmentService } from './services/reimbursement.c
 import { ReimbursementApproveService } from './services/reimbursement.approve.service';
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
-import { GetAllApprovalReimbursementRequestDTO } from './common/dto/get-all-for-approval-reimbursement-request.dto';
+import { ReimbursementStreamFileService } from './services/reimbursement.stream-file.service';
 
 @Controller('finance')
 export class FinanceController {
@@ -63,6 +65,7 @@ export class FinanceController {
     private readonly reimbursementCancelService: ReimbursementCancelService,
     private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
     private readonly reimbursementAuditlogService: ReimbursementAuditlogService,
+    private readonly reimbursementStreamFileService: ReimbursementStreamFileService,
   ) {}
 
   @Get('/reimbursements/request-types')
@@ -187,7 +190,7 @@ export class FinanceController {
   @Get('/reimbursements/requests/reports/hrbp')
   getHrbpReport(@Res({ passthrough: true }) res: Response): StreamableFile {
     // Your provided JSON data
-    const data = { name: 'hrbp', age: 14 };
+    const data = [{ name: 'hrbp', age: 14 }];
 
     // Convert JSON to CSV
     const csvString = jsonToCsv(data);
@@ -208,11 +211,18 @@ export class FinanceController {
   }
 
   @Get('/reimbursements/requests/reports/finance')
-  getFinanceReport(@Res({ passthrough: true }) res: Response): StreamableFile {
-    // Your provided JSON data
-    const data = { name: 'finance', age: 14 };
+  async getFinanceReport(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: FinanceReimbursementRequestReportDTO,
+  ) {
+    const user = req['user'] as RequestUser;
 
-    // Convert JSON to CSV
+    const data = await this.reimbursementStreamFileService.financeReport(
+      user,
+      query,
+    );
+
     const csvString = jsonToCsv(data);
 
     // Create a Readable stream and push the CSV string to it
