@@ -54,6 +54,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           message.getData().toString(),
         );
 
+        // TODO: Convert query to transaction mode
+
         const newRequest = data;
 
         await this.pgsql
@@ -132,8 +134,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
           const confirmationEmailData: ConfirmationEmailType = {
             to: [newRequest.email],
+            requestType: 'scheduled',
             referenceNo: newRequest.reference_no,
-            hrbpManagerName: hrbp?.full_name || 'No name set',
+            approverName: hrbp?.full_name || 'No name set',
             fullName: newRequest?.full_name || 'No name set',
             employeeId: newRequest?.employee_id || 'No emp id set',
             expenseType: newRequest.expense_type,
@@ -167,155 +170,162 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
           if (newRequest?.dynamic_approvers) {
             const approvers = newRequest.dynamic_approvers.split(',');
-
             approvers.forEach(async (email) => {
-              let propelauthUser =
-                await this.usersApiService.fetchUserInPropelauthByEmail(email);
-
-              if (!propelauthUser) {
-                await this.usersApiService.createUserInPropelauth(
-                  email,
-                  'External Reimbursement Approver Manager',
-                );
-              }
-
-              let approverManager = await this.pgsql
-                .selectFrom('users')
-                .innerJoin(
-                  'finance_reimbursement_approvers',
-                  'finance_reimbursement_approvers.signatory_id',
-                  'users.user_id',
-                )
-                .select([
-                  'finance_reimbursement_approvers.approver_id',
-                  'users.user_id',
-                  'users.email',
-                  'users.full_name',
-                ])
-                .where(
-                  'finance_reimbursement_approvers.table_reference',
-                  '=',
-                  'users',
-                )
-                .where('users.email', '=', email)
-                .executeTakeFirst();
-
-              if (!approverManager) {
-                const dbUser =
-                  await this.usersApiService.createOrGetUserInDatabase({
+              await this.pgsql.transaction().execute(async (trx) => {
+                const propelauthUser =
+                  await this.usersApiService.fetchUserInPropelauthByEmail(
                     email,
-                  });
+                  );
 
-                const newApprover = await this.pgsql
-                  .insertInto('finance_reimbursement_approvers')
-                  .values({
-                    signatory_id: dbUser.user_id,
-                    table_reference: 'users',
-                    is_group_of_approvers: false,
-                  })
-                  .returning(['finance_reimbursement_approvers.approver_id'])
+                if (!propelauthUser) {
+                  await this.usersApiService.createUserInPropelauth(
+                    email,
+                    'External Reimbursement Approver Manager',
+                  );
+                }
+
+                let approverManager = await trx
+                  .selectFrom('users')
+                  .innerJoin(
+                    'finance_reimbursement_approvers',
+                    'finance_reimbursement_approvers.signatory_id',
+                    'users.user_id',
+                  )
+                  .select([
+                    'finance_reimbursement_approvers.approver_id',
+                    'users.user_id',
+                    'users.email',
+                    'users.full_name',
+                  ])
+                  .where(
+                    'finance_reimbursement_approvers.table_reference',
+                    '=',
+                    'users',
+                  )
+                  .where('users.email', '=', email)
                   .executeTakeFirst();
 
-                approverManager = {
-                  approver_id: newApprover.approver_id,
-                  user_id: dbUser.user_id,
-                  email: dbUser.email,
-                  full_name: dbUser.full_name,
+                if (!approverManager) {
+                  const dbUser =
+                    await this.usersApiService.createOrGetUserInDatabase({
+                      email,
+                    });
+
+                  const newApprover = await trx
+                    .insertInto('finance_reimbursement_approvers')
+                    .values({
+                      signatory_id: dbUser.user_id,
+                      table_reference: 'users',
+                      is_group_of_approvers: false,
+                    })
+                    .returning(['finance_reimbursement_approvers.approver_id'])
+                    .executeTakeFirst();
+
+                  approverManager = {
+                    approver_id: newApprover.approver_id,
+                    user_id: dbUser.user_id,
+                    email: dbUser.email,
+                    full_name: dbUser.full_name,
+                  };
+                }
+
+                const hrbp = await trx
+                  .selectFrom('users')
+                  .innerJoin(
+                    'finance_reimbursement_approvers',
+                    'finance_reimbursement_approvers.signatory_id',
+                    'users.user_id',
+                  )
+                  .select([
+                    'finance_reimbursement_approvers.approver_id',
+                    'users.email',
+                    'users.full_name',
+                  ])
+                  .where(
+                    'finance_reimbursement_approvers.table_reference',
+                    '=',
+                    'users',
+                  )
+                  .where('users.email', '=', newRequest.hrbp_approver_email)
+                  .executeTakeFirst();
+
+                await trx
+                  .insertInto('finance_reimbursement_approval_matrix')
+                  .values([
+                    {
+                      reimbursement_request_id:
+                        newRequest.reimbursement_request_id,
+                      approver_id: approverManager.approver_id,
+                      approver_order: 1,
+                      is_hrbp: false,
+                      approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
+                    },
+                    {
+                      reimbursement_request_id:
+                        newRequest.reimbursement_request_id,
+                      approver_id: hrbp.approver_id,
+                      approver_order: 2,
+                      is_hrbp: true,
+                      approver_verifier: `${newRequest.reimbursement_request_id}<->2`,
+                    },
+                  ])
+                  .onConflict((oc) =>
+                    oc.column('approver_verifier').doNothing(),
+                  )
+                  .execute();
+
+                const confirmationEmailData: ConfirmationEmailType = {
+                  to: [newRequest.email],
+                  requestType: 'unscheduled',
+                  referenceNo: newRequest.reference_no,
+                  approverName: hrbp?.full_name || 'No name set',
+                  fullName: newRequest?.full_name || 'No name set',
+                  employeeId: newRequest?.employee_id || 'No emp id set',
+                  expenseType: newRequest.expense_type,
+                  expenseDate: newRequest.created_at,
+                  amount: newRequest.amount,
+                  receiptsAttached: newRequest.attachment,
                 };
-              }
 
-              const hrbp = await this.pgsql
-                .selectFrom('users')
-                .innerJoin(
-                  'finance_reimbursement_approvers',
-                  'finance_reimbursement_approvers.signatory_id',
-                  'users.user_id',
-                )
-                .select([
-                  'finance_reimbursement_approvers.approver_id',
-                  'users.email',
-                  'users.full_name',
-                ])
-                .where(
-                  'finance_reimbursement_approvers.table_reference',
-                  '=',
-                  'users',
-                )
-                .where('users.email', '=', newRequest.hrbp_approver_email)
-                .executeTakeFirst();
+                this.eventEmitter.emit(
+                  'reimbursement-request-send-email-confirmation',
+                  confirmationEmailData,
+                );
 
-              await this.pgsql
-                .insertInto('finance_reimbursement_approval_matrix')
-                .values([
-                  {
+                const managerApprovalEmailData: ManagerApprovalEmailType = {
+                  to: [email],
+                  approverFullName: email,
+                  fullName: newRequest.full_name,
+                  employeeId: newRequest.employee_id,
+                  expenseType: newRequest.expense_type,
+                  expenseDate: newRequest.created_at,
+                  amount: newRequest.amount,
+                  receiptsAttached: newRequest.attachment,
+                };
+
+                this.eventEmitter.emit(
+                  'reimbursement-request-send-email-manager-approval',
+                  managerApprovalEmailData,
+                );
+
+                const randomBytes = crypto.randomBytes(16);
+                const hexToken = randomBytes.toString('hex');
+
+                const generatedLink = `${this.configService.get(
+                  'FRONT_END_URL',
+                )}/sessionless-approval-link?token=${hexToken}`;
+
+                await trx
+                  .insertInto('finance_reimbursement_approval_links')
+                  .values({
                     reimbursement_request_id:
                       newRequest.reimbursement_request_id,
-                    approver_id: approverManager.approver_id,
-                    approver_order: 1,
-                    is_hrbp: false,
-                    approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
-                  },
-                  {
-                    reimbursement_request_id:
-                      newRequest.reimbursement_request_id,
-                    approver_id: hrbp.approver_id,
-                    approver_order: 2,
-                    is_hrbp: true,
-                    approver_verifier: `${newRequest.reimbursement_request_id}<->2`,
-                  },
-                ])
-                .onConflict((oc) => oc.column('approver_verifier').doNothing())
-                .execute();
-
-              const confirmationEmailData: ConfirmationEmailType = {
-                to: [newRequest.email],
-                referenceNo: newRequest.reference_no,
-                hrbpManagerName: hrbp?.full_name || 'No name set',
-                fullName: newRequest?.full_name || 'No name set',
-                employeeId: newRequest?.employee_id || 'No emp id set',
-                expenseType: newRequest.expense_type,
-                expenseDate: newRequest.created_at,
-                amount: newRequest.amount,
-                receiptsAttached: newRequest.attachment,
-              };
-
-              this.eventEmitter.emit(
-                'reimbursement-request-send-email-confirmation',
-                confirmationEmailData,
-              );
-
-              const managerApprovalEmailData: ManagerApprovalEmailType = {
-                to: [email],
-                approverFullName: email,
-                fullName: newRequest.full_name,
-                employeeId: newRequest.employee_id,
-                expenseType: newRequest.expense_type,
-                expenseDate: newRequest.created_at,
-                amount: newRequest.amount,
-                receiptsAttached: newRequest.attachment,
-              };
-
-              this.eventEmitter.emit(
-                'reimbursement-request-send-email-manager-approval',
-                managerApprovalEmailData,
-              );
-
-              const randomBytes = crypto.randomBytes(16);
-              const hexToken = randomBytes.toString('hex');
-
-              const generatedLink = `${this.configService.get(
-                'FRONT_END_URL',
-              )}/sessionless-approval-link?token=${hexToken}`;
-
-              await this.pgsql
-                .insertInto('finance_reimbursement_approval_links')
-                .values({
-                  reimbursement_request_id: newRequest.reimbursement_request_id,
-                  approval_link: generatedLink,
-                  token: hexToken,
-                  link_expired: false,
-                })
-                .execute();
+                    approval_link: generatedLink,
+                    token: hexToken,
+                    link_expired: false,
+                  })
+                  .execute();
+              });
             });
           }
         }

@@ -140,7 +140,7 @@ export class ReimbursementApproveService {
             reimbursementRequestApprovalApprover.reimbursement_request_id,
         });
 
-        // TODO: Check this please (Valid for unscheduled only)
+        // TODO: Check this please (Valid for unscheduled use only)
         if (nextReimbursementRequestApprovalApprover) {
           if (nextReimbursementRequestApprovalApprover.is_hrbp) {
             const hrbp = await this.pgsql
@@ -164,8 +164,6 @@ export class ReimbursementApproveService {
               'reimbursement-request-send-email-hrbp-approval',
               hrbpApprovalEmailData,
             );
-
-            this.logger.log('Sending email to next approver');
           }
         }
 
