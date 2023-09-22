@@ -29,8 +29,6 @@ export class UsersApiService {
   async createOrGetUserInDatabase(data: CreateUserType) {
     const { email, propelauth_user_id } = data;
 
-    console.log('users create: ' + JSON.stringify(data));
-
     const newUser = await this.pgsql
       .insertInto('users')
       .values({
@@ -126,9 +124,9 @@ export class UsersApiService {
     });
 
     this.eventEmitter.emit('reimbursement-request-send-email-new-user', {
-      to: [newPropelauthUser.email],
-      email: newPropelauthUser.email,
-      fullName: newPropelauthUser.email,
+      to: [email],
+      email: email,
+      fullName: email,
       password: temporaryPassword,
     });
 

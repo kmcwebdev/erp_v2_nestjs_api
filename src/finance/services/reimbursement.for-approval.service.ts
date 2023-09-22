@@ -91,11 +91,7 @@ export class ReimbursementForApprovalService {
     const hrbp = user.user_assigned_role === 'hrbp';
     const finance = user.user_assigned_role === 'finance';
 
-    const EXCLUDED_IN_LIST = [];
-
-    if (finance && !filter?.text_search) {
-      EXCLUDED_IN_LIST.push(APPROVED_REQUEST);
-    }
+    const EXCLUDED_IN_LIST = [CANCELLED_REQUEST, REJECTED_REQUEST];
 
     if (finance && !filter?.text_search) {
       EXCLUDED_IN_LIST.push(PROCESSING_REQUEST);
@@ -158,12 +154,15 @@ export class ReimbursementForApprovalService {
         'users.hrbp_approver_email',
         'users.payroll_account',
         'finance_reimbursement_requests.created_at',
-      ])
-      .where(
+      ]);
+
+    if (!finance) {
+      query = query.where(
         'finance_reimbursement_approval_matrix.approval_matrix_id',
         'in',
         forMyApprovalRequestIds,
       );
+    }
 
     if (EXCLUDED_IN_LIST.length) {
       query = query.where(
