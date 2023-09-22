@@ -156,14 +156,6 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_requests.created_at',
       ]);
 
-    if (!finance) {
-      query = query.where(
-        'finance_reimbursement_approval_matrix.approval_matrix_id',
-        'in',
-        forMyApprovalRequestIds,
-      );
-    }
-
     if (EXCLUDED_IN_LIST.length) {
       query = query.where(
         'finance_reimbursement_requests.request_status_id',
@@ -177,6 +169,14 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_requests.hrbp_request_status_id',
         '=',
         APPROVED_REQUEST,
+      );
+    }
+
+    if (!finance) {
+      query = query.where(
+        'finance_reimbursement_approval_matrix.approval_matrix_id',
+        'in',
+        forMyApprovalRequestIds,
       );
     }
 
@@ -194,10 +194,32 @@ export class ReimbursementForApprovalService {
       );
     }
 
+    if (filter?.request_status_ids) {
+      const requestStatusIds = filter.request_status_ids
+        .replace(/"/g, '')
+        .split(',');
+
+      // TODO: Do the check here if all items in array is a valid uuid
+
+      query = query.where(
+        'finance_reimbursement_requests.request_status_id',
+        'in',
+        requestStatusIds,
+      );
+    }
+
     if (filter?.text_search) {
       query = query.where(
         sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
          coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')) @@ websearch_to_tsquery(${filter.text_search})`,
+      );
+    }
+
+    if (filter?.from && filter?.to) {
+      const { from, to } = filter;
+
+      query = query.where(
+        sql`DATE(finance_reimbursement_requests.created_at) BETWEEN ${from} AND ${to}`,
       );
     }
 
