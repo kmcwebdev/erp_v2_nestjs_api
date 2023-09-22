@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { OnEvent } from '@nestjs/event-emitter';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
@@ -21,7 +21,6 @@ export class ReimbursementMemphisEmailManagerApprovalService
   constructor(
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
-    private readonly eventEmitter: EventEmitter2,
     private readonly httpService: HttpService,
   ) {}
 

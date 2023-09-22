@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { OnEvent } from '@nestjs/event-emitter';
 import { AxiosError } from 'axios';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
@@ -25,7 +25,6 @@ export class ReimbursementMemphisEmailConfirmationService
     private readonly configService: ConfigService,
     private readonly memphisService: MemphisService,
     private readonly httpService: HttpService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @OnEvent('reimbursement-request-send-email-confirmation')

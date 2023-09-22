@@ -27,7 +27,7 @@ export class ReimbursementApproveService {
       });
 
       return {
-        message: 'Request approval queue started.',
+        message: 'Request approval queue started',
       };
     }
 

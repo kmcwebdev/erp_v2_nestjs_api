@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  erp-v2-nestjs-api:
+    container_name: erp-v2-nestjs-api
+    image: erp-v2-nestjs-api:latest
+    platform: 'linux/amd64'
+    build:
+      context: .
+      args:
+        NODE_ENV: 'production'
+        DATABASE_URL: ${DATABASE_URL}
+
+    ports:
+      - 4000:4000

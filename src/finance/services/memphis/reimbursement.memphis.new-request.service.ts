@@ -169,34 +169,13 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             const approvers = newRequest.dynamic_approvers.split(',');
 
             approvers.forEach(async (email) => {
-              let propelauthUser = await this.usersApiService
-                .fetchUserInPropelauthByEmail(email)
-                .then((u) => {
-                  if (u) {
-                    return {
-                      email: u.email,
-                      temporaryPassword: '',
-                    };
-                  }
-
-                  return null;
-                });
+              let propelauthUser =
+                await this.usersApiService.fetchUserInPropelauthByEmail(email);
 
               if (!propelauthUser) {
-                propelauthUser =
-                  await this.usersApiService.createUserInPropelauth(
-                    email,
-                    'External Reimbursement Approver Manager',
-                  );
-
-                this.eventEmitter.emit(
-                  'reimbursement-request-send-email-new-user',
-                  {
-                    to: [propelauthUser.email],
-                    email: propelauthUser.email,
-                    fullName: propelauthUser.email,
-                    password: propelauthUser.temporaryPassword,
-                  },
+                await this.usersApiService.createUserInPropelauth(
+                  email,
+                  'External Reimbursement Approver Manager',
                 );
               }
 
@@ -218,13 +197,13 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   '=',
                   'users',
                 )
-                .where('users.email', '=', propelauthUser.email)
+                .where('users.email', '=', email)
                 .executeTakeFirst();
 
               if (!approverManager) {
                 const dbUser =
                   await this.usersApiService.createOrGetUserInDatabase({
-                    email: propelauthUser.email,
+                    email,
                   });
 
                 const newApprover = await this.pgsql
@@ -306,8 +285,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               );
 
               const managerApprovalEmailData: ManagerApprovalEmailType = {
-                to: [propelauthUser.email],
-                approverFullName: propelauthUser.email,
+                to: [email],
+                approverFullName: email,
                 fullName: newRequest.full_name,
                 employeeId: newRequest.employee_id,
                 expenseType: newRequest.expense_type,

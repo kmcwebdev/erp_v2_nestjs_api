@@ -6,11 +6,11 @@
   "private": true,
   "license": "UNLICENSED",
   "engines": {
-    "node": "18.17.1",
-    "npm": "9.6.7"
+    "node": ">=18.17.1",
+    "npm": ">=9.6.7"
   },
   "scripts": {
-    "build": "kysely-codegen && nest build",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

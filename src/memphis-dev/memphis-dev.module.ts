@@ -23,6 +23,21 @@ export class MemphisDevModule implements OnModuleInit {
         maxReconnect: 10,
         reconnectIntervalMs: 2000,
       });
+      this.logger.debug(
+        'MEMPHIS_HOST: ' + this.configService.get<string>('MEMPHIS_HOST'),
+      );
+      this.logger.debug(
+        'MEMPHIS_ACCOUNT_ID: ' +
+          this.configService.get<string>('MEMPHIS_ACCOUNT_ID'),
+      );
+      this.logger.debug(
+        'MEMPHIS_USERNAME: ' +
+          this.configService.get<string>('MEMPHIS_USERNAME'),
+      );
+      this.logger.debug(
+        'MEMPHIS_PASSWORD: ' +
+          this.configService.get<string>('MEMPHIS_PASSWORD'),
+      );
       this.logger.log('Connected to memphis.dev');
     } catch (error: unknown) {
       this.logger.error("Couldn't connect to Memphis");

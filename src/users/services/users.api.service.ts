@@ -8,6 +8,7 @@ import { AxiosError } from 'axios';
 import { propelauth } from 'src/auth/common/lib/propelauth';
 import { CreateUserType } from 'src/users/common/dto/create-user.dto';
 import { ERPHRV1User } from '../common/interface/erpHrV1User.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersApiService {
@@ -16,6 +17,7 @@ export class UsersApiService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly eventEmitter: EventEmitter2,
     @InjectKysely() private readonly pgsql: DB,
   ) {}
 
@@ -27,10 +29,13 @@ export class UsersApiService {
   async createOrGetUserInDatabase(data: CreateUserType) {
     const { email, propelauth_user_id } = data;
 
+    console.log('users create: ' + JSON.stringify(data));
+
     const newUser = await this.pgsql
       .insertInto('users')
       .values({
         employee_id: email,
+        full_name: email,
         propelauth_user_id,
         email,
         temporary_propelauth_user_id: false,
@@ -51,35 +56,43 @@ export class UsersApiService {
 
           const erpV1User = await this.fetchUserByEmailInERPHrV1(user.email);
 
-          const {
-            sr,
-            name,
-            firstName,
-            lastName,
-            clientId,
-            client,
-            hrbpEmail,
-            position,
-          } = erpV1User.data;
-
-          await trx
-            .updateTable('users')
-            .set({
-              employee_id: sr || 'Not set in erp hr',
-              full_name: name,
-              first_name: firstName,
-              last_name: lastName,
-              client_id: clientId,
-              client_name: client,
-              hrbp_approver_email:
-                hrbpEmail === 'people@kmc.solutions'
-                  ? 'christian.sulit@kmc.solutions'
-                  : hrbpEmail,
+          if (erpV1User.status !== 204) {
+            const {
+              sr,
+              name,
+              firstName,
+              lastName,
+              clientId,
+              client,
+              hrbpEmail,
               position,
-              updated_via_cron_erp_hr: true,
-            })
-            .where('users.user_id', '=', user.user_id)
-            .execute();
+            } = erpV1User.data;
+
+            const srExists = await trx
+              .selectFrom('users')
+              .select('user_id')
+              .where('users.employee_id', '=', sr)
+              .executeTakeFirst();
+
+            await trx
+              .updateTable('users')
+              .set({
+                employee_id: srExists ? null : sr,
+                full_name: name,
+                first_name: firstName,
+                last_name: lastName,
+                client_id: clientId,
+                client_name: client,
+                hrbp_approver_email:
+                  hrbpEmail === 'people@kmc.solutions'
+                    ? 'christian.sulit@kmc.solutions'
+                    : hrbpEmail,
+                position,
+                updated_via_cron_erp_hr: true,
+              })
+              .where('users.user_id', '=', user.user_id)
+              .execute();
+          }
 
           return user;
         });
@@ -97,7 +110,7 @@ export class UsersApiService {
   async createUserInPropelauth(email: string, role?: string) {
     if (!role) role = 'Member';
 
-    const temporaryPassword = String(new Date());
+    const temporaryPassword = String(Date.now());
 
     const isKmcSolutions = email.includes('@kmc.solutions');
 
@@ -109,7 +122,14 @@ export class UsersApiService {
       email: email,
       password: temporaryPassword,
       askUserToUpdatePasswordOnLogin: true,
-      sendEmailToConfirmEmailAddress: true,
+      sendEmailToConfirmEmailAddress: false,
+    });
+
+    this.eventEmitter.emit('reimbursement-request-send-email-new-user', {
+      to: [newPropelauthUser.email],
+      email: newPropelauthUser.email,
+      fullName: newPropelauthUser.email,
+      password: temporaryPassword,
     });
 
     await propelauth.addUserToOrg({
@@ -118,7 +138,7 @@ export class UsersApiService {
       role,
     });
 
-    return Object.assign(newPropelauthUser, { temporaryPassword });
+    return newPropelauthUser;
   }
 
   async fetchUserByEmailInERPHrV1(email: string) {

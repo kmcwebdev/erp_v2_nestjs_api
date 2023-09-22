@@ -27,3 +27,6 @@ To generate types for sql queries (fyi: not an orm)
 ```
 teller run pnpm run kysely-codegen
 ```
+```
+docker tag erp-v2-nestjs-api:latest registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest && docker push registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest
+```
