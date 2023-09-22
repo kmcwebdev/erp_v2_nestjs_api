@@ -19,6 +19,8 @@ export class ReimbursementCancelService {
           .updateTable('finance_reimbursement_requests')
           .set({
             request_status_id: CANCELLED_REQUEST,
+            hrbp_request_status_id: CANCELLED_REQUEST,
+            finance_request_status_id: CANCELLED_REQUEST,
           })
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',

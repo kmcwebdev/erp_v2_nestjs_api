@@ -164,19 +164,19 @@ export class ReimbursementForApprovalService {
       );
     }
 
-    if (finance) {
-      query = query.where(
-        'finance_reimbursement_requests.hrbp_request_status_id',
-        '=',
-        APPROVED_REQUEST,
-      );
-    }
-
     if (!finance) {
       query = query.where(
         'finance_reimbursement_approval_matrix.approval_matrix_id',
         'in',
         forMyApprovalRequestIds,
+      );
+    }
+
+    if (finance) {
+      query = query.where(
+        'finance_reimbursement_requests.hrbp_request_status_id',
+        '=',
+        APPROVED_REQUEST,
       );
     }
 
