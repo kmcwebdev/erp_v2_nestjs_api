@@ -41,6 +41,7 @@ import { ReimbursementGetAllService } from './services/reimbursement.get-all.ser
 import { ReimbursementGetOneService } from './services/reimbursement.get-one.service';
 import { ReimbursementCreateService } from './services/reimbursement.create.service';
 import { ReimbursementForApprovalService } from './services/reimbursement.for-approval.service';
+import { ReimbursementAnalyticsService } from './services/reimbursement.analytics.service';
 import { ReimbursementRejectService } from './services/reimbursement.reject.service';
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
@@ -59,6 +60,7 @@ export class FinanceController {
     private readonly reimbursementGetOneService: ReimbursementGetOneService,
     private readonly reimbursementCreateService: ReimbursementCreateService,
     private readonly reimbursementForApprovalService: ReimbursementForApprovalService,
+    private readonly reimbursementAnalyticsService: ReimbursementAnalyticsService,
     private readonly reimbursementApproveService: ReimbursementApproveService,
     private readonly reimbursementRejectService: ReimbursementRejectService,
     private readonly reimbursementOhHoldService: ReimbursementOhHoldService,
@@ -247,6 +249,34 @@ export class FinanceController {
     return this.financeReimbursementApiService.getReimbursementRequestsAnalytics(
       user,
     );
+  }
+
+  @Get('/reimbursements/requests/dashboard/analytics/members')
+  ReimbursementAnalyticsServiceForMembers(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementAnalyticsService.member(user);
+  }
+
+  @Get('/reimbursements/requests/dashboard/analytics/hrbp')
+  ReimbursementAnalyticsServiceForHrbp(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementAnalyticsService.member(user);
+  }
+
+  @Get('/reimbursements/requests/dashboard/analytics/managers')
+  ReimbursementAnalyticsServiceForManagers(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementAnalyticsService.member(user);
+  }
+
+  @Get('/reimbursements/requests/dashboard/analytics/finance')
+  ReimbursementAnalyticsServiceForFinance(@Req() req: Request) {
+    const user = req['user'] as RequestUser;
+
+    return this.reimbursementAnalyticsService.member(user);
   }
 
   // TODO: Be careful this query can return the reimbursement request of other users unless it's an approver or admin

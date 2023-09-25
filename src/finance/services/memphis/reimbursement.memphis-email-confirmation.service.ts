@@ -48,11 +48,6 @@ export class ReimbursementMemphisEmailConfirmationService
         consumerGroup: 'erp.reimbursement.email-confirmation.consumer-group',
       });
 
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.email-confirmation',
-        producerName: 'erp.reimbursement.email-confirmation.producer-name',
-      });
-
       this.consumer.on('message', async (message: Message) => {
         const data: ConfirmationEmailType = JSON.parse(
           message.getData().toString(),
@@ -77,6 +72,11 @@ export class ReimbursementMemphisEmailConfirmationService
         );
 
         message.ack();
+      });
+
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.email-confirmation',
+        producerName: 'erp.reimbursement.email-confirmation.producer-name',
       });
 
       this.logger.log(

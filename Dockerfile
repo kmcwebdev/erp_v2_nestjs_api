@@ -1,5 +1,5 @@
 # Base image with shared setup
-FROM node:18-alpine as base
+FROM node:18.18.0-alpine3.17 as base
 
 WORKDIR /app
 
@@ -14,28 +14,31 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 #
 FROM base as dev
 ENV NODE_ENV dev
-ARG DATABASE_URL
 
 # Copy source code into app folder
 COPY . .
+
+RUN npm install --location=global pnpm@latest
+
 # Install dependencies
-RUN npm ci
-RUN npm run kysely-codegen
+RUN pnpm install --frozen-lockfile
 
 #
 # 🏡 Production Build
 #
 FROM base as build
 ENV NODE_ENV production
-ARG DATABASE_URL
 
 # Copy only the necessary files
 COPY --from=dev /app/node_modules ./node_modules
 COPY . .
+
+RUN npm install --location=global pnpm@latest
+
 # Corrected build script command
-RUN npm run build
+RUN pnpm run build
 # Prune development dependencies to leave only production ones
-RUN npm prune --production
+RUN pnpm install --prod --frozen-lockfile
 
 #
 # 🚀 Production Server

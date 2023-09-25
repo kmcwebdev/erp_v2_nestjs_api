@@ -39,11 +39,6 @@ export class ReimbursementMemphisEmailHrbpApprovalService
         consumerGroup: 'erp.reimbursement.email-hrbp-approval.consumer-group',
       });
 
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.email-hrbp-approval',
-        producerName: 'erp.reimbursement.email-hrbp-approval.producer-name',
-      });
-
       this.consumer.on('message', async (message: Message) => {
         const data: HrbpApprovalEmailType = JSON.parse(
           message.getData().toString(),
@@ -68,6 +63,11 @@ export class ReimbursementMemphisEmailHrbpApprovalService
         );
 
         message.ack();
+      });
+
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.email-hrbp-approval',
+        producerName: 'erp.reimbursement.email-hrbp-approval.producer-name',
       });
 
       this.logger.log(

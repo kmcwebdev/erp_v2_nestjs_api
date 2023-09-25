@@ -44,11 +44,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         consumerGroup: 'erp.reimbursement.new-request.consumer-group',
       });
 
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.new-request',
-        producerName: 'erp.reimbursement.new-request.producer-name',
-      });
-
       this.consumer.on('message', async (message: Message) => {
         const data: ReimbursementRequest = JSON.parse(
           message.getData().toString(),
@@ -331,6 +326,11 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         }
 
         message.ack();
+      });
+
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.new-request',
+        producerName: 'erp.reimbursement.new-request.producer-name',
       });
 
       this.logger.log(
