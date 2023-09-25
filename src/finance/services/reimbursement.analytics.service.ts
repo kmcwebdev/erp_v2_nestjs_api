@@ -16,14 +16,13 @@ export class ReimbursementAnalyticsService {
       .transaction()
       .execute(async (trx) => {
         const getPendingApproval =
-          await sql`SELECT COUNT(*) FROM finance_reimbursement_requests WHERE requestor_id = ${user.original_user_id} AND hrbp_request_status_id = ${PENDING_REQUEST}`.execute(
-            trx,
-          );
+          await sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+            WHERE requestor_id = ${user.original_user_id} 
+            AND hrbp_request_status_id = ${PENDING_REQUEST}`.execute(trx);
 
         const getOverallRequest =
-          await sql`SELECT COUNT(*) FROM finance_reimbursement_requests WHERE requestor_id = ${user.original_user_id}`.execute(
-            trx,
-          );
+          await sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
+            WHERE requestor_id = ${user.original_user_id}`.execute(trx);
 
         return { getPendingApproval, getOverallRequest };
       });
