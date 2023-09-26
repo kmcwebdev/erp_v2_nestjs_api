@@ -262,7 +262,7 @@ export class FinanceController {
   ReimbursementAnalyticsServiceForHrbp(@Req() req: Request) {
     const user = req['user'] as RequestUser;
 
-    return this.reimbursementAnalyticsService.member(user);
+    return this.reimbursementAnalyticsService.hrbp(user);
   }
 
   @Get('/reimbursements/requests/dashboard/analytics/managers')
