@@ -3,7 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 
 const FinanceReimbursementRequestReportSchema = z.object({
   reimbursement_request_ids: z.preprocess(
-    (val: string) => JSON.parse(val),
+    (val: string) => (val ? JSON.parse(val) : []),
     z.array(z.string().uuid()).min(1),
   ),
 });

@@ -7,6 +7,7 @@ import {
   CANCELLED_REQUEST,
   ONHOLD_REQUEST,
   PENDING_REQUEST,
+  REJECTED_REQUEST,
   SCHEDULED_REQUEST,
   UNSCHEDULED_REQUEST,
 } from '../common/constant';
@@ -19,7 +20,7 @@ export class ReimbursementAnalyticsService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async member(user: RequestUser) {
-    const { getPendingApproval, getOverallRequest } = await this.pgsql
+    const { pendingApproval, overall } = await this.pgsql
       .transaction()
       .execute(async (trx) => {
         const getPendingApproval =
@@ -31,17 +32,24 @@ export class ReimbursementAnalyticsService {
           await sql`SELECT COUNT(*) FROM finance_reimbursement_requests 
             WHERE requestor_id = ${user.original_user_id}`.execute(trx);
 
-        return { getPendingApproval, getOverallRequest };
+        return {
+          pendingApproval: getPendingApproval.rows.length
+            ? getPendingApproval.rows[0]
+            : { count: 0 },
+          overall: getOverallRequest.rows.length
+            ? getOverallRequest.rows[0]
+            : { count: 0 },
+        };
       });
 
-    return { getPendingApproval, getOverallRequest };
+    return { pendingApproval, overall };
   }
 
   async hrbp(user: RequestUser) {
     const { pendingApproval, scheduled, unscheduled } = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const approverIds = await trx
+        const userApprover = await trx
           .selectFrom('finance_reimbursement_approvers')
           .select(['approver_id'])
           .where(
@@ -49,9 +57,9 @@ export class ReimbursementAnalyticsService {
             '=',
             user.original_user_id,
           )
-          .execute();
+          .executeTakeFirst();
 
-        if (approverIds.length === 0 || user.user_assigned_role != 'hrbp') {
+        if (!userApprover || user.user_assigned_role != 'hrbp') {
           return {
             pendingApproval: {
               count: 0,
@@ -68,11 +76,7 @@ export class ReimbursementAnalyticsService {
         const matrix = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .select(['approval_matrix_id', 'approver_order'])
-          .where(
-            'approver_id',
-            'in',
-            approverIds.map((ap) => ap.approver_id),
-          )
+          .where('approver_id', '=', userApprover.approver_id)
           .where('has_approved', '=', false)
           .where('has_rejected', '=', false)
           .execute();
@@ -90,14 +94,13 @@ export class ReimbursementAnalyticsService {
             'in',
             matrix.map((mt) => mt.approval_matrix_id),
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '!=',
+          .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
-          )
+            REJECTED_REQUEST,
+          ])
           .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
-            '!=',
+            '=',
             PENDING_REQUEST,
           )
           .executeTakeFirst();
@@ -120,16 +123,6 @@ export class ReimbursementAnalyticsService {
             '=',
             SCHEDULED_REQUEST,
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '!=',
-            CANCELLED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.hrbp_request_status_id',
-            '!=',
-            PENDING_REQUEST,
-          )
           .executeTakeFirst();
 
         const unscheduled = await trx
@@ -150,16 +143,6 @@ export class ReimbursementAnalyticsService {
             '=',
             UNSCHEDULED_REQUEST,
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '!=',
-            CANCELLED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.hrbp_request_status_id',
-            '!=',
-            PENDING_REQUEST,
-          )
           .executeTakeFirst();
 
         return {
@@ -177,10 +160,10 @@ export class ReimbursementAnalyticsService {
   }
 
   async manager(user: RequestUser) {
-    const { pendingApproval, overall } = await this.pgsql
+    const { pendingApproval, scheduled, unscheduled } = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const approverIds = await trx
+        const userApprover = await trx
           .selectFrom('finance_reimbursement_approvers')
           .select(['approver_id'])
           .where(
@@ -188,9 +171,9 @@ export class ReimbursementAnalyticsService {
             '=',
             user.original_user_id,
           )
-          .execute();
+          .executeTakeFirst();
 
-        if (approverIds.length === 0) {
+        if (!userApprover) {
           return {
             pendingApproval: {
               count: 0,
@@ -204,11 +187,7 @@ export class ReimbursementAnalyticsService {
         const matrix = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .select(['approval_matrix_id', 'approver_order'])
-          .where(
-            'approver_id',
-            'in',
-            approverIds.map((ap) => ap.approver_id),
-          )
+          .where('approver_id', '=', userApprover.approver_id)
           .where('has_approved', '=', false)
           .where('has_rejected', '=', false)
           .execute();
@@ -233,12 +212,12 @@ export class ReimbursementAnalyticsService {
           )
           .where(
             'finance_reimbursement_requests.request_status_id',
-            '!=',
+            '=',
             PENDING_REQUEST,
           )
           .executeTakeFirst();
 
-        const overall = await trx
+        const scheduled = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .innerJoin(
             'finance_reimbursement_requests',
@@ -251,22 +230,60 @@ export class ReimbursementAnalyticsService {
             'in',
             matrix.map((mt) => mt.approval_matrix_id),
           )
+          .where('finance_reimbursement_requests.request_status_id', 'not in', [
+            CANCELLED_REQUEST,
+            REJECTED_REQUEST,
+          ])
+          .where(
+            'finance_reimbursement_requests.request_status_id',
+            '=',
+            SCHEDULED_REQUEST,
+          )
+          .executeTakeFirst();
+
+        const unscheduled = await trx
+          .selectFrom('finance_reimbursement_approval_matrix')
+          .innerJoin(
+            'finance_reimbursement_requests',
+            'finance_reimbursement_requests.reimbursement_request_id',
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          )
+          .select(({ fn }) => fn.countAll().as('count'))
+          .where(
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            'in',
+            matrix.map((mt) => mt.approval_matrix_id),
+          )
+          .where('finance_reimbursement_requests.request_status_id', 'not in', [
+            CANCELLED_REQUEST,
+            REJECTED_REQUEST,
+          ])
+          .where(
+            'finance_reimbursement_requests.request_status_id',
+            '=',
+            UNSCHEDULED_REQUEST,
+          )
           .executeTakeFirst();
 
         return {
           pendingApproval,
-          overall,
+          scheduled,
+          unscheduled,
         };
       });
 
-    return { pendingApproval, overall };
+    return {
+      pendingApproval,
+      scheduled,
+      unscheduled,
+    };
   }
 
   async finance(user: RequestUser) {
     const { pendingApproval, scheduled, unscheduled, onhold } = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const approverIds = await trx
+        const userApprover = await trx
           .selectFrom('finance_reimbursement_approvers')
           .select(['approver_id'])
           .where(
@@ -274,9 +291,9 @@ export class ReimbursementAnalyticsService {
             '=',
             user.original_user_id,
           )
-          .execute();
+          .executeTakeFirst();
 
-        if (approverIds.length === 0 || user.user_assigned_role != 'finance') {
+        if (!userApprover || user.user_assigned_role != 'finance') {
           return {
             pendingApproval: {
               count: 0,
@@ -296,11 +313,7 @@ export class ReimbursementAnalyticsService {
         const matrix = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .select(['approval_matrix_id', 'approver_order'])
-          .where(
-            'approver_id',
-            'in',
-            approverIds.map((ap) => ap.approver_id),
-          )
+          .where('approver_id', '=', userApprover.approver_id)
           .where('has_approved', '=', false)
           .where('has_rejected', '=', false)
           .execute();
@@ -318,20 +331,14 @@ export class ReimbursementAnalyticsService {
             'in',
             matrix.map((mt) => mt.approval_matrix_id),
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '!=',
+          .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
-          )
+            REJECTED_REQUEST,
+          ])
           .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
-            '!=',
+            '=',
             APPROVED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.finance_request_status_id',
-            '!=',
-            PENDING_REQUEST,
           )
           .executeTakeFirst();
 
@@ -353,21 +360,10 @@ export class ReimbursementAnalyticsService {
             '=',
             SCHEDULED_REQUEST,
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '!=',
+          .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.hrbp_request_status_id',
-            '!=',
-            APPROVED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.finance_request_status_id',
-            '!=',
-            PENDING_REQUEST,
-          )
+            REJECTED_REQUEST,
+          ])
           .executeTakeFirst();
 
         const unscheduled = await trx
@@ -388,21 +384,10 @@ export class ReimbursementAnalyticsService {
             '=',
             UNSCHEDULED_REQUEST,
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '!=',
+          .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.hrbp_request_status_id',
-            '!=',
-            APPROVED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.finance_request_status_id',
-            '!=',
-            PENDING_REQUEST,
-          )
+            REJECTED_REQUEST,
+          ])
           .executeTakeFirst();
 
         const onhold = await trx
@@ -424,18 +409,8 @@ export class ReimbursementAnalyticsService {
             UNSCHEDULED_REQUEST,
           )
           .where(
-            'finance_reimbursement_requests.request_status_id',
-            '!=',
-            CANCELLED_REQUEST,
-          )
-          .where(
-            'finance_reimbursement_requests.hrbp_request_status_id',
-            '!=',
-            APPROVED_REQUEST,
-          )
-          .where(
             'finance_reimbursement_requests.finance_request_status_id',
-            '!=',
+            '=',
             ONHOLD_REQUEST,
           )
           .executeTakeFirst();
