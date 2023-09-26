@@ -190,11 +190,18 @@ export class FinanceController {
   }
 
   @Get('/reimbursements/requests/reports/hrbp')
-  getHrbpReport(@Res({ passthrough: true }) res: Response): StreamableFile {
-    // Your provided JSON data
-    const data = [{ name: 'hrbp', age: 14 }];
+  async getHrbpReport(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: FinanceReimbursementRequestReportDTO,
+  ) {
+    const user = req['user'] as RequestUser;
 
-    // Convert JSON to CSV
+    const data = await this.reimbursementStreamFileService.hrbpReport(
+      user,
+      query,
+    );
+
     const csvString = jsonToCsv(data);
 
     // Create a Readable stream and push the CSV string to it
@@ -269,14 +276,14 @@ export class FinanceController {
   ReimbursementAnalyticsServiceForManagers(@Req() req: Request) {
     const user = req['user'] as RequestUser;
 
-    return this.reimbursementAnalyticsService.member(user);
+    return this.reimbursementAnalyticsService.manager(user);
   }
 
   @Get('/reimbursements/requests/dashboard/analytics/finance')
   ReimbursementAnalyticsServiceForFinance(@Req() req: Request) {
     const user = req['user'] as RequestUser;
 
-    return this.reimbursementAnalyticsService.member(user);
+    return this.reimbursementAnalyticsService.finance(user);
   }
 
   // TODO: Be careful this query can return the reimbursement request of other users unless it's an approver or admin
