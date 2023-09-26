@@ -1,13 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpException,
   HttpStatus,
   Param,
-  Patch,
   Post,
   Query,
   Req,
@@ -28,15 +26,14 @@ import { GetOneReimbursementRequestDTO } from './common/dto/get-one-reimbursemen
 import { CancelReimbursementRequestDTO } from './common/dto/cancel-reimbursement-request.dto';
 import { RejectReimbursementRequestDTO } from './common/dto/reject-reimbursement-request.dto';
 import { ReimbursementRequestApprovalDTO } from './common/dto/approve-reimbursement-request.dto';
-import { UpdateReimbursementRequestDTO } from 'src/finance/common/dto/update-reimbursement-request.dto';
 import { CreateReimbursementRequestDTO } from 'src/finance/common/dto/create-reimbursement-request.dto';
-import { DeleteReimbursementRequestDTO } from 'src/finance/common/dto/delete-reimbursement-request.dto';
 import { GetAuditlogReimbursementRequestDTO } from './common/dto/get-auditlog-reimbursement-request.dto';
 import { FinanceReimbursementRequestReportDTO } from './common/dto/finance-reimbursement-request-report.dto';
 import { OnHoldReimbursementRequestDTO } from './common/dto/onhold-reimbursement-request.dto';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
 import { ReimbursementExpenseTypesService } from './services/reimbursement.expense-types.service';
+import { ReimbursementRequestStatusService } from './services/reimbursement.request-status.service';
 import { ReimbursementGetAllService } from './services/reimbursement.get-all.service';
 import { ReimbursementGetOneService } from './services/reimbursement.get-one.service';
 import { ReimbursementCreateService } from './services/reimbursement.create.service';
@@ -56,6 +53,7 @@ export class FinanceController {
     private readonly financeReimbursementApiService: ReimbursementApiService,
     private readonly reimbursementRequestTypesService: ReimbursementRequestTypesService,
     private readonly reimbursementExpenseTypesService: ReimbursementExpenseTypesService,
+    private readonly reimbursementRequestStatusService: ReimbursementRequestStatusService,
     private readonly reimbursementGetAllService: ReimbursementGetAllService,
     private readonly reimbursementGetOneService: ReimbursementGetOneService,
     private readonly reimbursementCreateService: ReimbursementCreateService,
@@ -105,14 +103,9 @@ export class FinanceController {
     return this.reimbursementCreateService.create(user, body);
   }
 
-  @Patch('/reimbursements/requests')
-  updateReimbursementRequests(@Body() body: UpdateReimbursementRequestDTO) {
-    return body;
-  }
-
-  @Delete('/reimbursements/requests')
-  deleteReimbursementRequests(@Param() body: DeleteReimbursementRequestDTO) {
-    return body;
+  @Get('/reimbursements/requests/status')
+  getAllReimbursementRequestStatus() {
+    return this.reimbursementRequestStatusService.get();
   }
 
   @Get('/reimbursements/requests/for-approvals')

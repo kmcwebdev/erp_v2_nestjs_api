@@ -112,20 +112,6 @@ export class ReimbursementForApprovalService {
         );
       }
 
-      if (filter?.request_status_ids) {
-        const requestStatusIds = filter.request_status_ids
-          .replace(/"/g, '')
-          .split(',');
-
-        // TODO: Do the check here if all items in array is a valid uuid
-
-        query = query.where(
-          'finance_reimbursement_requests.request_status_id',
-          'in',
-          requestStatusIds,
-        );
-      }
-
       if (filter?.text_search) {
         query = query.where(
           sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
@@ -281,20 +267,6 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_requests.expense_type_id',
         'in',
         expenseTypeIds,
-      );
-    }
-
-    if (filter?.request_status_ids) {
-      const requestStatusIds = filter.request_status_ids
-        .replace(/"/g, '')
-        .split(',');
-
-      // TODO: Do the check here if all items in array is a valid uuid
-
-      query = query.where(
-        'finance_reimbursement_requests.request_status_id',
-        'in',
-        requestStatusIds,
       );
     }
 
