@@ -52,6 +52,7 @@ export class ReimbursementAnalyticsService {
         const userApprover = await trx
           .selectFrom('finance_reimbursement_approvers')
           .select(['approver_id'])
+          .where('table_reference', '=', 'users')
           .where(
             'finance_reimbursement_approvers.signatory_id',
             '=',
@@ -166,6 +167,7 @@ export class ReimbursementAnalyticsService {
         const userApprover = await trx
           .selectFrom('finance_reimbursement_approvers')
           .select(['approver_id'])
+          .where('table_reference', '=', 'users')
           .where(
             'finance_reimbursement_approvers.signatory_id',
             '=',
@@ -191,6 +193,8 @@ export class ReimbursementAnalyticsService {
           .where('has_approved', '=', false)
           .where('has_rejected', '=', false)
           .execute();
+
+        console.log(matrix);
 
         const pendingApproval = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
@@ -286,6 +290,7 @@ export class ReimbursementAnalyticsService {
         const userApprover = await trx
           .selectFrom('finance_reimbursement_approvers')
           .select(['approver_id'])
+          .where('table_reference', '=', 'users')
           .where(
             'finance_reimbursement_approvers.signatory_id',
             '=',
