@@ -18,8 +18,6 @@ export class ReimbursementForApprovalService {
   constructor(@InjectKysely() private readonly pgsql: DB) {}
 
   async get(user: RequestUser, filter: GetAllApprovalReimbursementRequestType) {
-    const forMyApprovalRequestIds = [];
-
     const finance = user.user_assigned_role === 'finance';
 
     const EXCLUDED_IN_LIST = [CANCELLED_REQUEST, REJECTED_REQUEST];
@@ -134,38 +132,20 @@ export class ReimbursementForApprovalService {
     }
 
     const approvers = await this.pgsql.transaction().execute(async (trx) => {
-      const department = await trx
-        .selectFrom('departments')
-        .select(['group_id'])
-        .where('user_id', '=', user.original_user_id)
-        .executeTakeFirst();
-
-      const group = await trx
-        .selectFrom('groups')
-        .select(['group_id'])
-        .where('group_id', '=', department?.group_id || null) //TODO: Dangerous move here.
-        .executeTakeFirst();
-
       const approver = await trx
         .selectFrom('finance_reimbursement_approvers')
         .select(['approver_id'])
         .where(
           'finance_reimbursement_approvers.signatory_id',
-          'in',
-          [user.original_user_id, group?.group_id ? group.group_id : ''].filter(
-            (str) => str !== '',
-          ),
+          '=',
+          user.original_user_id,
         )
-        .execute();
+        .executeTakeFirst();
 
       const matrix = await trx
         .selectFrom('finance_reimbursement_approval_matrix')
         .select(['approval_matrix_id', 'approver_order'])
-        .where(
-          'approver_id',
-          'in',
-          approver.map((ap) => ap.approver_id),
-        )
+        .where('approver_id', '=', approver.approver_id)
         .where('has_approved', '=', false)
         .where('has_rejected', '=', false)
         .execute();
@@ -173,13 +153,7 @@ export class ReimbursementForApprovalService {
       return matrix;
     });
 
-    if (approvers.length) {
-      approvers.forEach((ap) =>
-        forMyApprovalRequestIds.push(ap.approval_matrix_id),
-      );
-    }
-
-    if (forMyApprovalRequestIds.length === 0) {
+    if (approvers.length === 0) {
       return [];
     }
 
@@ -245,7 +219,7 @@ export class ReimbursementForApprovalService {
     query = query.where(
       'finance_reimbursement_approval_matrix.approval_matrix_id',
       'in',
-      forMyApprovalRequestIds,
+      approvers.map((ap) => ap.approval_matrix_id),
     );
 
     if (EXCLUDED_IN_LIST.length) {
