@@ -7,11 +7,12 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { propelauth } from 'src/auth/common/lib/propelauth';
-import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 import { Reflector } from '@nestjs/core';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
+import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 import { IS_API_KEY } from '../decorator/apiKey.decorator';
+import { IS_URL } from '../decorator/url.decorator';
 
 @Injectable()
 export class PropelauthGuard implements CanActivate {
@@ -43,6 +44,19 @@ export class PropelauthGuard implements CanActivate {
       const apiKey = this.extractApiKeyFromHeader(request);
 
       this.logger.log('api_key: ' + apiKey);
+
+      return apiKey ? true : false;
+    }
+
+    const isUrl = this.reflector.getAllAndOverride<boolean>(IS_URL, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isUrl) {
+      const url = this.extractUrlFromHeader(request);
+
+      console.log(url);
 
       return true;
     }
@@ -106,6 +120,10 @@ export class PropelauthGuard implements CanActivate {
     const apiKey = request.headers['x-api-key'] as string;
 
     return apiKey ? apiKey : undefined;
+  }
+
+  private extractUrlFromHeader(request: Request): string {
+    return request.url;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
