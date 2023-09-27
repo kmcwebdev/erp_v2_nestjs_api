@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersApiService } from './services/users.api.service';
 import { CreateUserDTO } from 'src/users/common/dto/create-user.dto';
 import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
@@ -15,6 +22,7 @@ export class UsersController {
   }
 
   @Apikey()
+  @HttpCode(HttpStatus.OK)
   @Post('/propelauth-webhook/create')
   async propelauthCreateWebhook(@Body() body: unknown) {
     console.log(body);
