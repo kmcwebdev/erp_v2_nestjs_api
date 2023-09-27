@@ -70,18 +70,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           .execute();
 
         if (!newRequest.hrbp_approver_email) {
-          await this.pgsql
-            .updateTable('finance_reimbursement_requests')
-            .set({
-              no_hrbp_set: true,
-            })
-            .where(
-              'reimbursement_request_id',
-              '=',
-              newRequest.reimbursement_request_id,
-            )
-            .execute();
-
           return message.ack();
         }
 
@@ -121,10 +109,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 approver_id: hrbp.approver_id,
                 approver_order: 1,
                 is_hrbp: true,
-                approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
               },
             ])
-            .onConflict((oc) => oc.column('approver_verifier').doNothing())
             .execute();
 
           const confirmationEmailData: ConfirmationEmailType = {
@@ -253,7 +239,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       approver_id: approverManager.approver_id,
                       approver_order: 1,
                       is_hrbp: false,
-                      approver_verifier: `${newRequest.reimbursement_request_id}<->1`,
                     },
                     {
                       reimbursement_request_id:
@@ -261,12 +246,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       approver_id: hrbp.approver_id,
                       approver_order: 2,
                       is_hrbp: true,
-                      approver_verifier: `${newRequest.reimbursement_request_id}<->2`,
                     },
                   ])
-                  .onConflict((oc) =>
-                    oc.column('approver_verifier').doNothing(),
-                  )
                   .execute();
 
                 const randomBytes = crypto.randomBytes(16);
@@ -285,7 +266,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   .values({
                     reimbursement_request_id:
                       newRequest.reimbursement_request_id,
-                    approval_link: approveLink,
+                    approve_link: approveLink,
+                    rejection_link: rejectLink,
                     token: actionToken,
                     link_expired: false,
                   })
