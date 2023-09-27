@@ -82,6 +82,7 @@ export class ReimbursementGetOneService {
         frr.dynamic_approvers,
         frr.payroll_date,
         frr.date_approve,
+        frr.date_processed,
         fram.approval_matrix_id AS next_approval_matrix_id,
         na.next_approver_order,
         frr.created_at,
