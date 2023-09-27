@@ -3,7 +3,13 @@ import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface'
 import { CancelReimbursementRequestType } from '../common/dto/cancel-reimbursement-request.dto';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { CANCELLED_REQUEST } from '../common/constant';
+import {
+  APPROVED_REQUEST,
+  CANCELLED_REQUEST,
+  PENDING_REQUEST,
+  PROCESSING_REQUEST,
+  REJECTED_REQUEST,
+} from '../common/constant';
 
 @Injectable()
 export class ReimbursementCancelService {
@@ -25,6 +31,27 @@ export class ReimbursementCancelService {
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
           ])
+          .where('finance_reimbursement_requests.request_status_id', 'not in', [
+            CANCELLED_REQUEST,
+            REJECTED_REQUEST,
+          ])
+          .where((eb) =>
+            eb(
+              'finance_reimbursement_requests.request_status_id',
+              '=',
+              PENDING_REQUEST,
+            )
+              .or(
+                'finance_reimbursement_requests.hrbp_request_status_id',
+                '!=',
+                APPROVED_REQUEST,
+              )
+              .or(
+                'finance_reimbursement_requests.finance_request_status_id',
+                '!=',
+                PROCESSING_REQUEST,
+              ),
+          )
           .where(
             'finance_reimbursement_requests.requestor_id',
             '=',
