@@ -10,6 +10,7 @@ import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ReimbursementCronService } from './services/cron/reimbursement.cron.service';
 import { ReimbursementRequestTypesService } from './services/reimbursement.request-types.service';
 import { ReimbursementExpenseTypesService } from './services/reimbursement.expense-types.service';
+import { ReimbursementRequestStatusService } from './services/reimbursement.request-status.service';
 import { ReimbursementGetAllService } from './services/reimbursement.get-all.service';
 import { ReimbursementGetOneService } from './services/reimbursement.get-one.service';
 import { ReimbursementCreateService } from './services/reimbursement.create.service';
@@ -46,6 +47,7 @@ import { ReimbursementMemphisEmailManagerApprovalService } from './services/memp
     ReimbursementCronService,
     ReimbursementRequestTypesService,
     ReimbursementExpenseTypesService,
+    ReimbursementRequestStatusService,
     ReimbursementGetAllService,
     ReimbursementGetOneService,
     ReimbursementCreateService,

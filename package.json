@@ -6,8 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=18.17.1",
-    "npm": ">=9.6.7"
+    "node": "18.18.0",
+    "pnpm": ">=8.7.6",
+    "npm": "please-use-pnpm",
+    "yarn": "please-use-pnpm"
   },
   "scripts": {
     "build": "nest build",
@@ -22,19 +24,19 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "kysely-codegen": "kysely-codegen",
-    "docker:build:push": "teller run docker-compose build && docker tag erp-v2-nestjs-api:latest registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest && docker push registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest"
+    "docker:build:push": "docker-compose build && docker tag erp-v2-nestjs-api:latest registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest && docker push registry.digitalocean.com/kmc-docker-registry/erp-v2-nestjs-api:latest",
+    "update-kysely-types": "kysely-codegen --out-file ./kysely-types.ts --exclude-pattern spatial_ref_sys"
   },
   "dependencies": {
     "@highlight-run/nest": "^3.2.0",
     "@nestjs/axios": "^3.0.0",
-    "@nestjs/common": "^10.2.5",
+    "@nestjs/common": "^10.2.6",
     "@nestjs/config": "^3.1.1",
-    "@nestjs/core": "^10.2.5",
+    "@nestjs/core": "^10.2.6",
     "@nestjs/devtools-integration": "^0.1.5",
     "@nestjs/event-emitter": "^2.0.2",
     "@nestjs/mapped-types": "*",
-    "@nestjs/platform-express": "^10.2.5",
+    "@nestjs/platform-express": "^10.2.6",
     "@nestjs/schedule": "^3.0.4",
     "@propelauth/node": "^2.1.3",
     "axios": "^1.5.0",
@@ -58,7 +60,7 @@
   "devDependencies": {
     "@nestjs/cli": "^10.1.18",
     "@nestjs/schematics": "^10.0.2",
-    "@nestjs/testing": "^10.2.5",
+    "@nestjs/testing": "^10.2.6",
     "@types/compression": "^1.7.3",
     "@types/express": "^4.17.17",
     "@types/hpp": "^0.2.2",

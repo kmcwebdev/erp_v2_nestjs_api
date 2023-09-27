@@ -37,11 +37,6 @@ export class ReimbursementMemphisEmailNewUserService implements OnModuleInit {
         consumerGroup: 'erp.reimbursement.email-new-user.consumer-group',
       });
 
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.email-new-user',
-        producerName: 'erp.reimbursement.email-new-user.producer-name',
-      });
-
       this.consumer.on('message', async (message: Message) => {
         const data: NewUserEmailType = JSON.parse(message.getData().toString());
 
@@ -64,6 +59,11 @@ export class ReimbursementMemphisEmailNewUserService implements OnModuleInit {
         );
 
         message.ack();
+      });
+
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.email-new-user',
+        producerName: 'erp.reimbursement.email-new-user.producer-name',
       });
 
       this.logger.log('Memphis new user email station is ready 📧 🚀');

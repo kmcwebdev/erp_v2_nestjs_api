@@ -33,11 +33,6 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
         consumerGroup: 'erp.reimbursement.bulk-approval.consumer-group',
       });
 
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.bulk-approval',
-        producerName: 'erp.reimbursement.bulk-approval.producer-name',
-      });
-
       this.consumer.on('message', async (message: Message) => {
         const data: { user: RequestUser; matrixIds: string[] } = JSON.parse(
           message.getData().toString(),
@@ -64,6 +59,11 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
           });
 
         message.ack();
+      });
+
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.bulk-approval',
+        producerName: 'erp.reimbursement.bulk-approval.producer-name',
       });
 
       this.logger.log(

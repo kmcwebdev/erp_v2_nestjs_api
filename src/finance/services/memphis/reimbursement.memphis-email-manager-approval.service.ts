@@ -40,11 +40,6 @@ export class ReimbursementMemphisEmailManagerApprovalService
           'erp.reimbursement.email-manager-approval.consumer-group',
       });
 
-      this.producer = await this.memphisService.producer({
-        stationName: 'erp.reimbursement.email-manager-approval',
-        producerName: 'erp.reimbursement.email-manager-approval.producer-name',
-      });
-
       this.consumer.on('message', async (message: Message) => {
         const data: ManagerApprovalEmailType = JSON.parse(
           message.getData().toString(),
@@ -69,6 +64,11 @@ export class ReimbursementMemphisEmailManagerApprovalService
         );
 
         message.ack();
+      });
+
+      this.producer = await this.memphisService.producer({
+        stationName: 'erp.reimbursement.email-manager-approval',
+        producerName: 'erp.reimbursement.email-manager-approval.producer-name',
       });
 
       this.logger.log(
