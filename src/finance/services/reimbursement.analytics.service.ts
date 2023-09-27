@@ -120,7 +120,7 @@ export class ReimbursementAnalyticsService {
             matrix.map((mt) => mt.approval_matrix_id),
           )
           .where(
-            'finance_reimbursement_requests.request_status_id',
+            'finance_reimbursement_requests.reimbursement_request_type_id',
             '=',
             SCHEDULED_REQUEST,
           )
@@ -140,7 +140,7 @@ export class ReimbursementAnalyticsService {
             matrix.map((mt) => mt.approval_matrix_id),
           )
           .where(
-            'finance_reimbursement_requests.request_status_id',
+            'finance_reimbursement_requests.reimbursement_request_type_id',
             '=',
             UNSCHEDULED_REQUEST,
           )
@@ -194,8 +194,6 @@ export class ReimbursementAnalyticsService {
           .where('has_rejected', '=', false)
           .execute();
 
-        console.log(matrix);
-
         const pendingApproval = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .innerJoin(
@@ -239,11 +237,13 @@ export class ReimbursementAnalyticsService {
             REJECTED_REQUEST,
           ])
           .where(
-            'finance_reimbursement_requests.request_status_id',
+            'finance_reimbursement_requests.reimbursement_request_type_id',
             '=',
             SCHEDULED_REQUEST,
           )
           .executeTakeFirst();
+
+        console.log(scheduled);
 
         const unscheduled = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
@@ -263,7 +263,7 @@ export class ReimbursementAnalyticsService {
             REJECTED_REQUEST,
           ])
           .where(
-            'finance_reimbursement_requests.request_status_id',
+            'finance_reimbursement_requests.reimbursement_request_type_id',
             '=',
             UNSCHEDULED_REQUEST,
           )
@@ -360,15 +360,20 @@ export class ReimbursementAnalyticsService {
             'in',
             matrix.map((mt) => mt.approval_matrix_id),
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '=',
-            SCHEDULED_REQUEST,
-          )
           .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
             REJECTED_REQUEST,
           ])
+          .where(
+            'finance_reimbursement_requests.hrbp_request_status_id',
+            '=',
+            APPROVED_REQUEST,
+          )
+          .where(
+            'finance_reimbursement_requests.reimbursement_request_type_id',
+            '=',
+            SCHEDULED_REQUEST,
+          )
           .executeTakeFirst();
 
         const unscheduled = await trx
@@ -384,15 +389,20 @@ export class ReimbursementAnalyticsService {
             'in',
             matrix.map((mt) => mt.approval_matrix_id),
           )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '=',
-            UNSCHEDULED_REQUEST,
-          )
           .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
             REJECTED_REQUEST,
           ])
+          .where(
+            'finance_reimbursement_requests.hrbp_request_status_id',
+            '=',
+            APPROVED_REQUEST,
+          )
+          .where(
+            'finance_reimbursement_requests.reimbursement_request_type_id',
+            '=',
+            UNSCHEDULED_REQUEST,
+          )
           .executeTakeFirst();
 
         const onhold = await trx
@@ -407,11 +417,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             'in',
             matrix.map((mt) => mt.approval_matrix_id),
-          )
-          .where(
-            'finance_reimbursement_requests.request_status_id',
-            '=',
-            UNSCHEDULED_REQUEST,
           )
           .where(
             'finance_reimbursement_requests.finance_request_status_id',
