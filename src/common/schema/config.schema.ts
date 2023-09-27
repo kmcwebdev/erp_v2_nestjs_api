@@ -199,25 +199,43 @@ export const configSchema = z.object({
   UPLOAD_LOCATION: z
     .string({
       description: 'Filestack upload location',
-      required_error: 'UPLOAD_LOCATION is required',
-      invalid_type_error: 'UPLOAD_LOCATION must be a string',
+      required_error: 'REIMBURSEMENT_ATTACHMENT_UPLOAD_LOCATION is required',
+      invalid_type_error:
+        'REIMBURSEMENT_ATTACHMENT_UPLOAD_LOCATION must be a string',
     })
     .nonempty({
       message: 'UPLOAD_LOCATION must not be empty',
     }),
-  UPLOAD_CONTAINER: z
+  REIMBURSEMENT_ATTACHMENT_UPLOAD_CONTAINER: z
     .string({
       description: 'Filestack upload container',
-      required_error: 'UPLOAD_CONTAINER is required',
-      invalid_type_error: 'UPLOAD_CONTAINER must be a string',
+      required_error: 'REIMBURSEMENT_ATTACHMENT_UPLOAD_CONTAINER is required',
+      invalid_type_error:
+        'REIMBURSEMENT_ATTACHMENT_UPLOAD_CONTAINER must be a string',
     })
     .nonempty({
       message: 'UPLOAD_CONTAINER must not be empty',
     }),
-  UPLOAD_ACCESS: z.enum(['public', 'private'], {
+  REIMBURSEMENT_ATTACHMENT_UPLOAD_ACCESS: z.enum(['public', 'private'], {
     description: 'Filestack upload access',
-    required_error: 'UPLOAD_ACCESS is required',
-    invalid_type_error: 'UPLOAD_ACCESS must be one of "public" or "private"',
+    required_error: 'REIMBURSEMENT_ATTACHMENT_UPLOAD_ACCESS is required',
+    invalid_type_error:
+      'REIMBURSEMENT_ATTACHMENT_UPLOAD_ACCESS must be one of "public" or "private"',
+  }),
+  COMMON_UPLOAD_CONTAINER: z
+    .string({
+      description: 'Filestack upload container',
+      required_error: 'COMMON_UPLOAD_CONTAINER is required',
+      invalid_type_error: 'COMMON_UPLOAD_CONTAINER must be a string',
+    })
+    .nonempty({
+      message: 'UPLOAD_CONTAINER must not be empty',
+    }),
+  COMMON_UPLOAD_ACCESS: z.enum(['public', 'private'], {
+    description: 'Filestack upload access',
+    required_error: 'COMMON_UPLOAD_ACCESS is required',
+    invalid_type_error:
+      'COMMON_UPLOAD_ACCESS must be one of "public" or "private"',
   }),
   FRONT_END_URL: z
     .string({
