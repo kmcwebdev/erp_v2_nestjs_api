@@ -3,6 +3,7 @@ import { z } from 'zod';
 // TODO: Add description to zod types
 export const HrbpApprovalEmailSchema = z.object({
   to: z.array(z.string().email()),
+  referenceNo: z.string().nonempty(),
   approverFullName: z.string().nonempty(),
   fullName: z.string().nonempty(),
   employeeId: z.string().nonempty(),

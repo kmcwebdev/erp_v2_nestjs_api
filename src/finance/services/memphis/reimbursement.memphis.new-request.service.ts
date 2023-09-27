@@ -133,6 +133,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
           const hrbpApprovalEmailData: HrbpApprovalEmailType = {
             to: [newRequest.hrbp_approver_email],
+            referenceNo: newRequest.reference_no,
             approverFullName: hrbp.full_name || 'HRBP',
             fullName: newRequest?.full_name || 'No name set',
             employeeId: newRequest?.employee_id || 'No employee id set',
