@@ -57,9 +57,6 @@ export class ReimbursementMemphisEmailNewUserService implements OnModuleInit {
               }),
             ),
         ).finally(() => message.ack());
-
-        console.log('[new-user]: Message acknowledge triggered');
-        message.ack();
       });
 
       this.producer = await this.memphisService.producer({

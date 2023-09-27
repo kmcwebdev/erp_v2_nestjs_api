@@ -70,9 +70,6 @@ export class ReimbursementMemphisEmailConfirmationService
               }),
             ),
         ).finally(() => message.ack());
-
-        console.log('[email-confirmation]: Message acknowledge triggered');
-        message.ack();
       });
 
       this.producer = await this.memphisService.producer({

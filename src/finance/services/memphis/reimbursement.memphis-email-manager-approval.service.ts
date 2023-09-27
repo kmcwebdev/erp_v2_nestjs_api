@@ -62,9 +62,6 @@ export class ReimbursementMemphisEmailManagerApprovalService
               }),
             ),
         ).finally(() => message.ack());
-
-        console.log('[email-manager-approval]: Message acknowledge triggered');
-        message.ack();
       });
 
       this.producer = await this.memphisService.producer({

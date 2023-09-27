@@ -61,9 +61,6 @@ export class ReimbursementMemphisEmailHrbpApprovalService
               }),
             ),
         ).finally(() => message.ack());
-
-        console.log('[email-hrbp-approval]: Message acknowledge triggered');
-        message.ack();
       });
 
       this.producer = await this.memphisService.producer({
