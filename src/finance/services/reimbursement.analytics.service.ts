@@ -82,6 +82,20 @@ export class ReimbursementAnalyticsService {
           .where('has_rejected', '=', false)
           .execute();
 
+        if (!matrix.length) {
+          return {
+            pendingApproval: {
+              count: 0,
+            },
+            scheduled: {
+              count: 0,
+            },
+            unscheduled: {
+              count: 0,
+            },
+          };
+        }
+
         const pendingApproval = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .innerJoin(
@@ -120,6 +134,11 @@ export class ReimbursementAnalyticsService {
             matrix.map((mt) => mt.approval_matrix_id),
           )
           .where(
+            'finance_reimbursement_requests.hrbp_request_status_id',
+            '=',
+            PENDING_REQUEST,
+          )
+          .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
             '=',
             SCHEDULED_REQUEST,
@@ -138,6 +157,11 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             'in',
             matrix.map((mt) => mt.approval_matrix_id),
+          )
+          .where(
+            'finance_reimbursement_requests.hrbp_request_status_id',
+            '=',
+            PENDING_REQUEST,
           )
           .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
@@ -193,6 +217,17 @@ export class ReimbursementAnalyticsService {
           .where('has_approved', '=', false)
           .where('has_rejected', '=', false)
           .execute();
+
+        if (!matrix.length) {
+          return {
+            pendingApproval: {
+              count: 0,
+            },
+            overall: {
+              count: 0,
+            },
+          };
+        }
 
         const pendingApproval = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
@@ -320,6 +355,23 @@ export class ReimbursementAnalyticsService {
           .where('has_approved', '=', false)
           .where('has_rejected', '=', false)
           .execute();
+
+        if (!matrix.length) {
+          return {
+            pendingApproval: {
+              count: 0,
+            },
+            scheduled: {
+              count: 0,
+            },
+            unscheduled: {
+              count: 0,
+            },
+            onhold: {
+              count: 0,
+            },
+          };
+        }
 
         const pendingApproval = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
