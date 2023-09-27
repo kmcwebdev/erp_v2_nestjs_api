@@ -356,10 +356,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
-          .where('finance_reimbursement_requests.request_status_id', 'not in', [
-            CANCELLED_REQUEST,
-            REJECTED_REQUEST,
-          ])
           .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
@@ -375,10 +371,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
-          .where('finance_reimbursement_requests.request_status_id', 'not in', [
-            CANCELLED_REQUEST,
-            REJECTED_REQUEST,
-          ])
           .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
@@ -399,10 +391,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
-          .where('finance_reimbursement_requests.request_status_id', 'not in', [
-            CANCELLED_REQUEST,
-            REJECTED_REQUEST,
-          ])
           .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
