@@ -348,31 +348,6 @@ export class ReimbursementAnalyticsService {
           };
         }
 
-        const matrix = await trx
-          .selectFrom('finance_reimbursement_approval_matrix')
-          .select(['approval_matrix_id', 'approver_order'])
-          .where('approver_id', '=', userApprover.approver_id)
-          .where('has_approved', '=', false)
-          .where('has_rejected', '=', false)
-          .execute();
-
-        if (!matrix.length) {
-          return {
-            pendingApproval: {
-              count: 0,
-            },
-            scheduled: {
-              count: 0,
-            },
-            unscheduled: {
-              count: 0,
-            },
-            onhold: {
-              count: 0,
-            },
-          };
-        }
-
         const pendingApproval = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .innerJoin(
@@ -381,11 +356,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
-          .where(
-            'finance_reimbursement_approval_matrix.approval_matrix_id',
-            'in',
-            matrix.map((mt) => mt.approval_matrix_id),
-          )
           .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
             REJECTED_REQUEST,
@@ -405,11 +375,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
-          .where(
-            'finance_reimbursement_approval_matrix.approval_matrix_id',
-            'in',
-            matrix.map((mt) => mt.approval_matrix_id),
-          )
           .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
             REJECTED_REQUEST,
@@ -434,11 +399,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
-          .where(
-            'finance_reimbursement_approval_matrix.approval_matrix_id',
-            'in',
-            matrix.map((mt) => mt.approval_matrix_id),
-          )
           .where('finance_reimbursement_requests.request_status_id', 'not in', [
             CANCELLED_REQUEST,
             REJECTED_REQUEST,
@@ -463,11 +423,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
-          .where(
-            'finance_reimbursement_approval_matrix.approval_matrix_id',
-            'in',
-            matrix.map((mt) => mt.approval_matrix_id),
-          )
           .where(
             'finance_reimbursement_requests.finance_request_status_id',
             '=',
