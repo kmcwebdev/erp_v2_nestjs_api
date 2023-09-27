@@ -1,14 +1,10 @@
-import type { ColumnType } from 'kysely';
+import type { ColumnType } from "kysely";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<
-  string,
-  string | number | bigint,
-  string | number | bigint
->;
+export type Int8 = ColumnType<string, string | number | bigint, string | number | bigint>;
 
 export type Numeric = ColumnType<string, string | number, string | number>;
 
@@ -101,6 +97,7 @@ export interface FinanceReimbursementRequests {
   payroll_date: Timestamp | null;
   date_approve: Timestamp | null;
   created_at: Generated<Timestamp | null>;
+  date_processed: Timestamp | null;
 }
 
 export interface FinanceReimbursementRequestStatus {
