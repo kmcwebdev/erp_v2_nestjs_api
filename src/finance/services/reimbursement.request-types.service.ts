@@ -12,7 +12,6 @@ export class ReimbursementRequestTypesService {
     return await this.pgsql
       .selectFrom('finance_reimbursement_request_types')
       .select(['reimbursement_request_type_id', 'request_type'])
-      .orderBy('request_type')
       .execute();
   }
 }

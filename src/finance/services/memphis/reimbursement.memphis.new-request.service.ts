@@ -271,6 +271,28 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   )
                   .execute();
 
+                const randomBytes = crypto.randomBytes(16);
+                const actionToken = randomBytes.toString('hex');
+
+                const approveLink = `${this.configService.get(
+                  'FRONT_END_URL',
+                )}/email-action/approve/${actionToken}`;
+
+                const rejectLink = `${this.configService.get(
+                  'FRONT_END_URL',
+                )}/email-action/reject/${actionToken}`;
+
+                await trx
+                  .insertInto('finance_reimbursement_approval_links')
+                  .values({
+                    reimbursement_request_id:
+                      newRequest.reimbursement_request_id,
+                    approval_link: approveLink,
+                    token: actionToken,
+                    link_expired: false,
+                  })
+                  .execute();
+
                 const confirmationEmailData: ConfirmationEmailType = {
                   to: [newRequest.email],
                   requestType: 'unscheduled',
@@ -304,24 +326,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   'reimbursement-request-send-email-manager-approval',
                   managerApprovalEmailData,
                 );
-
-                const randomBytes = crypto.randomBytes(16);
-                const hexToken = randomBytes.toString('hex');
-
-                const generatedLink = `${this.configService.get(
-                  'FRONT_END_URL',
-                )}/sessionless-approval-link?token=${hexToken}`;
-
-                await trx
-                  .insertInto('finance_reimbursement_approval_links')
-                  .values({
-                    reimbursement_request_id:
-                      newRequest.reimbursement_request_id,
-                    approval_link: generatedLink,
-                    token: hexToken,
-                    link_expired: false,
-                  })
-                  .execute();
               });
             });
           }
