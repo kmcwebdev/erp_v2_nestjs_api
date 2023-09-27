@@ -11,6 +11,7 @@ import { PostgresModule } from './common/database/postgres.module';
 import { AuthModule } from './auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MemphisDevModule } from './memphis-dev/memphis-dev.module';
+import { FilestackModule } from './filestack/filestack.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MemphisDevModule } from './memphis-dev/memphis-dev.module';
     UsersModule,
     FinanceModule,
     LegalAndComplianceModule,
+    FilestackModule,
   ],
   providers: [
     {
