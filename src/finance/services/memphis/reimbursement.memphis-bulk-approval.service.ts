@@ -56,9 +56,8 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
           })
           .catch((error) => {
             this.logger.error('An error occurred:', error);
-          });
-
-        message.ack();
+          })
+          .finally(() => message.ack());
       });
 
       this.producer = await this.memphisService.producer({
