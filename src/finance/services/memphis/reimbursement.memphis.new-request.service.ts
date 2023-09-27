@@ -230,7 +230,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   .where('users.email', '=', newRequest.hrbp_approver_email)
                   .executeTakeFirst();
 
-                await trx
+                const approvers = await trx
                   .insertInto('finance_reimbursement_approval_matrix')
                   .values([
                     {
@@ -248,7 +248,10 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       is_hrbp: true,
                     },
                   ])
-                  .execute();
+                  .returning(
+                    'finance_reimbursement_approval_matrix.approval_matrix_id',
+                  )
+                  .executeTakeFirst();
 
                 const randomBytes = crypto.randomBytes(16);
                 const actionToken = randomBytes.toString('hex');
@@ -268,6 +271,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       newRequest.reimbursement_request_id,
                     approve_link: approveLink,
                     rejection_link: rejectLink,
+                    approver_matrix_id: approvers.approval_matrix_id,
                     token: actionToken,
                     link_expired: false,
                   })
