@@ -56,8 +56,9 @@ export class ReimbursementMemphisEmailNewUserService implements OnModuleInit {
                 throw Error('Failed to send new user email');
               }),
             ),
-        );
+        ).finally(() => message.ack());
 
+        console.log('[new-user]: Message acknowledge triggered');
         message.ack();
       });
 

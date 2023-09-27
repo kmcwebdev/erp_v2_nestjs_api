@@ -60,8 +60,9 @@ export class ReimbursementMemphisEmailHrbpApprovalService
                 throw Error('Failed to send approval email to hrbp');
               }),
             ),
-        );
+        ).finally(() => message.ack());
 
+        console.log('[email-hrbp-approval]: Message acknowledge triggered');
         message.ack();
       });
 
