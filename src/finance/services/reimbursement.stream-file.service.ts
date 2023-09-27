@@ -106,6 +106,7 @@ export class ReimbursementStreamFileService {
           .updateTable('finance_reimbursement_requests')
           .set({
             finance_request_status_id: PROCESSING_REQUEST,
+            date_processed: new Date(Date.now()),
           })
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
