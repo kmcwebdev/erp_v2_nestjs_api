@@ -151,6 +151,7 @@ export class ReimbursementApproveService {
 
             const hrbpApprovalEmailData: HrbpApprovalEmailType = {
               to: [hrbp.email],
+              referenceNo: reimbursement.reference_no,
               approverFullName: hrbp.full_name || 'HRBP',
               fullName: reimbursement?.full_name || 'No name set',
               employeeId: reimbursement?.employee_id || 'No employee id set',
