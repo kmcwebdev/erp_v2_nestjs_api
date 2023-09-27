@@ -160,8 +160,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             'reimbursement-request-send-email-hrbp-approval',
             hrbpApprovalEmailData,
           );
-
-          message.ack();
         }
 
         if (newRequest.request_type_id === UNSCHEDULED_REQUEST) {
@@ -329,8 +327,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
               });
             });
           }
-
-          message.ack();
         }
 
         message.ack();
