@@ -69,8 +69,9 @@ export class ReimbursementMemphisEmailConfirmationService
                 throw Error('Failed to send confirmation email to requestor');
               }),
             ),
-        );
+        ).finally(() => message.ack());
 
+        console.log('[email-confirmation]: Message acknowledge triggered');
         message.ack();
       });
 

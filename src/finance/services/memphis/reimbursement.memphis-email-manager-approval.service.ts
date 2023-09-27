@@ -61,8 +61,9 @@ export class ReimbursementMemphisEmailManagerApprovalService
                 throw Error('Failed to send approval email to manager');
               }),
             ),
-        );
+        ).finally(() => message.ack());
 
+        console.log('[email-manager-approval]: Message acknowledge triggered');
         message.ack();
       });
 
