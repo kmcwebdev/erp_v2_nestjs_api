@@ -66,6 +66,7 @@ export class ReimbursementGetAllService {
         'users.hrbp_approver_email',
         'finance_reimbursement_requests.payroll_date',
         'finance_reimbursement_requests.date_approve',
+        'finance_reimbursement_requests.date_processed',
         'finance_reimbursement_requests.created_at',
       ]);
 
