@@ -7,6 +7,7 @@ import {
   CANCELLED_REQUEST,
   ONHOLD_REQUEST,
   PENDING_REQUEST,
+  PROCESSING_REQUEST,
   REJECTED_REQUEST,
   SCHEDULED_REQUEST,
   UNSCHEDULED_REQUEST,
@@ -361,6 +362,11 @@ export class ReimbursementAnalyticsService {
             '=',
             APPROVED_REQUEST,
           )
+          .where(
+            'finance_reimbursement_requests.finance_request_status_id',
+            '!=',
+            PROCESSING_REQUEST,
+          )
           .executeTakeFirst();
 
         const scheduled = await trx
@@ -375,6 +381,11 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
             APPROVED_REQUEST,
+          )
+          .where(
+            'finance_reimbursement_requests.finance_request_status_id',
+            '!=',
+            PROCESSING_REQUEST,
           )
           .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
@@ -395,6 +406,11 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
             APPROVED_REQUEST,
+          )
+          .where(
+            'finance_reimbursement_requests.finance_request_status_id',
+            '!=',
+            PROCESSING_REQUEST,
           )
           .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
