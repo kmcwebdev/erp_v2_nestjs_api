@@ -243,8 +243,6 @@ export class ReimbursementAnalyticsService {
           )
           .executeTakeFirst();
 
-        console.log(scheduled);
-
         const unscheduled = await trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .innerJoin(
