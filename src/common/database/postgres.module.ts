@@ -17,6 +17,7 @@ import { Pool } from 'pg';
             database: config.get('DATABASE_NAME'),
             password: config.get('DATABASE_PASS'),
             port: Number(config.get('DATABASE_PORT')),
+            ssl: true,
           }),
         }),
       }),
