@@ -205,7 +205,10 @@ export class ReimbursementAnalyticsService {
             pendingApproval: {
               count: 0,
             },
-            overall: {
+            scheduled: {
+              count: 0,
+            },
+            unscheduled: {
               count: 0,
             },
           };
@@ -224,7 +227,10 @@ export class ReimbursementAnalyticsService {
             pendingApproval: {
               count: 0,
             },
-            overall: {
+            scheduled: {
+              count: 0,
+            },
+            unscheduled: {
               count: 0,
             },
           };
