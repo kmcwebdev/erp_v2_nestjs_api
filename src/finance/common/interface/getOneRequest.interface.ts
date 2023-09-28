@@ -36,6 +36,8 @@ interface Approver {
   is_hrbp: boolean;
   performed_by_user_id: string | null;
   description: string | null;
+  session_id_source: string | null;
+  session_id: string | null;
   approver_name: string | null;
   is_group_of_approvers: boolean;
   table_reference: string;
