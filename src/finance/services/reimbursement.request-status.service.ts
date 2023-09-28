@@ -11,11 +11,6 @@ export class ReimbursementRequestStatusService {
   async get() {
     return await this.pgsql
       .selectFrom('finance_reimbursement_request_status')
-      .innerJoin(
-        'finance_reimbursement_requests',
-        'finance_reimbursement_request_status.request_status_id',
-        'finance_reimbursement_requests.request_status_id',
-      )
       .select([
         'finance_reimbursement_request_status.request_status_id',
         'finance_reimbursement_request_status.request_status',
