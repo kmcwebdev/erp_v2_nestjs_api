@@ -6,12 +6,7 @@ import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimbursement-request.dto';
-import {
-  APPROVED_REQUEST,
-  CANCELLED_REQUEST,
-  PROCESSING_REQUEST,
-  REJECTED_REQUEST,
-} from '../common/constant';
+import { APPROVED_REQUEST } from '../common/constant';
 import { HrbpApprovalEmailType } from '../common/zod-schema/hrbp-approval-email.schema';
 
 @Injectable()
@@ -53,36 +48,6 @@ export class ReimbursementApproveService {
             performed_by_user_id: user.original_user_id,
             updated_at: new Date(),
           })
-          .where((eb) =>
-            eb
-              .selectFrom('finance_reimbursement_requests')
-              .innerJoin(
-                'finance_reimbursement_approval_matrix',
-                'finance_reimbursement_approval_matrix.reimbursement_request_id',
-                'finance_reimbursement_requests.reimbursement_request_id',
-              )
-              .where(
-                'finance_reimbursement_approval_matrix.approval_matrix_id',
-                '=',
-                approval_matrix_id,
-              )
-              .where(
-                'finance_reimbursement_requests.request_status_id',
-                'not in',
-                [CANCELLED_REQUEST, REJECTED_REQUEST],
-              )
-              .where(
-                'finance_reimbursement_requests.hrbp_request_status_id',
-                '!=',
-                APPROVED_REQUEST,
-              )
-              .where(
-                'finance_reimbursement_requests.finance_request_status_id',
-                '!=',
-                PROCESSING_REQUEST,
-              )
-              .limit(1),
-          )
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
             '=',
