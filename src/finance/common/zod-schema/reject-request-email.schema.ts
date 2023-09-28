@@ -9,6 +9,7 @@ export const RejectRequestEmailSchema = z.object({
   expenseDate: z.string().nonempty(),
   amount: z.string().nonempty(),
   receiptsAttached: z.string().nonempty(),
+  remarks: z.string().nonempty(),
 });
 
 export type RejectRequestEmailType = z.infer<typeof RejectRequestEmailSchema>;
