@@ -6,7 +6,7 @@ import { DB } from 'src/common/types';
 import { ReimbursementGetOneService } from './reimbursement.get-one.service';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimbursement-request.dto';
-import { APPROVED_REQUEST } from '../common/constant';
+import { APPROVED_REQUEST, PENDING_REQUEST } from '../common/constant';
 import { HrbpApprovalEmailType } from '../common/zod-schema/hrbp-approval-email.schema';
 
 @Injectable()
@@ -38,10 +38,14 @@ export class ReimbursementApproveService {
     user: RequestUser,
     approval_matrix_id: string,
   ) {
+    const isManager =
+      user.user_assigned_role === 'external reimbursement approver manager';
+    const isHrbp = user.user_assigned_role === 'hrbp';
+
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const reimbursementRequestApprovalApprover = await trx
+        let updateRequestMatrix = trx
           .updateTable('finance_reimbursement_approval_matrix')
           .set({
             has_approved: true,
@@ -66,8 +70,44 @@ export class ReimbursementApproveService {
           .returning([
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             'finance_reimbursement_approval_matrix.is_hrbp',
-          ])
-          .executeTakeFirst();
+          ]);
+
+        if (isManager) {
+          updateRequestMatrix = updateRequestMatrix.where(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            'in',
+            this.pgsql
+              .selectFrom('finance_reimbursement_requests as frr')
+              .innerJoin(
+                'finance_reimbursement_approval_matrix as fram',
+                'fram.reimbursement_request_id',
+                'frr.reimbursement_request_id',
+              )
+              .select('frr.reimbursement_request_id')
+              .where('fram.approval_matrix_id', '=', approval_matrix_id)
+              .where('frr.request_status_id', '=', PENDING_REQUEST),
+          );
+        }
+
+        if (isHrbp) {
+          updateRequestMatrix = updateRequestMatrix.where(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+            'in',
+            this.pgsql
+              .selectFrom('finance_reimbursement_requests as frr')
+              .innerJoin(
+                'finance_reimbursement_approval_matrix as fram',
+                'fram.reimbursement_request_id',
+                'frr.reimbursement_request_id',
+              )
+              .select('frr.reimbursement_request_id')
+              .where('fram.approval_matrix_id', '=', approval_matrix_id)
+              .where('frr.hrbp_request_status_id', '=', PENDING_REQUEST),
+          );
+        }
+
+        const reimbursementRequestApprovalApprover =
+          await updateRequestMatrix.executeTakeFirst();
 
         if (!reimbursementRequestApprovalApprover) {
           return {

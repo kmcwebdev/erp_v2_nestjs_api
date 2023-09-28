@@ -134,7 +134,7 @@ export class ReimbursementGetAllService {
 
     if (reimbursementRequestIds.length) {
       query = query.where(
-        'finance_reimbursement_requests.reimbursement_request_type_id',
+        'finance_reimbursement_requests.reimbursement_request_id',
         'in',
         reimbursementRequestIds,
       );
@@ -186,7 +186,6 @@ export class ReimbursementGetAllService {
       );
     }
 
-    // TODO: I think this is not necessary...
     if (filter?.text_search) {
       query = query.where(
         sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
