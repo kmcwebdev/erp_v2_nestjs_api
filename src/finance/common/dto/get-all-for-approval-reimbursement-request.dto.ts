@@ -4,6 +4,7 @@ import { createZodDto } from 'nestjs-zod';
 // TODO: Add description to zod types
 const GetAllApprovalReimbursementRequestSchema = z
   .object({
+    reimbursement_type_id: z.string().uuid(),
     text_search: z.string().nonempty(),
     expense_type_ids: z.string().nonempty(),
     from: z.string().datetime(),

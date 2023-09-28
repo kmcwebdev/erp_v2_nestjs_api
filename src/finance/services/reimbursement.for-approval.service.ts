@@ -96,6 +96,14 @@ export class ReimbursementForApprovalService {
         PROCESSING_REQUEST,
       );
 
+      if (filter?.reimbursement_type_id) {
+        query = query.where(
+          'finance_reimbursement_requests.reimbursement_request_type_id',
+          '=',
+          filter.reimbursement_type_id,
+        );
+      }
+
       if (filter?.expense_type_ids) {
         const expenseTypeIds = filter.expense_type_ids
           .replace(/"/g, '')
@@ -241,6 +249,14 @@ export class ReimbursementForApprovalService {
         'finance_reimbursement_requests.expense_type_id',
         'in',
         expenseTypeIds,
+      );
+    }
+
+    if (filter?.reimbursement_type_id) {
+      query = query.where(
+        'finance_reimbursement_requests.reimbursement_request_type_id',
+        '=',
+        filter.reimbursement_type_id,
       );
     }
 
