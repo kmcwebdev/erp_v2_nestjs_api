@@ -9,7 +9,6 @@ import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimburs
 import {
   APPROVED_REQUEST,
   CANCELLED_REQUEST,
-  PENDING_REQUEST,
   PROCESSING_REQUEST,
   REJECTED_REQUEST,
 } from '../common/constant';
@@ -71,11 +70,6 @@ export class ReimbursementApproveService {
                 'finance_reimbursement_requests.request_status_id',
                 'not in',
                 [CANCELLED_REQUEST, REJECTED_REQUEST],
-              )
-              .where(
-                'finance_reimbursement_requests.request_status_id',
-                '=',
-                PENDING_REQUEST,
               )
               .where(
                 'finance_reimbursement_requests.hrbp_request_status_id',
