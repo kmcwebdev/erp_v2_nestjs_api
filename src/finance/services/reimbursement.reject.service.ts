@@ -1,15 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { RejectReimbursementRequestType } from '../common/dto/reject-reimbursement-request.dto';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { REJECTED_REQUEST } from '../common/constant';
+import { RejectRequestEmailType } from '../common/zod-schema/reject-request-email.schema';
 
 @Injectable()
 export class ReimbursementRejectService {
   private readonly logger = new Logger(ReimbursementRejectService.name);
 
-  constructor(@InjectKysely() private readonly pgsql: DB) {}
+  constructor(
+    @InjectKysely() private readonly pgsql: DB,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async reject(user: RequestUser, data: RejectReimbursementRequestType) {
     const finance = user.user_assigned_role === 'finance';
@@ -37,7 +42,7 @@ export class ReimbursementRejectService {
               '=',
               reimbursement_request_id_placeholder,
             )
-            .executeTakeFirst();
+            .executeTakeFirstOrThrow();
 
           await trx
             .insertInto('finance_reimbursement_approval_audit_logs')
@@ -89,7 +94,7 @@ export class ReimbursementRejectService {
           .returning([
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           ])
-          .executeTakeFirst();
+          .executeTakeFirstOrThrow();
 
         if (!reimbursementRequestMatrix) {
           return {
@@ -106,13 +111,50 @@ export class ReimbursementRejectService {
           })
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
+            'finance_reimbursement_requests.expense_type_id',
+            'finance_reimbursement_requests.requestor_id',
+            'finance_reimbursement_requests.amount',
+            'finance_reimbursement_requests.attachment',
+            'finance_reimbursement_requests.created_at',
           ])
           .where(
             'finance_reimbursement_requests.reimbursement_request_id',
             '=',
             reimbursementRequestMatrix.reimbursement_request_id,
           )
-          .executeTakeFirst();
+          .executeTakeFirstOrThrow();
+
+        const expenseType = await trx
+          .selectFrom('finance_reimbursement_expense_types')
+          .select('finance_reimbursement_expense_types.expense_type')
+          .where(
+            'finance_reimbursement_expense_types.expense_type_id',
+            '=',
+            reimbursementRequest.expense_type_id,
+          )
+          .executeTakeFirstOrThrow();
+
+        const requestor = await trx
+          .selectFrom('users')
+          .select(['users.email', 'users.full_name', 'employee_id'])
+          .where('users.user_id', '=', reimbursementRequest.requestor_id)
+          .executeTakeFirstOrThrow();
+
+        const emailRejectionData: RejectRequestEmailType = {
+          to: [requestor.email],
+          fullName: requestor.full_name,
+          employeeId: requestor.employee_id,
+          expenseType: expenseType.expense_type,
+          expenseDate: reimbursementRequest.created_at.toString(),
+          amount: reimbursementRequest.amount,
+          receiptsAttached: reimbursementRequest.attachment,
+          remarks: data.rejection_reason,
+        };
+
+        this.eventEmitter.emit(
+          'reimbursement-request-send-email-rejection',
+          emailRejectionData,
+        );
 
         return {
           reimbursement_request_id:
