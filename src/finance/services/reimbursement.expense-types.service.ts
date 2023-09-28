@@ -33,7 +33,7 @@ export class ReimbursementExpenseTypesService {
     return await this.pgsql
       .selectFrom('finance_reimbursement_expense_types')
       .select([
-        'finance_reimbursement_expense_types.expense_type',
+        'finance_reimbursement_expense_types.expense_type_id',
         'finance_reimbursement_expense_types.expense_type',
       ])
       .orderBy('finance_reimbursement_expense_types.sort_order_num')
