@@ -99,6 +99,10 @@ const GetAllReimbursementRequestSchema = z
           message: 'last_id must be a positive number',
         }),
     ),
+    history: z.preprocess(
+      (val) => (val === 'true' ? true : false),
+      z.boolean().default(false),
+    ),
   })
   .partial()
   .refine(

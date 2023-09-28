@@ -4,6 +4,12 @@ import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { GetAllReimbursementRequestType } from '../common/dto/get-all-reimbursement-request.dto';
+import {
+  APPROVED_REQUEST,
+  ONHOLD_REQUEST,
+  PROCESSING_REQUEST,
+  REJECTED_REQUEST,
+} from '../common/constant';
 
 @Injectable()
 export class ReimbursementGetAllService {
@@ -14,6 +20,62 @@ export class ReimbursementGetAllService {
   async get(user: RequestUser, filter: GetAllReimbursementRequestType) {
     const { original_user_id } = user;
     const default_page_limit = 20;
+
+    const reimbursementRequestIds = [];
+
+    if (
+      ['hrbp', 'external reimbursement approver manager', 'finance'].includes(
+        user.user_assigned_role,
+      ) &&
+      filter?.history
+    ) {
+      const initialRequestStatuses = [APPROVED_REQUEST, REJECTED_REQUEST];
+
+      if (user.user_assigned_role === 'finance') {
+        initialRequestStatuses.push(ONHOLD_REQUEST);
+        initialRequestStatuses.push(PROCESSING_REQUEST);
+      }
+
+      const approvers = await this.pgsql.transaction().execute(async (trx) => {
+        const approver = await trx
+          .selectFrom('finance_reimbursement_approvers')
+          .select(['approver_id'])
+          .where(
+            'finance_reimbursement_approvers.signatory_id',
+            '=',
+            user.original_user_id,
+          )
+          .executeTakeFirst();
+
+        const matrix = await trx
+          .selectFrom('finance_reimbursement_approval_matrix')
+          .innerJoin(
+            'finance_reimbursement_requests',
+            'finance_reimbursement_requests.reimbursement_request_id',
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          )
+          .select('finance_reimbursement_requests.reimbursement_request_id')
+          .where(
+            'finance_reimbursement_requests.hrbp_request_status_id',
+            'in',
+            initialRequestStatuses,
+          )
+          .where(
+            'finance_reimbursement_approval_matrix.approver_id',
+            '=',
+            approver.approver_id,
+          )
+          .execute();
+
+        return matrix;
+      });
+
+      if (approvers.length) {
+        approvers.forEach((ap) =>
+          reimbursementRequestIds.push(ap.reimbursement_request_id),
+        );
+      }
+    }
 
     let query = this.pgsql
       .selectFrom('finance_reimbursement_requests')
@@ -70,11 +132,21 @@ export class ReimbursementGetAllService {
         'finance_reimbursement_requests.created_at',
       ]);
 
-    query = query.where(
-      'finance_reimbursement_requests.requestor_id',
-      '=',
-      original_user_id,
-    );
+    if (reimbursementRequestIds.length) {
+      query = query.where(
+        'finance_reimbursement_requests.reimbursement_request_type_id',
+        'in',
+        reimbursementRequestIds,
+      );
+    }
+
+    if (!filter?.history) {
+      query = query.where(
+        'finance_reimbursement_requests.requestor_id',
+        '=',
+        original_user_id,
+      );
+    }
 
     if (filter?.reference_no) {
       query = query.where(
@@ -84,7 +156,7 @@ export class ReimbursementGetAllService {
       );
     }
 
-    if (filter?.reimbursement_type_id) {
+    if (filter?.reimbursement_type_id && !filter?.history) {
       query = query.where(
         'finance_reimbursement_requests.reimbursement_request_type_id',
         '=',
