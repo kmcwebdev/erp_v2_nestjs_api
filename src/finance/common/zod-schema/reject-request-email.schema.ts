@@ -1,10 +1,8 @@
 import { z } from 'zod';
 
 // TODO: Add description to zod types
-export const ManagerApprovalEmailSchema = z.object({
+export const RejectRequestEmailSchema = z.object({
   to: z.array(z.string().email()),
-  referenceNo: z.string().nonempty(),
-  approverFullName: z.string().nonempty(),
   fullName: z.string().nonempty(),
   employeeId: z.string().nonempty(),
   expenseType: z.string().nonempty(),
@@ -13,6 +11,4 @@ export const ManagerApprovalEmailSchema = z.object({
   receiptsAttached: z.string().nonempty(),
 });
 
-export type ManagerApprovalEmailType = z.infer<
-  typeof ManagerApprovalEmailSchema
->;
+export type RejectRequestEmailType = z.infer<typeof RejectRequestEmailSchema>;
