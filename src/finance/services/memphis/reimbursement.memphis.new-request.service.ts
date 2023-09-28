@@ -298,6 +298,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
                 const managerApprovalEmailData: ManagerApprovalEmailType = {
                   to: [email],
+                  referenceNo: newRequest.reference_no,
                   approverFullName: email,
                   fullName: newRequest.full_name,
                   employeeId: newRequest.employee_id,
