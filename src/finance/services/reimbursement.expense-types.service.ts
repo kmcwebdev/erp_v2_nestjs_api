@@ -31,14 +31,9 @@ export class ReimbursementExpenseTypesService {
 
   async all() {
     return await this.pgsql
-      .selectFrom('finance_reimbursement_request_expense_types')
-      .innerJoin(
-        'finance_reimbursement_expense_types',
-        'finance_reimbursement_expense_types.expense_type_id',
-        'finance_reimbursement_request_expense_types.expense_type_id',
-      )
+      .selectFrom('finance_reimbursement_expense_types')
       .select([
-        'finance_reimbursement_request_expense_types.expense_type_id',
+        'finance_reimbursement_expense_types.expense_type',
         'finance_reimbursement_expense_types.expense_type',
       ])
       .orderBy('finance_reimbursement_expense_types.sort_order_num')
