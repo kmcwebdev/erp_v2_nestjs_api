@@ -65,7 +65,10 @@ export class ReimbursementCancelService {
           .executeTakeFirst();
 
         if (!reimbursementRequest) {
-          throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
+          throw new HttpException(
+            'Request not found or request is already cancelled',
+            HttpStatus.NOT_FOUND,
+          );
         }
 
         await trx
