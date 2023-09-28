@@ -27,7 +27,7 @@ export class ReimbursementMemphisEmailRejectRequestService
     private readonly httpService: HttpService,
   ) {}
 
-  @OnEvent('reimbursement-request-send-email-confirmation')
+  @OnEvent('reimbursement-request-send-email-rejection')
   async triggerMemphisEvent(data: RejectRequestEmailType) {
     const parsed = await RejectRequestEmailSchema.safeParseAsync(data);
 
