@@ -47,7 +47,7 @@ export class ReimbursementGetAllService {
           )
           .executeTakeFirst();
 
-        const matrix = await trx
+        let matrix = trx
           .selectFrom('finance_reimbursement_approval_matrix')
           .innerJoin(
             'finance_reimbursement_requests',
@@ -59,15 +59,21 @@ export class ReimbursementGetAllService {
             'finance_reimbursement_requests.hrbp_request_status_id',
             'in',
             initialRequestStatuses,
+          );
+
+        if (
+          ['hrbp', 'external reimbursement approver manager'].includes(
+            user.user_assigned_role,
           )
-          .where(
+        ) {
+          matrix = matrix.where(
             'finance_reimbursement_approval_matrix.approver_id',
             '=',
             approver.approver_id,
-          )
-          .execute();
+          );
+        }
 
-        return matrix;
+        return await matrix.execute();
       });
 
       if (approvers.length) {
