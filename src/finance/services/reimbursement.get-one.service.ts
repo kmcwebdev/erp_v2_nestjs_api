@@ -26,6 +26,16 @@ export class ReimbursementGetOneService {
                       'is_hrbp', fram.is_hrbp,
                       'performed_by_user_id', fram.performed_by_user_id,
                       'description', fram.description,
+                      'session_id_source', -- might be the users id or groups table
+                          CASE
+                              WHEN fra.table_reference = 'users' THEN 'users'
+                              WHEN fra.table_reference = 'groups' THEN 'groups'
+                          END,
+                      'session_id', -- might be the user propelauth id or group id
+                          CASE
+                              WHEN fra.table_reference = 'users' THEN u.propelauth_user_id
+                              WHEN fra.table_reference = 'groups' THEN g.group_id
+                          END,
                       'approver_name',
                           CASE
                               WHEN fra.table_reference = 'users' THEN u.full_name
