@@ -9,6 +9,7 @@ import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimburs
 import {
   APPROVED_REQUEST,
   CANCELLED_REQUEST,
+  PENDING_REQUEST,
   PROCESSING_REQUEST,
   REJECTED_REQUEST,
 } from '../common/constant';
@@ -62,7 +63,7 @@ export class ReimbursementApproveService {
                 'finance_reimbursement_requests.reimbursement_request_id',
               )
               .where(
-                'finance_reimbursement_approval_matrix.reimbursement_request_id',
+                'finance_reimbursement_approval_matrix.approval_matrix_id',
                 '=',
                 approval_matrix_id,
               )
@@ -70,6 +71,11 @@ export class ReimbursementApproveService {
                 'finance_reimbursement_requests.request_status_id',
                 'not in',
                 [CANCELLED_REQUEST, REJECTED_REQUEST],
+              )
+              .where(
+                'finance_reimbursement_requests.request_status_id',
+                '=',
+                PENDING_REQUEST,
               )
               .where(
                 'finance_reimbursement_requests.hrbp_request_status_id',
@@ -80,7 +86,8 @@ export class ReimbursementApproveService {
                 'finance_reimbursement_requests.finance_request_status_id',
                 '!=',
                 PROCESSING_REQUEST,
-              ),
+              )
+              .limit(1),
           )
           .where(
             'finance_reimbursement_approval_matrix.approval_matrix_id',
@@ -163,6 +170,11 @@ export class ReimbursementApproveService {
                             DATE_TRUNC('MONTH', CURRENT_DATE) + INTERVAL '9 days' + INTERVAL '1 month'
                       END
                   END,
+                  request_status_id = 
+                      CASE 
+                          WHEN request_status_id != ${APPROVED_REQUEST} THEN ${APPROVED_REQUEST}
+                          ELSE request_status_id
+                      END,
                   hrbp_request_status_id = ${APPROVED_REQUEST},
                   date_approve = CURRENT_TIMESTAMP
               WHERE reimbursement_request_id = ${reimbursementRequestApprovalApprover.reimbursement_request_id}
