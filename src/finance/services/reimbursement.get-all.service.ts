@@ -156,7 +156,7 @@ export class ReimbursementGetAllService {
       );
     }
 
-    if (filter?.reimbursement_type_id && !filter?.history) {
+    if (filter?.reimbursement_type_id) {
       query = query.where(
         'finance_reimbursement_requests.reimbursement_request_type_id',
         '=',
