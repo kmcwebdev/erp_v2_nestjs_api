@@ -113,7 +113,7 @@ export class ReimbursementForApprovalService {
       if (filter?.text_search) {
         query = query.where(
           sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
-         coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')) @@ websearch_to_tsquery(${filter.text_search})`,
+         coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')) @@ plainto_tsquery(${filter.text_search})`,
         );
       }
 
