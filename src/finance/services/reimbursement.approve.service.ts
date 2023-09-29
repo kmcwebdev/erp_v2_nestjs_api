@@ -8,6 +8,7 @@ import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface'
 import { ReimbursementRequestApprovalType } from '../common/dto/approve-reimbursement-request.dto';
 import { APPROVED_REQUEST, PENDING_REQUEST } from '../common/constant';
 import { HrbpApprovalEmailType } from '../common/zod-schema/hrbp-approval-email.schema';
+import { ApproveRequestEmailType } from '../common/zod-schema/approve-email.schema';
 
 @Injectable()
 export class ReimbursementApproveService {
@@ -136,22 +137,75 @@ export class ReimbursementApproveService {
           .executeTakeFirst();
 
         if (!reimbursementRequestApprovalApprover.is_hrbp) {
-          await this.pgsql
-            .updateTable('finance_reimbursement_requests')
-            .set({
-              request_status_id: APPROVED_REQUEST,
-            })
-            .where(
-              'finance_reimbursement_requests.reimbursement_request_id',
-              '=',
-              reimbursementRequestApprovalApprover.reimbursement_request_id,
-            )
-            .execute();
+          await this.pgsql.transaction().execute(async (trx) => {
+            const updateReimbursementRequest = await trx
+              .updateTable('finance_reimbursement_requests as frr')
+              .set({
+                request_status_id: APPROVED_REQUEST,
+              })
+              .where(
+                'frr.reimbursement_request_id',
+                '=',
+                reimbursementRequestApprovalApprover.reimbursement_request_id,
+              )
+              .returning([
+                'frr.reimbursement_request_id',
+                'frr.requestor_id',
+                'frr.expense_type_id',
+                'frr.amount',
+                'frr.attachment',
+                'frr.created_at',
+              ])
+              .executeTakeFirstOrThrow();
+
+            const requestor = await trx
+              .selectFrom('users')
+              .select(['users.email', 'users.employee_id', 'users.full_name'])
+              .where(
+                'users.user_id',
+                '=',
+                updateReimbursementRequest.requestor_id,
+              )
+              .executeTakeFirstOrThrow();
+
+            const expenseType = await trx
+              .selectFrom('finance_reimbursement_expense_types')
+              .select('expense_type')
+              .where(
+                'expense_type_id',
+                '=',
+                updateReimbursementRequest.expense_type_id,
+              )
+              .executeTakeFirstOrThrow();
+
+            const approveRequestEmailData: ApproveRequestEmailType = {
+              to: [requestor.email],
+              fullName: requestor.full_name,
+              employeeId: requestor.employee_id,
+              expenseType: expenseType.expense_type,
+              expenseDate: updateReimbursementRequest.created_at.toISOString(),
+              amount: updateReimbursementRequest.amount,
+              receiptsAttached: updateReimbursementRequest.attachment,
+            };
+
+            this.eventEmitter.emit(
+              'reimbursement-request-send-email-approve-request',
+              approveRequestEmailData,
+            );
+          });
         }
 
         if (reimbursementRequestApprovalApprover.is_hrbp) {
-          await sql`
-              UPDATE finance_reimbursement_requests 
+          await this.pgsql.transaction().execute(async (trx) => {
+            const updateReimbursementRequest = await sql<{
+              reimbursement_request_id: string;
+              requestor_id: string;
+              expense_type_id: string;
+              amount: string;
+              attachment: string;
+              created_at: string;
+            }>`
+              UPDATE finance_reimbursement_requests
               SET payroll_date = 
                   CASE 
                     WHEN EXTRACT(DAY FROM CURRENT_DATE) BETWEEN 1 AND 15 THEN
@@ -177,7 +231,44 @@ export class ReimbursementApproveService {
                   hrbp_request_status_id = ${APPROVED_REQUEST},
                   date_approve = CURRENT_TIMESTAMP
               WHERE reimbursement_request_id = ${reimbursementRequestApprovalApprover.reimbursement_request_id}
-            `.execute(this.pgsql);
+              RETURNING reimbursement_request_id, requestor_id, expense_type_id, amount, attachment, created_at;
+            `.execute(trx);
+
+            const requestor = await trx
+              .selectFrom('users')
+              .select(['users.email', 'users.employee_id', 'users.full_name'])
+              .where(
+                'users.user_id',
+                '=',
+                updateReimbursementRequest.rows[0].requestor_id,
+              )
+              .executeTakeFirstOrThrow();
+
+            const expenseType = await trx
+              .selectFrom('finance_reimbursement_expense_types')
+              .select('expense_type')
+              .where(
+                'expense_type_id',
+                '=',
+                updateReimbursementRequest.rows[0].expense_type_id,
+              )
+              .executeTakeFirstOrThrow();
+
+            const approveRequestEmailData: ApproveRequestEmailType = {
+              to: [requestor.email],
+              fullName: requestor.full_name,
+              employeeId: requestor.employee_id,
+              expenseType: expenseType.expense_type,
+              expenseDate: updateReimbursementRequest.rows[0].created_at,
+              amount: updateReimbursementRequest.rows[0].amount,
+              receiptsAttached: updateReimbursementRequest.rows[0].attachment,
+            };
+
+            this.eventEmitter.emit(
+              'reimbursement-request-send-email-approve-request',
+              approveRequestEmailData,
+            );
+          });
         }
 
         const reimbursement = await this.reimbursementGetOneService.get({

@@ -145,7 +145,7 @@ export class ReimbursementRejectService {
           fullName: requestor.full_name,
           employeeId: requestor.employee_id,
           expenseType: expenseType.expense_type,
-          expenseDate: reimbursementRequest.created_at.toString(),
+          expenseDate: reimbursementRequest.created_at.toISOString(),
           amount: reimbursementRequest.amount,
           receiptsAttached: reimbursementRequest.attachment,
           remarks: data.rejection_reason,
