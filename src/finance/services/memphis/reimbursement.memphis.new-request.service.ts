@@ -41,7 +41,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
   async generatePropelauthLongliveAcessToken(
     data: GeneratePropelauthLongliveAccessTokenType,
-  ) {
+  ): Promise<{ access_token: string }> {
     const { data: response } = await firstValueFrom(
       this.httpService
         .post(
@@ -296,7 +296,13 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 const actionToken =
                   await this.generatePropelauthLongliveAcessToken({
                     user_id: approverManager.propelauth_user_id,
-                  }).catch((err) => console.error(err));
+                  })
+                    .then((data) => data.access_token)
+                    .catch(() => {
+                      throw new Error(
+                        'Failed to fetch user propel access token',
+                      );
+                    });
 
                 const approveLink = `${this.configService.get(
                   'FRONT_END_URL',
