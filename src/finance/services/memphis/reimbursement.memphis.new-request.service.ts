@@ -296,17 +296,15 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                 const actionToken =
                   await this.generatePropelauthLongliveAcessToken({
                     user_id: approverManager.propelauth_user_id,
-                  }).catch((err) => console.log(err));
+                  }).catch((err) => console.error(err));
 
                 const approveLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/approve/${'actionToken'}`;
+                )}/email-action/approve/${actionToken}`;
 
                 const rejectLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/reject/${'actionToken'}`;
-
-                console.log(actionToken);
+                )}/email-action/reject/${actionToken}`;
 
                 await trx
                   .insertInto('finance_reimbursement_approval_links')
