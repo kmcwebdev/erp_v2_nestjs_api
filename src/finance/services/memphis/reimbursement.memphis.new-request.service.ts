@@ -306,6 +306,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   expenseDate: newRequest.created_at,
                   amount: newRequest.amount,
                   receiptsAttached: newRequest.attachment,
+                  approvalLink: approveLink,
+                  rejectionLink: rejectLink,
                 };
 
                 this.eventEmitter.emit(
