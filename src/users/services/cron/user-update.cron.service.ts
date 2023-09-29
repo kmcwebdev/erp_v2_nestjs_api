@@ -4,7 +4,6 @@ import { Cron } from '@nestjs/schedule';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { UsersApiService } from '../users.api.service';
-import { propelauth } from 'src/auth/common/lib/propelauth';
 
 const TEMPORARY_APPROVER = 'leanna.pedragosa@kmc.solutions';
 
@@ -35,25 +34,6 @@ export class UserUpdateCronService {
 
         const userInErpHrV1 =
           await this.usersApiService.fetchUserByEmailInERPHrV1(u.email);
-
-        const propelauthUser = await propelauth.fetchUserMetadataByEmail(
-          u.email,
-        );
-
-        if (propelauthUser) {
-          await this.pgsql
-            .updateTable('users as u')
-            .set({
-              propelauth_user_id: propelauthUser.userId,
-              temporary_propelauth_user_id: false,
-            })
-            .where('u.email', '=', u.email)
-            .execute();
-
-          this.logger.log(
-            'Propelauth user updated' + ' : ' + propelauthUser.userId,
-          );
-        }
 
         this.logger.log(userInErpHrV1.statusText + ' : ' + u.email);
 
