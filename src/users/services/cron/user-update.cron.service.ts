@@ -40,6 +40,8 @@ export class UserUpdateCronService {
           u.email,
         );
 
+        this.logger.log(userInErpHrV1.statusText + ' : ' + u.email);
+
         if (userInErpHrV1.status === 200 && propelauthUser) {
           const {
             sr,
