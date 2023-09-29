@@ -1,14 +1,71 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
+import { ReimbursementApproveService } from './reimbursement.approve.service';
+import { ReimbursementRequestEmailApprovalType } from '../common/dto/email-approval-reimbursement-request.dto';
+import { propelauth } from 'src/auth/common/lib/propelauth';
 
 @Injectable()
 export class ReimbursementEmailApprovalService {
   private readonly logger = new Logger(ReimbursementEmailApprovalService.name);
 
-  constructor(@InjectKysely() private readonly pgsql: DB) {}
+  constructor(
+    private readonly reimbursementApproveService: ReimbursementApproveService,
+    @InjectKysely() private readonly pgsql: DB,
+  ) {}
 
-  async approve(data: any) {
-    return 'OK';
+  async approve(data: ReimbursementRequestEmailApprovalType) {
+    const result = await this.pgsql.transaction().execute(async (trx) => {
+      const approvalToken = await trx
+        .selectFrom('finance_reimbursement_approval_links as fral')
+        .select(['fral.approver_matrix_id', 'fral.token'])
+        .where('fral.token', '=', data.token)
+        .executeTakeFirstOrThrow();
+
+      const propelauthUser = await propelauth.validateAccessTokenAndGetUser(
+        approvalToken.token,
+      );
+
+      const userMetadata = await propelauth.fetchUserMetadataByUserId(
+        propelauthUser.userId,
+        true,
+      );
+
+      const usersProperty = Object.values(userMetadata.orgIdToOrgInfo).map(
+        (orgMemberInfo) => ({
+          orgId: orgMemberInfo.orgId,
+          orgName: orgMemberInfo.orgName,
+          userAssignedRole: orgMemberInfo.assignedRole,
+          usersPermission: orgMemberInfo.permissions,
+        }),
+      );
+
+      const userFromDb = await trx
+        .selectFrom('users')
+        .select([
+          'users.user_id',
+          'users.full_name',
+          'users.hrbp_approver_email',
+        ])
+        .where('users.propelauth_user_id', '=', propelauthUser.userId)
+        .executeTakeFirst();
+
+      await this.reimbursementApproveService.approve(
+        {
+          original_user_id: userFromDb.user_id,
+          hrbp_approver_email: userFromDb.hrbp_approver_email,
+          user_assigned_role: usersProperty[0].userAssignedRole.toLowerCase(),
+          permissions: usersProperty[0].usersPermission,
+          ...propelauthUser,
+        },
+        {
+          approval_matrix_ids: [approvalToken.approver_matrix_id],
+        },
+      );
+
+      return 'OK';
+    });
+
+    return result;
   }
 }

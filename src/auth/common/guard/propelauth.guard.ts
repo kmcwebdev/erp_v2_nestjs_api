@@ -75,7 +75,7 @@ export class PropelauthGuard implements CanActivate {
         true,
       );
 
-      const result = Object.values(userMetadata.orgIdToOrgInfo).map(
+      const userProperties = Object.values(userMetadata.orgIdToOrgInfo).map(
         (orgMemberInfo) => ({
           orgId: orgMemberInfo.orgId,
           orgName: orgMemberInfo.orgName,
@@ -102,9 +102,9 @@ export class PropelauthGuard implements CanActivate {
         request.user.full_name = userFromDb.full_name;
       }
 
-      if (result.length) {
-        const assigned_role = result[0].userAssignedRole.toLowerCase();
-        const assigned_permissions = result[0].usersPermission;
+      if (userProperties.length) {
+        const assigned_role = userProperties[0].userAssignedRole.toLowerCase();
+        const assigned_permissions = userProperties[0].usersPermission;
 
         request.user.user_assigned_role = assigned_role;
         request.user.permissions = assigned_permissions;

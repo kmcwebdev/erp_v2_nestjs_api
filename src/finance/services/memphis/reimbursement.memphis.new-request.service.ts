@@ -1,16 +1,18 @@
-import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { catchError, firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { UsersApiService } from 'src/users/services/users.api.service';
+import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
 import { ReimbursementRequest } from 'src/finance/common/interface/getOneRequest.interface';
 import { ConfirmationEmailType } from 'src/finance/common/zod-schema/confirmation-email.schema';
 import { HrbpApprovalEmailType } from 'src/finance/common/zod-schema/hrbp-approval-email.schema';
 import { ManagerApprovalEmailType } from 'src/finance/common/zod-schema/manager-approval-email.schema';
-import { SCHEDULED_REQUEST, UNSCHEDULED_REQUEST } from '../../common/constant';
+import { GeneratePropelauthLongliveAccessTokenType } from 'src/auth/common/dto/generate-propelauth-longlive-access-token.dto';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -24,6 +26,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
   constructor(
     @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
     private readonly memphisService: MemphisService,
     private readonly eventEmitter: EventEmitter2,
     private readonly usersApiService: UsersApiService,
@@ -34,6 +37,38 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });
+  }
+
+  async generatePropelauthLongliveAcessToken(
+    data: GeneratePropelauthLongliveAccessTokenType,
+  ) {
+    const { data: response } = await firstValueFrom(
+      this.httpService
+        .post(
+          '/api/backend/v1/access_token',
+          {
+            duration_in_minutes: 2880,
+            user_id: data.user_id,
+          },
+          {
+            baseURL: this.configService.get('PROPELAUTH_AUTH_URL'),
+            headers: {
+              Authorization: `Bearer ${this.configService.get(
+                'PROPELAUTH_API_KEY',
+              )}`,
+            },
+          },
+        )
+        .pipe(
+          catchError(() => {
+            throw 'Failed to generate long live access token';
+          }),
+        ),
+    );
+
+    this.logger.log('Generate success for propelauth long live access token');
+
+    return response;
   }
 
   async onModuleInit() {
@@ -178,6 +213,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     'users.user_id',
                     'users.email',
                     'users.full_name',
+                    'users.propelauth_user_id',
                   ])
                   .where(
                     'finance_reimbursement_approvers.table_reference',
@@ -206,6 +242,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   approverManager = {
                     approver_id: newApprover.approver_id,
                     user_id: dbUser.user_id,
+                    propelauth_user_id: dbUser.propelauth_user_id,
                     email: dbUser.email,
                     full_name: dbUser.full_name,
                   };
@@ -254,16 +291,22 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   )
                   .executeTakeFirst();
 
-                const randomBytes = crypto.randomBytes(16);
-                const actionToken = randomBytes.toString('hex');
+                console.log(approverManager);
+
+                const actionToken =
+                  await this.generatePropelauthLongliveAcessToken({
+                    user_id: approverManager.propelauth_user_id,
+                  }).catch((err) => console.log(err));
 
                 const approveLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/approve/${actionToken}`;
+                )}/email-action/approve/${'actionToken'}`;
 
                 const rejectLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/reject/${actionToken}`;
+                )}/email-action/reject/${'actionToken'}`;
+
+                console.log(actionToken);
 
                 await trx
                   .insertInto('finance_reimbursement_approval_links')
@@ -273,7 +316,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     approve_link: approveLink,
                     rejection_link: rejectLink,
                     approver_matrix_id: approvers.approval_matrix_id,
-                    token: actionToken,
+                    token: '123123',
                     link_expired: false,
                   })
                   .execute();
