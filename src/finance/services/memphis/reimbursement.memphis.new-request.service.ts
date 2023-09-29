@@ -291,8 +291,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   )
                   .executeTakeFirst();
 
-                console.log(approverManager);
-
                 const actionToken =
                   await this.generatePropelauthLongliveAcessToken({
                     user_id: approverManager.propelauth_user_id,
