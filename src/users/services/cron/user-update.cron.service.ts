@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { UsersApiService } from '../users.api.service';
+import { propelauth } from 'src/auth/common/lib/propelauth';
 
 const TEMPORARY_APPROVER = 'leanna.pedragosa@kmc.solutions';
 
@@ -17,7 +18,7 @@ export class UserUpdateCronService {
     @InjectKysely() private readonly pgsql: DB,
   ) {}
 
-  @Cron(CronExpression.EVERY_12_HOURS)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCron() {
     try {
       const outdatedUsers = await this.pgsql
@@ -35,6 +36,10 @@ export class UserUpdateCronService {
         const userInErpHrV1 =
           await this.usersApiService.fetchUserByEmailInERPHrV1(u.email);
 
+        const propelauthUser = await propelauth.fetchUserMetadataByEmail(
+          u.email,
+        );
+
         if (userInErpHrV1.status === 200) {
           const {
             sr,
@@ -50,6 +55,7 @@ export class UserUpdateCronService {
           const updatedUser = await this.pgsql
             .updateTable('users')
             .set({
+              propelauth_user_id: propelauthUser ? propelauthUser.userId : null,
               employee_id: sr || 'Not set in erp hr',
               full_name: name,
               first_name: firstName,
