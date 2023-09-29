@@ -41,11 +41,14 @@ import { ReimbursementForApprovalService } from './services/reimbursement.for-ap
 import { ReimbursementAnalyticsService } from './services/reimbursement.analytics.service';
 import { ReimbursementRejectService } from './services/reimbursement.reject.service';
 import { ReimbursementCancelService } from './services/reimbursement.cancel.service';
+import { ReimbursementEmailApprovalService } from './services/reimbursement.email-approval.service';
+import { ReimbursementEmailRejectionService } from './services/reimbursement.email-rejection.service';
 import { ReimbursementCreateAttachmentService } from './services/reimbursement.create-attachment.service';
 import { ReimbursementApproveService } from './services/reimbursement.approve.service';
 import { ReimbursementOhHoldService } from './services/reimbursement.onhold.service';
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
 import { ReimbursementStreamFileService } from './services/reimbursement.stream-file.service';
+import { IsUrl } from 'src/auth/common/decorator/url.decorator';
 
 @Controller('finance')
 export class FinanceController {
@@ -63,6 +66,8 @@ export class FinanceController {
     private readonly reimbursementRejectService: ReimbursementRejectService,
     private readonly reimbursementOhHoldService: ReimbursementOhHoldService,
     private readonly reimbursementCancelService: ReimbursementCancelService,
+    private readonly reimbursementEmailApprovalService: ReimbursementEmailApprovalService,
+    private readonly reimbursementEmailRejectionService: ReimbursementEmailRejectionService,
     private readonly reimbursementCreateAttachmentService: ReimbursementCreateAttachmentService,
     private readonly reimbursementAuditlogService: ReimbursementAuditlogService,
     private readonly reimbursementStreamFileService: ReimbursementStreamFileService,
@@ -180,6 +185,20 @@ export class FinanceController {
   @Get('/reimbursements/requests/auditlogs')
   getAuditlogs(@Query() query: GetAuditlogReimbursementRequestDTO) {
     return this.reimbursementAuditlogService.get(query);
+  }
+
+  @IsUrl()
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/email-approval/approve')
+  ReimbursementEmailApprovalApprove(@Body() body: any) {
+    return this.reimbursementEmailApprovalService.approve({});
+  }
+
+  @IsUrl()
+  @HttpCode(HttpStatus.OK)
+  @Post('/reimbursement/requests/email-approval/reject')
+  ReimbursementEmailApprovalReject(@Body() body: any) {
+    return this.reimbursementEmailRejectionService.reject({});
   }
 
   @Get('/reimbursements/requests/reports/hrbp')
