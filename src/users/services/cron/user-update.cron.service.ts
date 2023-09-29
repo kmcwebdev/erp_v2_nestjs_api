@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { UsersApiService } from '../users.api.service';
@@ -18,7 +18,7 @@ export class UserUpdateCronService {
     @InjectKysely() private readonly pgsql: DB,
   ) {}
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron('0 */1 * * * *')
   async handleCron() {
     try {
       const outdatedUsers = await this.pgsql
@@ -68,6 +68,7 @@ export class UserUpdateCronService {
                   : hrbpEmail,
               position,
               temporary_propelauth_user_id: false,
+              temporary_employee_id: sr ? false : true,
               updated_via_cron_erp_hr: true,
             })
             .returning(['users.email'])
