@@ -40,7 +40,7 @@ export class UserUpdateCronService {
           u.email,
         );
 
-        if (userInErpHrV1.status === 200) {
+        if (userInErpHrV1.status === 200 && propelauthUser) {
           const {
             sr,
             name,
@@ -55,7 +55,7 @@ export class UserUpdateCronService {
           const updatedUser = await this.pgsql
             .updateTable('users')
             .set({
-              propelauth_user_id: propelauthUser ? propelauthUser.userId : null,
+              propelauth_user_id: propelauthUser.userId,
               employee_id: sr || 'Not set in erp hr',
               full_name: name,
               first_name: firstName,
@@ -67,6 +67,7 @@ export class UserUpdateCronService {
                   ? TEMPORARY_APPROVER
                   : hrbpEmail,
               position,
+              temporary_propelauth_user_id: false,
               updated_via_cron_erp_hr: true,
             })
             .returning(['users.email'])
