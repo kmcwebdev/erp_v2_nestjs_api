@@ -49,6 +49,7 @@ import { ReimbursementOhHoldService } from './services/reimbursement.onhold.serv
 import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.service';
 import { ReimbursementStreamFileService } from './services/reimbursement.stream-file.service';
 import { IsUrl } from 'src/auth/common/decorator/url.decorator';
+import { ReimbursementRequestEmailApprovalDTO } from './common/dto/email-approval-reimbursement-request.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -190,8 +191,10 @@ export class FinanceController {
   @IsUrl()
   @HttpCode(HttpStatus.OK)
   @Post('/reimbursement/requests/email-approval/approve')
-  ReimbursementEmailApprovalApprove(@Body() body: any) {
-    return this.reimbursementEmailApprovalService.approve({});
+  ReimbursementEmailApprovalApprove(
+    @Body() body: ReimbursementRequestEmailApprovalDTO,
+  ) {
+    return this.reimbursementEmailApprovalService.approve(body);
   }
 
   @IsUrl()

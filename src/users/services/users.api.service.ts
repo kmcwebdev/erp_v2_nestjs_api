@@ -23,7 +23,6 @@ export class UsersApiService {
 
   async getUsers() {
     return null;
-    ``;
   }
 
   async createOrGetUserInDatabase(data: CreateUserType) {
@@ -38,7 +37,12 @@ export class UsersApiService {
         email,
         temporary_propelauth_user_id: false,
       })
-      .returning(['users.user_id', 'users.email', 'users.full_name'])
+      .returning([
+        'users.user_id',
+        'users.propelauth_user_id',
+        'users.email',
+        'users.full_name',
+      ])
       .onConflict((oc) => oc.column('email').doNothing())
       .executeTakeFirst();
 
@@ -48,7 +52,12 @@ export class UsersApiService {
         .execute(async (trx) => {
           const user = await trx
             .selectFrom('users')
-            .select(['users.user_id', 'users.email', 'users.full_name'])
+            .select([
+              'users.user_id',
+              'users.propelauth_user_id',
+              'users.email',
+              'users.full_name',
+            ])
             .where('users.email', '=', email)
             .executeTakeFirst();
 
