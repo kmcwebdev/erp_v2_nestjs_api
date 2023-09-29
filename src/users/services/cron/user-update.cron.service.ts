@@ -49,6 +49,10 @@ export class UserUpdateCronService {
             })
             .where('u.email', '=', u.email)
             .execute();
+
+          this.logger.log(
+            'Propelauth user updated' + ' : ' + propelauthUser.userId,
+          );
         }
 
         this.logger.log(userInErpHrV1.statusText + ' : ' + u.email);
