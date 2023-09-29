@@ -56,7 +56,7 @@ export class UserUpdateCronService {
             .updateTable('users')
             .set({
               propelauth_user_id: propelauthUser.userId,
-              employee_id: sr || 'Not set in erp hr',
+              employee_id: sr || 'NA',
               full_name: name,
               first_name: firstName,
               last_name: lastName,
