@@ -16,6 +16,8 @@ export class ReimbursementEmailApprovalService {
 
   async approve(data: ReimbursementRequestEmailApprovalType) {
     const result = await this.pgsql.transaction().execute(async (trx) => {
+      console.log(data.token);
+
       const approvalToken = await trx
         .selectFrom('finance_reimbursement_approval_links as fral')
         .select(['fral.approver_matrix_id', 'fral.token'])

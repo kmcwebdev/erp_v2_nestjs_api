@@ -320,7 +320,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     approve_link: approveLink,
                     rejection_link: rejectLink,
                     approver_matrix_id: approvers.approval_matrix_id,
-                    token: '123123',
+                    token: actionToken,
                     link_expired: false,
                   })
                   .execute();
