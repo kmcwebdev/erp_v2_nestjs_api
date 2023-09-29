@@ -183,7 +183,7 @@ export class ReimbursementApproveService {
               fullName: requestor.full_name,
               employeeId: requestor.employee_id,
               expenseType: expenseType.expense_type,
-              expenseDate: updateReimbursementRequest.created_at.toISOString(),
+              expenseDate: updateReimbursementRequest.created_at.toString(),
               amount: updateReimbursementRequest.amount,
               receiptsAttached: updateReimbursementRequest.attachment,
             };
