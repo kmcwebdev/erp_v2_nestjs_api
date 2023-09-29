@@ -25,7 +25,7 @@ export class ReimbursementEmailApprovalService {
         .executeTakeFirstOrThrow();
 
       const propelauthUser = await propelauth.validateAccessTokenAndGetUser(
-        approvalToken.token,
+        `Bearer ${data.token}`,
       );
 
       const userMetadata = await propelauth.fetchUserMetadataByUserId(
