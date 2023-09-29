@@ -31,6 +31,8 @@ import { ReimbursementMemphisEmailHrbpApprovalService } from './services/memphis
 import { ReimbursementMemphisEmailManagerApprovalService } from './services/memphis/reimbursement.memphis-email-manager-approval.service';
 import { ReimbursementMemphisEmailRejectRequestService } from './services/memphis/reimbursement.memphis-email-reject-request.service';
 import { ReimbursementMemphisEmailApproveService } from './services/memphis/reimbursement.memphise-email-approve.service';
+import { ReimbursementEmailApprovalService } from './services/reimbursement.email-approval.service';
+import { ReimbursementEmailRejectionService } from './services/reimbursement.email-rejection.service';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { ReimbursementMemphisEmailApproveService } from './services/memphis/reim
     ReimbursementOhHoldService,
     ReimbursementCancelService,
     ReimbursementRejectService,
+    ReimbursementEmailApprovalService,
+    ReimbursementEmailRejectionService,
     ReimbursementAuditlogService,
     ReimbursementStreamFileService,
     ReimbursementCreateAttachmentService,
