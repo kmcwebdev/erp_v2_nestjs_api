@@ -40,7 +40,20 @@ export class UserUpdateCronService {
           u.email,
         );
 
-        if (userInErpHrV1.status === 200 && propelauthUser) {
+        if (propelauthUser) {
+          await this.pgsql
+            .updateTable('users as u')
+            .set({
+              propelauth_user_id: propelauthUser.userId,
+              temporary_propelauth_user_id: false,
+            })
+            .where('u.email', '=', u.email)
+            .execute();
+        }
+
+        this.logger.log(userInErpHrV1.statusText + ' : ' + u.email);
+
+        if (userInErpHrV1.status === 200) {
           const {
             sr,
             name,
@@ -55,7 +68,6 @@ export class UserUpdateCronService {
           const updatedUser = await this.pgsql
             .updateTable('users')
             .set({
-              propelauth_user_id: propelauthUser.userId,
               employee_id: sr || 'NA',
               full_name: name,
               first_name: firstName,
