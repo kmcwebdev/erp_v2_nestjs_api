@@ -30,6 +30,7 @@ import { ReimbursementMemphisEmailConfirmationService } from './services/memphis
 import { ReimbursementMemphisEmailHrbpApprovalService } from './services/memphis/reimbursement.memphis-email-hrbp-approval.service';
 import { ReimbursementMemphisEmailManagerApprovalService } from './services/memphis/reimbursement.memphis-email-manager-approval.service';
 import { ReimbursementMemphisEmailRejectRequestService } from './services/memphis/reimbursement.memphis-email-reject-request.service';
+import { ReimbursementMemphisEmailApproveService } from './services/memphis/reimbursement.memphise-email-approve.service';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { ReimbursementMemphisEmailRejectRequestService } from './services/memphi
     ReimbursementMemphisEmailManagerApprovalService,
     ReimbursementMemphisEmailHrbpApprovalService,
     ReimbursementMemphisEmailRejectRequestService,
+    ReimbursementMemphisEmailApproveService,
   ],
 })
 export class FinanceModule {}
