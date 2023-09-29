@@ -76,14 +76,6 @@ export class ReimbursementForApprovalService {
           'finance_reimbursement_requests.created_at',
         ]);
 
-      if (EXCLUDED_IN_LIST.length) {
-        query = query.where(
-          'finance_reimbursement_requests.request_status_id',
-          'not in',
-          EXCLUDED_IN_LIST,
-        );
-      }
-
       query = query.where(
         'finance_reimbursement_requests.hrbp_request_status_id',
         '=',

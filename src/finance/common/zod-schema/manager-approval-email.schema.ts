@@ -11,6 +11,8 @@ export const ManagerApprovalEmailSchema = z.object({
   expenseDate: z.string().nonempty(),
   amount: z.string().nonempty(),
   receiptsAttached: z.string().nonempty(),
+  approvalLink: z.string().url().optional(),
+  rejectionLink: z.string().url().optional(),
 });
 
 export type ManagerApprovalEmailType = z.infer<
