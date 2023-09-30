@@ -1,5 +1,11 @@
 import { ConfigService } from '@nestjs/config';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { catchError, firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -189,6 +195,21 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             const approvers = newRequest.dynamic_approvers.split(',');
             approvers.forEach(async (email) => {
               await this.pgsql.transaction().execute(async (trx) => {
+                const IamMyManagerStupidMotherFucker = await trx
+                  .selectFrom('users')
+                  .select('users.email')
+                  .where('users.user_id', '=', newRequest.requestor_id)
+                  .executeTakeFirst();
+
+                if (IamMyManagerStupidMotherFucker) {
+                  if (IamMyManagerStupidMotherFucker.email === email) {
+                    throw new HttpException(
+                      'Nope not gonna happen 🤪',
+                      HttpStatus.BAD_REQUEST,
+                    );
+                  }
+                }
+
                 const propelauthUser =
                   await this.usersApiService.fetchUserInPropelauthByEmail(
                     email,
