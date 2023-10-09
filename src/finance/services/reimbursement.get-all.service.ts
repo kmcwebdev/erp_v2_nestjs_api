@@ -225,6 +225,20 @@ export class ReimbursementGetAllService {
       );
     }
 
+    if (filter?.expense_type_ids) {
+      const expenseTypeIds = filter.expense_type_ids
+        .replace(/"/g, '')
+        .split(',');
+
+      // TODO: Do the check here if all items in array is a valid uuid
+
+      query = query.where(
+        'finance_reimbursement_requests.expense_type_id',
+        'in',
+        expenseTypeIds,
+      );
+    }
+
     if (filter?.text_search) {
       query = query.where(
         sql`to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
