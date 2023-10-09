@@ -29,7 +29,15 @@ export class ReimbursementGetAllService {
       ) &&
       filter?.history
     ) {
-      const initialRequestStatuses = [APPROVED_REQUEST, REJECTED_REQUEST];
+      const initialRequestStatuses = [REJECTED_REQUEST];
+
+      if (
+        ['hrbp', 'external reimbursement approver manager'].includes(
+          user.user_assigned_role,
+        )
+      ) {
+        initialRequestStatuses.push(APPROVED_REQUEST);
+      }
 
       if (user.user_assigned_role === 'finance') {
         initialRequestStatuses.push(ONHOLD_REQUEST);
@@ -54,12 +62,33 @@ export class ReimbursementGetAllService {
             'finance_reimbursement_requests.reimbursement_request_id',
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
-          .select('finance_reimbursement_requests.reimbursement_request_id')
-          .where(
+          .select('finance_reimbursement_requests.reimbursement_request_id');
+
+        if (
+          user.user_assigned_role === 'external reimbursement approver manager'
+        ) {
+          matrix = matrix.where(
+            'finance_reimbursement_requests.request_status_id',
+            'in',
+            initialRequestStatuses,
+          );
+        }
+
+        if (user.user_assigned_role === 'hrbp') {
+          matrix = matrix.where(
             'finance_reimbursement_requests.hrbp_request_status_id',
             'in',
             initialRequestStatuses,
           );
+        }
+
+        if (user.user_assigned_role === 'finance') {
+          matrix = matrix.where(
+            'finance_reimbursement_requests.finance_request_status_id',
+            'in',
+            initialRequestStatuses,
+          );
+        }
 
         if (
           ['hrbp', 'external reimbursement approver manager'].includes(
