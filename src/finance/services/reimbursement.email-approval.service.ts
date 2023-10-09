@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { ReimbursementApproveService } from './reimbursement.approve.service';
@@ -19,8 +19,16 @@ export class ReimbursementEmailApprovalService {
       const approvalToken = await trx
         .selectFrom('finance_reimbursement_approval_links as fral')
         .select(['fral.approver_matrix_id', 'fral.token'])
+        .where('fral.link_expired', '=', false)
         .where('fral.token', '=', data.token)
-        .executeTakeFirstOrThrow();
+        .executeTakeFirst();
+
+      if (!approvalToken) {
+        throw new HttpException(
+          'Approval link not found or has expired',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const propelauthUser = await propelauth.validateAccessTokenAndGetUser(
         `Bearer ${data.token}`,
@@ -62,6 +70,14 @@ export class ReimbursementEmailApprovalService {
           approval_matrix_ids: [approvalToken.approver_matrix_id],
         },
       );
+
+      await this.pgsql
+        .updateTable('finance_reimbursement_approval_links as fral')
+        .set({
+          link_expired: true,
+        })
+        .where('fral.token', '=', data.token)
+        .execute();
 
       return 'OK';
     });
