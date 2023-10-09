@@ -104,6 +104,7 @@ const GetAllReimbursementRequestSchema = z
       z.boolean().default(false),
     ),
     // TODO: Add message and description for this
+    expense_type_ids: z.string().nonempty(),
     from: z.string().datetime(),
     to: z.string().datetime(),
   })
