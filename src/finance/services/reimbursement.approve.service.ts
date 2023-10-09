@@ -150,6 +150,7 @@ export class ReimbursementApproveService {
               )
               .returning([
                 'frr.reimbursement_request_id',
+                'frr.reference_no',
                 'frr.requestor_id',
                 'frr.expense_type_id',
                 'frr.amount',
@@ -181,6 +182,7 @@ export class ReimbursementApproveService {
             const approveRequestEmailData: ApproveRequestEmailType = {
               to: [requestor.email],
               fullName: requestor.full_name,
+              referenceNo: updateReimbursementRequest.reference_no,
               employeeId: requestor.employee_id,
               expenseType: expenseType.expense_type,
               expenseDate: updateReimbursementRequest.created_at.toString(),
