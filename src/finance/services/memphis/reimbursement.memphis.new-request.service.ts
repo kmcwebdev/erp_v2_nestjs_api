@@ -201,16 +201,27 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   }
                 }
 
+                let propelauth_user_id = '';
+
                 const propelauthUser =
                   await this.usersApiService.fetchUserInPropelauthByEmail(
                     email,
                   );
 
+                propelauth_user_id = propelauthUser.userId;
+
                 if (!propelauthUser) {
-                  await this.usersApiService.createUserInPropelauth(
-                    email,
-                    'External Reimbursement Approver Manager',
-                  );
+                  const newPropelauthUser =
+                    await this.usersApiService.createUserInPropelauth(
+                      email,
+                      'External Reimbursement Approver Manager',
+                    );
+
+                  propelauth_user_id = newPropelauthUser.userId;
+                }
+
+                if (!propelauth_user_id) {
+                  throw new Error('Propelauth user id not populated with data');
                 }
 
                 let approverManager = await trx
@@ -239,6 +250,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   const dbUser =
                     await this.usersApiService.createOrGetUserInDatabase({
                       email,
+                      propelauth_user_id,
                     });
 
                   const newApprover = await trx
@@ -254,7 +266,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   approverManager = {
                     approver_id: newApprover.approver_id,
                     user_id: dbUser.user_id,
-                    propelauth_user_id: dbUser.propelauth_user_id,
+                    propelauth_user_id,
                     email: dbUser.email,
                     full_name: dbUser.full_name,
                   };
@@ -305,7 +317,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
                 const actionToken =
                   await this.generatePropelauthLongliveAcessToken({
-                    user_id: approverManager.propelauth_user_id,
+                    user_id: propelauth_user_id,
                   })
                     .then((data) => data.access_token)
                     .catch(() => {
