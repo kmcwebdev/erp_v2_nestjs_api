@@ -133,7 +133,7 @@ export class UsersApiService {
       password: temporaryPassword,
       askUserToUpdatePasswordOnLogin: true,
       sendEmailToConfirmEmailAddress: false,
-      emailConfirmed: true, // TODO: Might be a dangerous move.
+      emailConfirmed: true,
     });
 
     this.eventEmitter.emit('reimbursement-request-send-email-new-user', {

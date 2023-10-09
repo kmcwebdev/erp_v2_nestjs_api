@@ -7,7 +7,6 @@ import {
   CANCELLED_REQUEST,
   ONHOLD_REQUEST,
   PENDING_REQUEST,
-  PROCESSING_REQUEST,
   REJECTED_REQUEST,
   SCHEDULED_REQUEST,
   UNSCHEDULED_REQUEST,
@@ -370,8 +369,8 @@ export class ReimbursementAnalyticsService {
           )
           .where(
             'finance_reimbursement_requests.finance_request_status_id',
-            '!=',
-            PROCESSING_REQUEST,
+            '=',
+            PENDING_REQUEST,
           )
           .executeTakeFirst();
 
@@ -390,8 +389,8 @@ export class ReimbursementAnalyticsService {
           )
           .where(
             'finance_reimbursement_requests.finance_request_status_id',
-            '!=',
-            PROCESSING_REQUEST,
+            '=',
+            PENDING_REQUEST,
           )
           .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
@@ -415,8 +414,8 @@ export class ReimbursementAnalyticsService {
           )
           .where(
             'finance_reimbursement_requests.finance_request_status_id',
-            '!=',
-            PROCESSING_REQUEST,
+            '=',
+            PENDING_REQUEST,
           )
           .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
