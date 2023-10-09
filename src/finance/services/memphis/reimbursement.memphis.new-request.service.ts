@@ -1,11 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { catchError, firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -203,10 +197,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
                 if (IamMyManagerStupidMotherFucker) {
                   if (IamMyManagerStupidMotherFucker.email === email) {
-                    throw new HttpException(
-                      'Nope not gonna happen 🤪',
-                      HttpStatus.BAD_REQUEST,
-                    );
+                    throw new Error('Nope not gonna happen 🤪');
                   }
                 }
 
@@ -323,13 +314,18 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       );
                     });
 
+                // TODO: Can be refactor
                 const approveLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/approve/${actionToken}`;
+                )}/email-action/approve/${actionToken}?requestor=${
+                  newRequest.full_name || 'no_name'
+                }&rid=${newRequest.reference_no}`;
 
                 const rejectLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/reject/${actionToken}`;
+                )}/email-action/reject/${actionToken}?requestor=${
+                  newRequest.full_name || 'no_name'
+                }&rid=${newRequest.reference_no}`;
 
                 await trx
                   .insertInto('finance_reimbursement_approval_links')

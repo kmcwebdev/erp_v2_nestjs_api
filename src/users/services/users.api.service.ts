@@ -127,6 +127,9 @@ export class UsersApiService {
 
     const newPropelauthUser = await propelauth.createUser({
       email: email,
+      firstName: 'Juan',
+      lastName: 'Dela Cruz',
+      username: email,
       password: temporaryPassword,
       askUserToUpdatePasswordOnLogin: true,
       sendEmailToConfirmEmailAddress: false,
