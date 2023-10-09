@@ -50,7 +50,7 @@ export class ReimbursementRejectService {
               reimbursement_request_id:
                 reimbursementRequest.reimbursement_request_id,
               user_id: user.original_user_id,
-              description: `[REJECTED]: ${data.rejection_reason}`,
+              description: data.rejection_reason,
             })
             .execute();
 

@@ -129,7 +129,7 @@ export class UsersApiService {
       email: email,
       firstName: 'Juan',
       lastName: 'Dela Cruz',
-      username: email,
+      username: email.match(/([^@]+)/)[0],
       password: temporaryPassword,
       askUserToUpdatePasswordOnLogin: true,
       sendEmailToConfirmEmailAddress: false,
