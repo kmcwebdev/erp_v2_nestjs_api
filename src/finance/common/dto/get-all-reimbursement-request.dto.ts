@@ -103,6 +103,9 @@ const GetAllReimbursementRequestSchema = z
       (val) => (val === 'true' ? true : false),
       z.boolean().default(false),
     ),
+    // TODO: Add message and description for this
+    from: z.string().datetime(),
+    to: z.string().datetime(),
   })
   .partial()
   .refine(

@@ -232,6 +232,14 @@ export class ReimbursementGetAllService {
       );
     }
 
+    if (filter?.from && filter?.to) {
+      const { from, to } = filter;
+
+      query = query.where(
+        sql`DATE(finance_reimbursement_requests.created_at) BETWEEN ${from} AND ${to}`,
+      );
+    }
+
     return await query
       .orderBy('finance_reimbursement_requests.created_at', 'desc')
       .limit(default_page_limit || filter?.page_limit)
