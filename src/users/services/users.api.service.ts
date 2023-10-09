@@ -127,13 +127,10 @@ export class UsersApiService {
 
     const newPropelauthUser = await propelauth.createUser({
       email: email,
-      firstName: 'Juan',
-      lastName: 'Dela Cruz',
-      username: email.match(/([^@]+)/)[0],
       password: temporaryPassword,
       askUserToUpdatePasswordOnLogin: true,
-      sendEmailToConfirmEmailAddress: false,
-      emailConfirmed: true,
+      sendEmailToConfirmEmailAddress: true,
+      emailConfirmed: false,
     });
 
     this.eventEmitter.emit('reimbursement-request-send-email-new-user', {
