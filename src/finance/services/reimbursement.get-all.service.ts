@@ -203,14 +203,6 @@ export class ReimbursementGetAllService {
       );
     }
 
-    if (filter?.expense_type_id) {
-      query = query.where(
-        'finance_reimbursement_requests.expense_type_id',
-        '=',
-        filter.expense_type_id,
-      );
-    }
-
     if (filter?.request_status_id) {
       query = query.where(
         'finance_reimbursement_requests.request_status_id',
