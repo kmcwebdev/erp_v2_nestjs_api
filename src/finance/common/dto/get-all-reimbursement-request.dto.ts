@@ -11,22 +11,6 @@ const GetAllReimbursementRequestSchema = z
       .uuid({
         message: 'reimbursement_type_id must be a valid uuid',
       }),
-    expense_type_id: z
-      .string({
-        description: 'expense_type_id',
-        invalid_type_error: 'expense_type_id must be a string',
-      })
-      .uuid({
-        message: 'expense_type_id must be a valid uuid',
-      }),
-    requestor_id: z
-      .string({
-        description: 'requestor_id',
-        invalid_type_error: 'requestor_id must be a string',
-      })
-      .uuid({
-        message: 'requestor_id must be a valid uuid',
-      }),
     request_status_id: z.array(
       z
         .string({
@@ -60,14 +44,6 @@ const GetAllReimbursementRequestSchema = z
       })
       .positive({
         message: 'amount_max must be a positive number',
-      }),
-    date_filed: z
-      .string({
-        description: 'date_filed',
-        invalid_type_error: 'date_filed must be a string',
-      })
-      .datetime({
-        message: 'date_filed must be a valid datetime',
       }),
     text_search: z
       .string({
@@ -116,18 +92,17 @@ const GetAllReimbursementRequestSchema = z
       }
 
       if (input?.amount_min && !input?.amount_max) {
-        return false;
+        input.amount_max = 999_999_999;
       }
 
       if (!input?.amount_min && input?.amount_max) {
-        return false;
+        input.amount_min = 1;
       }
 
       return true;
     },
     {
       path: ['amount_min', 'amount_max'],
-      message: 'amount_min must be less than or equal to amount_max',
     },
   );
 
