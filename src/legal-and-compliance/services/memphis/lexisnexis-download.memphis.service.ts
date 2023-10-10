@@ -51,13 +51,23 @@ export class LacLexisnexisDownloadService implements OnModuleInit {
         stationName: 'erp.lac.lexisnexis-download',
         consumerName: 'erp.lac.lexisnexis-download.consumer-name',
         consumerGroup: 'erp.lac.lexisnexis-download.consumer-group',
-        pullIntervalMs: 10000,
+        pullIntervalMs: 5000,
       });
 
       this.consumer.on('message', async (message: Message) => {
         const data: LexisnexisDownloadMetadata = JSON.parse(
           message.getData().toString(),
         );
+
+        const lexisSearch = await this.pgsql
+          .selectFrom('lexisnexis_search')
+          .select('lexisnexis_search_id')
+          .where('lexisnexis_search_id', '=', data.lexisnexis_search_id)
+          .executeTakeFirst();
+
+        if (!lexisSearch) {
+          return message.ack();
+        }
 
         const base64Pdf = await firstValueFrom(
           this.httpService
