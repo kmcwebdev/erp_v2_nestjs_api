@@ -70,7 +70,7 @@ dependencies:
     version: 0.1.6(@nestjs/common@10.2.7)(@nestjs/core@10.2.7)(kysely@0.26.3)(reflect-metadata@0.1.13)
   nestjs-zod:
     specifier: ^3.0.0
-    version: 3.0.0(@nestjs/common@10.2.7)(@nestjs/core@10.2.7)(zod@3.22.2)
+    version: 3.0.0(@nestjs/common@10.2.7)(@nestjs/core@10.2.7)(zod@3.22.3)
   pg:
     specifier: ^8.11.3
     version: 8.11.3
@@ -87,8 +87,8 @@ dependencies:
     specifier: ^7.8.1
     version: 7.8.1
   zod:
-    specifier: ^3.22.2
-    version: 3.22.2
+    specifier: ^3.22.3
+    version: 3.22.3
 
 devDependencies:
   '@nestjs/cli':
@@ -6713,7 +6713,7 @@ packages:
       reflect-metadata: 0.1.13
     dev: false
 
-  /nestjs-zod@3.0.0(@nestjs/common@10.2.7)(@nestjs/core@10.2.7)(zod@3.22.2):
+  /nestjs-zod@3.0.0(@nestjs/common@10.2.7)(@nestjs/core@10.2.7)(zod@3.22.3):
     resolution: {integrity: sha512-vL9CHShCVj6TmjCVPOd4my46D8d7FdoB4nQvvh+lmVTuzvnwuD+slSxjT4EDdPDWDFtjhfpvQnnkr55/80KHEQ==}
     peerDependencies:
       '@nestjs/common': '>= 8.0.0'
@@ -6731,7 +6731,7 @@ packages:
       '@nestjs/common': 10.2.7(reflect-metadata@0.1.13)(rxjs@7.8.1)
       '@nestjs/core': 10.2.7(@nestjs/common@10.2.7)(@nestjs/platform-express@10.2.7)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       merge-deep: 3.0.3
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /nkeys.js@1.0.5:
@@ -8509,6 +8509,6 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zod@3.22.2:
-    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
+  /zod@3.22.3:
+    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
     dev: false
