@@ -52,12 +52,12 @@ export class LegalAndComplianceService {
     return insertJob;
   }
 
-  test() {
+  lexisnexisDownload() {
     return this.eventEmitter.emit('lac-lexisnexis-download', {
-      lexisnexis_search_id: '6cd2673a-b4d0-4d35-855b-9129b2987ba6',
+      lexisnexis_search_id: '1b50344f-c113-4579-b381-0b8eaef78469',
       search_query: 'Oriental game limited',
-      category: 'negativeNews',
-      download_id: '8IL5csh0nyKXHbiDhdS98ZF3khrhHI-Z0QYXf4XV8og',
+      category: 'legal',
+      download_id: 'T_5iLdc5CJPxHUZoX45lU2Zz4wsj13oa_H-Pz2BO2CU',
     });
   }
 }

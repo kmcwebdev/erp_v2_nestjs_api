@@ -17,7 +17,7 @@ export class LegalAndComplianceController {
   @Public()
   @Get('test')
   test() {
-    this.legalAndComplianceService.test();
+    this.legalAndComplianceService.lexisnexisDownload();
 
     return 'OK';
   }
