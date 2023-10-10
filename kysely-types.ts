@@ -118,11 +118,19 @@ export interface Groups {
   created_at: Generated<Timestamp | null>;
 }
 
-export interface LexisnexisDiligenceSearch {
-  audit_log_id: Generated<string>;
-  legacy_client_id: string | null;
+export interface LexisnexisSearch {
+  lexisnexis_search_id: Generated<string>;
+  search_query: string;
+  erp_client_id: string | null;
   search_category: string | null;
-  created_at: number;
+  query_type: string | null;
+  total_size: Generated<number | null>;
+  download_id: string | null;
+  pdf_report_url: string | null;
+  report_generation_status: Generated<string | null>;
+  report_generation_desc: string | null;
+  finished_at: Timestamp | null;
+  created_at: Generated<Timestamp | null>;
 }
 
 export interface Users {
@@ -157,6 +165,6 @@ export interface DB {
   finance_reimbursement_request_types: FinanceReimbursementRequestTypes;
   finance_reimbursement_requests: FinanceReimbursementRequests;
   groups: Groups;
-  lexisnexis_diligence_search: LexisnexisDiligenceSearch;
+  lexisnexis_search: LexisnexisSearch;
   users: Users;
 }

@@ -103,6 +103,7 @@ const GetAllReimbursementRequestSchema = z
     },
     {
       path: ['amount_min', 'amount_max'],
+      message: 'Get all request schema error',
     },
   );
 

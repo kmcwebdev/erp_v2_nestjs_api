@@ -313,7 +313,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   .returning(
                     'finance_reimbursement_approval_matrix.approval_matrix_id',
                   )
-                  .executeTakeFirst();
+                  .execute();
+
+                console.log(approvers);
 
                 const actionToken =
                   await this.generatePropelauthLongliveAcessToken({
@@ -346,7 +348,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       newRequest.reimbursement_request_id,
                     approve_link: approveLink,
                     rejection_link: rejectLink,
-                    approver_matrix_id: approvers.approval_matrix_id,
+                    approver_matrix_id: approvers[0].approval_matrix_id,
                     token: actionToken,
                     link_expired: false,
                   })

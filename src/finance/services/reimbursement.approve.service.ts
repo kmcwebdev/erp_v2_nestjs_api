@@ -74,6 +74,8 @@ export class ReimbursementApproveService {
           ]);
 
         if (isManager) {
+          console.log(approval_matrix_id);
+
           updateRequestMatrix = updateRequestMatrix.where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             'in',
@@ -110,6 +112,8 @@ export class ReimbursementApproveService {
         const reimbursementRequestApprovalApprover =
           await updateRequestMatrix.executeTakeFirst();
 
+        console.log(reimbursementRequestApprovalApprover);
+
         if (!reimbursementRequestApprovalApprover) {
           return {
             message: 'This request is already approved or cancelled',
@@ -136,7 +140,9 @@ export class ReimbursementApproveService {
           .limit(1)
           .executeTakeFirst();
 
-        if (!reimbursementRequestApprovalApprover.is_hrbp) {
+        console.log(nextReimbursementRequestApprovalApprover);
+
+        if (isManager) {
           await this.pgsql.transaction().execute(async (trx) => {
             const updateReimbursementRequest = await trx
               .updateTable('finance_reimbursement_requests as frr')

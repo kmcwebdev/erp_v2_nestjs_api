@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
 import { UsersModule } from 'src/users/users.module';
 import { FinanceController } from './finance.controller';
-import { PropelauthGuard } from 'src/auth/common/guard/propelauth.guard';
 import { MemphisDevModule } from 'src/memphis-dev/memphis-dev.module';
 import { ReimbursementApiService } from './services/reimbursement.api.service';
 import { ReimbursementCronService } from './services/cron/reimbursement.cron.service';
@@ -43,10 +41,6 @@ import { ReimbursementEmailRejectionService } from './services/reimbursement.ema
   ],
   controllers: [FinanceController],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: PropelauthGuard,
-    },
     ReimbursementApiService,
     ReimbursementCronService,
     ReimbursementRequestTypesService,
