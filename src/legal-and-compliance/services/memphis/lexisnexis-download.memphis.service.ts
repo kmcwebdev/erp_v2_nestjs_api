@@ -104,8 +104,6 @@ export class LacLexisnexisDownloadService implements OnModuleInit {
             ),
         );
 
-        console.log(base64Pdf.data);
-
         if (base64Pdf.status === 200 && base64Pdf.data.status === 'COMPLETE') {
           const pdf = Buffer.from(base64Pdf.data.fileBase64, 'base64');
           const streamBuffer = new WritableStreamBuffer();
@@ -149,6 +147,13 @@ export class LacLexisnexisDownloadService implements OnModuleInit {
             .executeTakeFirstOrThrow();
 
           message.ack();
+        }
+
+        if (base64Pdf.data.status === 'ERROR') {
+          this.logger.error(
+            'Something went wrong converting pdf - ' +
+              data.lexisnexis_search_id,
+          );
         }
       });
 
