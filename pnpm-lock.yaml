@@ -60,7 +60,7 @@ dependencies:
     specifier: ^0.26.1
     version: 0.26.3
   memphis-dev:
-    specifier: ^1.1.3
+    specifier: ^1.1.4
     version: 1.1.4
   mssql:
     specifier: ^10.0.1
