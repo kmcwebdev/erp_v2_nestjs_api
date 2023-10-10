@@ -3,6 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { LexisnexisSearchType } from '../common/dto/lexisnexis-search.dto';
+import { LexisnexisDownloadType } from '../common/dto/lexisnexis-download.dto';
 
 @Injectable()
 export class LegalAndComplianceService {
@@ -52,12 +53,12 @@ export class LegalAndComplianceService {
     return insertJob;
   }
 
-  lexisnexisDownload() {
+  lexisnexisDownload(data: LexisnexisDownloadType) {
     return this.eventEmitter.emit('lac-lexisnexis-download', {
-      lexisnexis_search_id: 'ad24df38-3ff3-4093-8439-8235528535ab',
-      search_query: 'PLAYNGO PH ,INC.',
-      category: 'agencyDecision',
-      download_id: 'blAiAmwmE2M6kvQy9EIjoWw-AXBd8pO8a3iN44JyRRc',
+      lexisnexis_search_id: data.lexisnexis_search_id,
+      search_query: data.search_query,
+      category: data.category,
+      download_id: data.download_id,
     });
   }
 }

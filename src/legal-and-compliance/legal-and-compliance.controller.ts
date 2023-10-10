@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { LegalAndComplianceService } from './services/legal-and-compliance.service';
 import { LexisnexisSearchDto } from './common/dto/lexisnexis-search.dto';
-import { Public } from 'src/auth/common/decorator/public.decorator';
+import { LexisnexisDownloadDto } from './common/dto/lexisnexis-download.dto';
 
 @Controller('legal-and-compliance')
 export class LegalAndComplianceController {
@@ -14,10 +14,9 @@ export class LegalAndComplianceController {
     return this.legalAndComplianceService.lexisnexisSearch(query);
   }
 
-  @Public()
-  @Get('test')
-  test() {
-    this.legalAndComplianceService.lexisnexisDownload();
+  @Get('lexisnexis-download')
+  lexisnexisDownload(@Query() query: LexisnexisDownloadDto) {
+    this.legalAndComplianceService.lexisnexisDownload(query);
 
     return 'OK';
   }
