@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Consumer, MemphisService, Message, Producer } from 'memphis-dev';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
@@ -9,6 +9,7 @@ import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
 import { LexisnexisSearchType } from 'src/legal-and-compliance/common/dto/lexisnexis-search.dto';
 import { LexisnexisSearchMetadata } from 'src/legal-and-compliance/common/interface/lexisnexis-search-metadata.interface';
+import { LexisnexisDownloadMetadata } from 'src/legal-and-compliance/common/interface/lexisnexis-download-metadata.inteface';
 
 type LacLexisnexisSearch = LexisnexisSearchType & LexisnexisSearchMetadata;
 
@@ -23,6 +24,7 @@ export class LacLexisnexisSearchService implements OnModuleInit {
     @InjectKysely() private readonly pgsql: DB,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly eventEmitter: EventEmitter2,
     private readonly memphisService: MemphisService,
   ) {}
 
@@ -99,6 +101,19 @@ export class LacLexisnexisSearchService implements OnModuleInit {
             })
             .where('lexisnexis_search_id', '=', data.lexisnexis_search_id)
             .executeTakeFirstOrThrow();
+
+          if (searchQuery.data.totalSize > 0) {
+            this.logger.log('Sending to lexisnexis download service');
+
+            const downloadPayload: LexisnexisDownloadMetadata = {
+              lexisnexis_search_id: data.lexisnexis_search_id,
+              category: data.category,
+              search_query: data.search_query,
+              download_id: searchQuery.data.downloadId,
+            };
+
+            this.eventEmitter.emit('lac-lexisnexis-download', downloadPayload);
+          }
 
           message.ack();
         }

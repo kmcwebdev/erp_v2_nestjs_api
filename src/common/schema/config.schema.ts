@@ -222,6 +222,22 @@ export const configSchema = z.object({
     invalid_type_error:
       'REIMBURSEMENT_ATTACHMENT_UPLOAD_ACCESS must be one of "public" or "private"',
   }),
+  LEXISNEXIS_ATTACHMENT_UPLOAD_CONTAINER: z
+    .string({
+      description: 'Filestack upload container',
+      required_error: 'LEXISNEXIS_ATTACHMENT_UPLOAD_CONTAINER is required',
+      invalid_type_error:
+        'LEXISNEXIS_ATTACHMENT_UPLOAD_CONTAINER must be a string',
+    })
+    .nonempty({
+      message: 'UPLOAD_CONTAINER must not be empty',
+    }),
+  LEXISNEXIS_ATTACHMENT_UPLOAD_ACCESS: z.enum(['public', 'private'], {
+    description: 'Filestack upload access',
+    required_error: 'LEXISNEXIS_ATTACHMENT_UPLOAD_ACCESS is required',
+    invalid_type_error:
+      'LEXISNEXIS_ATTACHMENT_UPLOAD_ACCESS must be one of "public" or "private"',
+  }),
   COMMON_UPLOAD_CONTAINER: z
     .string({
       description: 'Filestack upload container',
