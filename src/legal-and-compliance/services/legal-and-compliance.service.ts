@@ -54,10 +54,10 @@ export class LegalAndComplianceService {
 
   lexisnexisDownload() {
     return this.eventEmitter.emit('lac-lexisnexis-download', {
-      lexisnexis_search_id: '1b50344f-c113-4579-b381-0b8eaef78469',
-      search_query: 'Oriental game limited',
-      category: 'legal',
-      download_id: 'T_5iLdc5CJPxHUZoX45lU2Zz4wsj13oa_H-Pz2BO2CU',
+      lexisnexis_search_id: 'ad24df38-3ff3-4093-8439-8235528535ab',
+      search_query: 'PLAYNGO PH ,INC.',
+      category: 'agencyDecision',
+      download_id: 'blAiAmwmE2M6kvQy9EIjoWw-AXBd8pO8a3iN44JyRRc',
     });
   }
 }
