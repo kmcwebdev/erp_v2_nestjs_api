@@ -86,6 +86,9 @@ dependencies:
   rxjs:
     specifier: ^7.8.1
     version: 7.8.1
+  stream-buffers:
+    specifier: ^3.0.2
+    version: 3.0.2
   zod:
     specifier: ^3.22.3
     version: 3.22.3
@@ -124,6 +127,9 @@ devDependencies:
   '@types/pg':
     specifier: ^8.10.2
     version: 8.10.3
+  '@types/stream-buffers':
+    specifier: ^3.0.5
+    version: 3.0.5
   '@types/supertest':
     specifier: ^2.0.12
     version: 2.0.12
@@ -3066,6 +3072,12 @@ packages:
 
   /@types/stack-utils@2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
+    dev: true
+
+  /@types/stream-buffers@3.0.5:
+    resolution: {integrity: sha512-mEKCVRgR+0fM3FUcywARE6J50sz++u/KQL5sBMJKFzLTyX/WsKN2THr7vMic6fWoFfT454LXOnJYUMp8ANNBMw==}
+    dependencies:
+      '@types/node': 20.6.5
     dev: true
 
   /@types/superagent@4.1.18:
@@ -7713,6 +7725,11 @@ packages:
   /stoppable@1.1.0:
     resolution: {integrity: sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==}
     engines: {node: '>=4', npm: '>=6'}
+    dev: false
+
+  /stream-buffers@3.0.2:
+    resolution: {integrity: sha512-DQi1h8VEBA/lURbSwFtEHnSTb9s2/pwLEaFuNhXwy1Dx3Sa0lOuYT2yNUr4/j2fs8oCAMANtrZ5OrPZtyVs3MQ==}
+    engines: {node: '>= 0.10.0'}
     dev: false
 
   /streamsearch@1.1.0:
