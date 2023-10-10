@@ -18,17 +18,22 @@ export class ReimbursementEmailApprovalService {
     const result = await this.pgsql.transaction().execute(async (trx) => {
       const approvalToken = await trx
         .selectFrom('finance_reimbursement_approval_links as fral')
-        .select(['fral.approver_matrix_id', 'fral.token'])
-        .where('fral.link_expired', '=', false)
+        .select([
+          'fral.reimbursement_request_id',
+          'fral.approver_matrix_id',
+          'fral.token',
+        ])
+        // .where('fral.link_expired', '=', false)
         .where('fral.token', '=', data.token)
+        .orderBy('fral.created_at', 'desc')
         .executeTakeFirst();
 
-      if (!approvalToken) {
-        throw new HttpException(
-          'Approval link not found or has expired',
-          HttpStatus.NOT_FOUND,
-        );
-      }
+      // if (!approvalToken) {
+      //   throw new HttpException(
+      //     'Approval link not found or has expired',
+      //     HttpStatus.NOT_FOUND,
+      //   );
+      // }
 
       const propelauthUser = await propelauth.validateAccessTokenAndGetUser(
         `Bearer ${data.token}`,

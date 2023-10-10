@@ -19,7 +19,7 @@ export class ReimbursementMemphisBulkApprovalService implements OnModuleInit {
   ) {}
 
   @OnEvent('reimbursement-request-bulk-approval')
-  async test(data: { user: RequestUser; matrixIds: string[] }) {
+  async triggerMemphisEvent(data: { user: RequestUser; matrixIds: string[] }) {
     return await this.producer.produce({
       message: Buffer.from(JSON.stringify(data)),
     });

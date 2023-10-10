@@ -246,6 +246,15 @@ export const configSchema = z.object({
     .url({
       message: 'FRONT_END_URL must be a valid URL',
     }),
+  LEXISNEXIS_API_KEY: z
+    .string({
+      description: 'Lexisnexis search API Key',
+      required_error: 'LEXISNEXIS_API_KEY is required',
+      invalid_type_error: 'LEXISNEXIS_API_KEY must be a string',
+    })
+    .nonempty({
+      message: 'LEXISNEXIS_API_KEY must be a valid URL',
+    }),
 });
 
 export type Config = z.infer<typeof configSchema>;

@@ -43,7 +43,7 @@ export class AuthService {
         ),
     );
 
-    this.logger.log('Generate success for propelauth long live access token');
+    this.logger.log('Generate propelauth long live access token success');
 
     return response;
   }
