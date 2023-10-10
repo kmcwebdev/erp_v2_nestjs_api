@@ -134,7 +134,7 @@ export class LacLexisnexisDownloadService implements OnModuleInit {
               pdf_report_url: fileHandle.url,
             })
             .where('lexisnexis_search_id', '=', data.lexisnexis_search_id)
-            .execute();
+            .executeTakeFirstOrThrow();
 
           message.ack();
         }

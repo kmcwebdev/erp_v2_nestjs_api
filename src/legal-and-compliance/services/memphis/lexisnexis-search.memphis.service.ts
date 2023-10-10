@@ -102,18 +102,14 @@ export class LacLexisnexisSearchService implements OnModuleInit {
             .where('lexisnexis_search_id', '=', data.lexisnexis_search_id)
             .executeTakeFirstOrThrow();
 
-          if (searchQuery.data.totalSize > 0) {
-            this.logger.log('Sending to lexisnexis download service');
+          const downloadPayload: LexisnexisDownloadMetadata = {
+            lexisnexis_search_id: data.lexisnexis_search_id,
+            category: data.category,
+            search_query: data.search_query,
+            download_id: searchQuery.data.downloadId,
+          };
 
-            const downloadPayload: LexisnexisDownloadMetadata = {
-              lexisnexis_search_id: data.lexisnexis_search_id,
-              category: data.category,
-              search_query: data.search_query,
-              download_id: searchQuery.data.downloadId,
-            };
-
-            this.eventEmitter.emit('lac-lexisnexis-download', downloadPayload);
-          }
+          this.eventEmitter.emit('lac-lexisnexis-download', downloadPayload);
 
           message.ack();
         }
