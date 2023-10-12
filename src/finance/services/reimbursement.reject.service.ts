@@ -111,6 +111,7 @@ export class ReimbursementRejectService {
           })
           .returning([
             'finance_reimbursement_requests.reimbursement_request_id',
+            'finance_reimbursement_requests.reference_no',
             'finance_reimbursement_requests.expense_type_id',
             'finance_reimbursement_requests.requestor_id',
             'finance_reimbursement_requests.amount',
@@ -142,6 +143,7 @@ export class ReimbursementRejectService {
 
         const emailRejectionData: RejectRequestEmailType = {
           to: [requestor.email],
+          referenceNo: reimbursementRequest.reference_no,
           fullName: requestor.full_name,
           employeeId: requestor.employee_id,
           expenseType: expenseType.expense_type,
