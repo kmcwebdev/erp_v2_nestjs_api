@@ -25,7 +25,6 @@ export class ReimbursementEmailApprovalService {
         ])
         .where('fral.link_expired', '=', false)
         .where('fral.token', '=', data.token)
-        .orderBy('fral.created_at', 'desc')
         .executeTakeFirst();
 
       if (!approvalToken) {
