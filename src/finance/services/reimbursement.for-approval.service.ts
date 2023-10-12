@@ -5,6 +5,7 @@ import { DB } from 'src/common/types';
 import {
   APPROVED_REQUEST,
   CANCELLED_REQUEST,
+  CREDITED_REQUEST,
   PROCESSING_REQUEST,
   REJECTED_REQUEST,
 } from '../common/constant';
@@ -88,8 +89,8 @@ export class ReimbursementForApprovalService {
 
       query = query.where(
         'finance_reimbursement_requests.finance_request_status_id',
-        '!=',
-        PROCESSING_REQUEST,
+        'not in',
+        [PROCESSING_REQUEST, CREDITED_REQUEST],
       );
 
       if (filter?.reimbursement_type_id) {
