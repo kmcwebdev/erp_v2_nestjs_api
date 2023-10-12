@@ -6,6 +6,7 @@ import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface'
 import { GetAllReimbursementRequestType } from '../common/dto/get-all-reimbursement-request.dto';
 import {
   APPROVED_REQUEST,
+  CREDITED_REQUEST,
   ONHOLD_REQUEST,
   PROCESSING_REQUEST,
   REJECTED_REQUEST,
@@ -42,6 +43,7 @@ export class ReimbursementGetAllService {
       if (user.user_assigned_role === 'finance') {
         initialRequestStatuses.push(ONHOLD_REQUEST);
         initialRequestStatuses.push(PROCESSING_REQUEST);
+        initialRequestStatuses.push(CREDITED_REQUEST);
       }
 
       const approvers = await this.pgsql.transaction().execute(async (trx) => {
