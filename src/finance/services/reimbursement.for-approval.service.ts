@@ -74,6 +74,9 @@ export class ReimbursementForApprovalService {
           'users.client_name',
           'users.hrbp_approver_email',
           'users.payroll_account',
+          sql<string>`finance_reimbursement_requests.cursor_id::text`.as(
+            'cursor_id',
+          ),
           'finance_reimbursement_requests.created_at',
           sql<number>`ts_rank(to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
          coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')), plainto_tsquery(${
@@ -218,6 +221,9 @@ export class ReimbursementForApprovalService {
         'users.client_name',
         'users.hrbp_approver_email',
         'users.payroll_account',
+        sql<string>`finance_reimbursement_requests.cursor_id::text`.as(
+          'cursor_id',
+        ),
         'finance_reimbursement_requests.created_at',
         sql<number>`ts_rank(to_tsvector('english', finance_reimbursement_requests.reference_no || ' ' || coalesce(users.full_name, '') || ' ' || users.email || ' ' ||  
          coalesce(users.client_name, '') || ' ' || coalesce(users.hrbp_approver_email, '')), plainto_tsquery(${

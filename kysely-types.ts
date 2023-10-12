@@ -98,6 +98,7 @@ export interface FinanceReimbursementRequests {
   date_approve: Timestamp | null;
   created_at: Generated<Timestamp | null>;
   date_processed: Timestamp | null;
+  cursor_id: Generated<Int8>;
 }
 
 export interface FinanceReimbursementRequestStatus {
