@@ -252,7 +252,7 @@ export class ReimbursementGetAllService {
     }
 
     return await query
-      .orderBy('finance_reimbursement_requests.created_at', 'desc')
+      .orderBy('finance_reimbursement_requests.cursor_id', 'desc')
       .limit(default_page_limit || filter?.page_limit)
       .execute();
   }

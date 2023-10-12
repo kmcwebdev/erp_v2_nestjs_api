@@ -134,7 +134,7 @@ export class ReimbursementForApprovalService {
       }
 
       return await query
-        .orderBy('finance_reimbursement_requests.created_at', 'desc')
+        .orderBy('finance_reimbursement_requests.cursor_id', 'desc')
         .limit(10)
         .execute();
     }
@@ -283,7 +283,7 @@ export class ReimbursementForApprovalService {
     }
 
     return await query
-      .orderBy('finance_reimbursement_requests.created_at', 'desc')
+      .orderBy('finance_reimbursement_requests.cursor_id', 'desc')
       .limit(10)
       .execute();
   }
