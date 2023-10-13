@@ -316,8 +316,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   )
                   .execute();
 
-                console.log(approvers);
-
                 const userToken =
                   await this.generatePropelauthLongliveAcessToken({
                     user_id: propelauth_user_id,

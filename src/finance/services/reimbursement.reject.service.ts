@@ -19,6 +19,8 @@ export class ReimbursementRejectService {
   async reject(user: RequestUser, data: RejectReimbursementRequestType) {
     const finance = user.user_assigned_role === 'finance';
 
+    console.log(data);
+
     if (finance) {
       // TODO: If the view is finance dashboard the UI is still passing
       // the approval_matrix_id property along with the reimbursement_request_id
@@ -94,7 +96,7 @@ export class ReimbursementRejectService {
           .returning([
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           ])
-          .executeTakeFirstOrThrow();
+          .executeTakeFirst();
 
         if (!reimbursementRequestMatrix) {
           return {

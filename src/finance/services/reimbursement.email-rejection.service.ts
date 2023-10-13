@@ -19,13 +19,17 @@ export class ReimbursementEmailRejectionService {
       const approvalToken = await trx
         .selectFrom('finance_reimbursement_approval_links as fral')
         .select([
+          'fral.approval_link_id',
           'fral.reimbursement_request_id',
           'fral.approver_matrix_id',
           'fral.token',
+          'fral.hash',
         ])
         .where('fral.link_expired', '=', false)
         .where('fral.hash', '=', data.hash)
         .executeTakeFirst();
+
+      console.log(approvalToken);
 
       if (!approvalToken) {
         throw new HttpException(
@@ -76,14 +80,13 @@ export class ReimbursementEmailRejectionService {
         },
       );
 
-      await this.pgsql
+      await trx
         .updateTable('finance_reimbursement_approval_links as fral')
         .set({
           link_expired: true,
-          token: null,
         })
-        .where('fral.hash', '=', data.hash)
-        .execute();
+        .where('fral.approval_link_id', '=', approvalToken.approval_link_id)
+        .executeTakeFirstOrThrow();
 
       return 'OK';
     });
