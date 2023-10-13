@@ -216,7 +216,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       'External Reimbursement Approver Manager',
                     );
 
-                  console.log('propelauthUser', propelauthUser);
+                  console.log('newPropelauthUser', newPropelauthUser);
 
                   propelauth_user_id = newPropelauthUser.userId;
                 } else {
