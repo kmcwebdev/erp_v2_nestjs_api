@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { catchError, firstValueFrom } from 'rxjs';
@@ -317,7 +318,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
                 console.log(approvers);
 
-                const actionToken =
+                const userToken =
                   await this.generatePropelauthLongliveAcessToken({
                     user_id: propelauth_user_id,
                   })
@@ -328,16 +329,26 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       );
                     });
 
+                function createHash(data: string) {
+                  const hash = crypto.createHash('sha256');
+
+                  hash.update(data);
+
+                  return hash.digest('hex');
+                }
+
+                const hash = createHash(newRequest.reimbursement_request_id);
+
                 // TODO: Can be refactor
                 const approveLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/approve/${actionToken}?requestor=${
+                )}/email-action/approve/${hash}?requestor=${
                   newRequest.full_name || 'no_name'
                 }&rid=${newRequest.reference_no}`;
 
                 const rejectLink = `${this.configService.get(
                   'FRONT_END_URL',
-                )}/email-action/reject/${actionToken}?requestor=${
+                )}/email-action/reject/${hash}?requestor=${
                   newRequest.full_name || 'no_name'
                 }&rid=${newRequest.reference_no}`;
 
@@ -349,7 +360,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     approve_link: approveLink,
                     rejection_link: rejectLink,
                     approver_matrix_id: approvers[0].approval_matrix_id,
-                    token: actionToken,
+                    token: userToken,
+                    hash,
                     link_expired: false,
                   })
                   .execute();

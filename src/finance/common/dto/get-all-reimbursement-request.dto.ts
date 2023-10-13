@@ -64,15 +64,15 @@ const GetAllReimbursementRequestSchema = z
           message: 'page_limit must be a positive number',
         }),
     ),
-    last_id: z.preprocess(
+    cursor_id: z.preprocess(
       (val) => Number(val),
       z
         .number({
-          description: 'last_id',
-          invalid_type_error: 'last_id must be a number',
+          description: 'cursor_id',
+          invalid_type_error: 'cursor_id must be a number',
         })
         .positive({
-          message: 'last_id must be a positive number',
+          message: 'cursor_id must be a positive number',
         }),
     ),
     history: z.preprocess(
