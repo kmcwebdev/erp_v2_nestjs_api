@@ -45,7 +45,7 @@ export class ReimbursementMemphisEmailManagerApprovalService
           message.getData().toString(),
         );
 
-        await firstValueFrom(
+        const sendEmail = await firstValueFrom(
           this.httpService
             .post('/api/email/manager-approval', data, {
               baseURL: this.configService.get('FRONT_END_URL'),
@@ -62,6 +62,8 @@ export class ReimbursementMemphisEmailManagerApprovalService
               }),
             ),
         ).finally(() => message.ack());
+
+        console.log(sendEmail);
       });
 
       this.producer = await this.memphisService.producer({
