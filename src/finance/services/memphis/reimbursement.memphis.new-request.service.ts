@@ -273,6 +273,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   };
                 }
 
+                console.log('approverManager', approverManager);
+
                 const hrbp = await trx
                   .selectFrom('users')
                   .innerJoin(
