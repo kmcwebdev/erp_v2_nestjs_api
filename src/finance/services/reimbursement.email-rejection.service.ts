@@ -72,7 +72,7 @@ export class ReimbursementEmailRejectionService {
         },
         {
           approval_matrix_id: approvalToken.approver_matrix_id,
-          rejection_reason: data.rejection_reason,
+          rejection_reason: 'Rejected via email action',
         },
       );
 
