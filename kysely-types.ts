@@ -35,6 +35,7 @@ export interface FinanceReimbursementApprovalLinks {
   token: string;
   link_expired: Generated<boolean | null>;
   created_at: Generated<Timestamp | null>;
+  hash: string | null;
 }
 
 export interface FinanceReimbursementApprovalMatrix {

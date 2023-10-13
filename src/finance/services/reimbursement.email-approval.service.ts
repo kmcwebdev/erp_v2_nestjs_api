@@ -24,7 +24,7 @@ export class ReimbursementEmailApprovalService {
           'fral.token',
         ])
         .where('fral.link_expired', '=', false)
-        .where('fral.token', '=', data.token)
+        .where('fral.hash', '=', data.hash)
         .executeTakeFirst();
 
       if (!approvalToken) {
@@ -35,7 +35,7 @@ export class ReimbursementEmailApprovalService {
       }
 
       const propelauthUser = await propelauth.validateAccessTokenAndGetUser(
-        `Bearer ${data.token}`,
+        `Bearer ${approvalToken.token}`,
       );
 
       const userMetadata = await propelauth.fetchUserMetadataByUserId(
@@ -79,8 +79,9 @@ export class ReimbursementEmailApprovalService {
         .updateTable('finance_reimbursement_approval_links as fral')
         .set({
           link_expired: true,
+          token: null,
         })
-        .where('fral.token', '=', data.token)
+        .where('fral.hash', '=', data.hash)
         .execute();
 
       return 'OK';

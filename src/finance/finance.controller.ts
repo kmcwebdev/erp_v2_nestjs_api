@@ -50,6 +50,7 @@ import { ReimbursementAuditlogService } from './services/reimbursement.auditlog.
 import { ReimbursementStreamFileService } from './services/reimbursement.stream-file.service';
 import { IsUrl } from 'src/auth/common/decorator/url.decorator';
 import { ReimbursementRequestEmailApprovalDTO } from './common/dto/email-approval-reimbursement-request.dto';
+import { ReimbursementRequestEmailRejectDTO } from './common/dto/email-rejection-reimbursement-request.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -200,8 +201,10 @@ export class FinanceController {
   @IsUrl()
   @HttpCode(HttpStatus.OK)
   @Post('/reimbursement/requests/email-approval/reject')
-  ReimbursementEmailApprovalReject(@Body() body: any) {
-    return this.reimbursementEmailRejectionService.reject({});
+  ReimbursementEmailApprovalReject(
+    @Body() body: ReimbursementRequestEmailRejectDTO,
+  ) {
+    return this.reimbursementEmailRejectionService.reject(body);
   }
 
   @Get('/reimbursements/requests/reports/hrbp')
