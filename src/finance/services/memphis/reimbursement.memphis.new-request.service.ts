@@ -209,8 +209,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     email,
                   );
 
-                propelauth_user_id = propelauthUser.userId;
-
                 if (!propelauthUser) {
                   const newPropelauthUser =
                     await this.usersApiService.createUserInPropelauth(
@@ -218,7 +216,11 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       'External Reimbursement Approver Manager',
                     );
 
+                  console.log('propelauthUser', propelauthUser);
+
                   propelauth_user_id = newPropelauthUser.userId;
+                } else {
+                  propelauth_user_id = propelauthUser.userId;
                 }
 
                 if (!propelauth_user_id) {
