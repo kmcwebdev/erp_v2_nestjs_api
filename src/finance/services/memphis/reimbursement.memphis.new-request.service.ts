@@ -63,7 +63,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
         )
         .pipe(
           catchError((error: AxiosError) => {
-            console.error(error.response);
+            console.error(error.response.data);
 
             throw 'Failed to generate long live access token';
           }),
@@ -331,7 +331,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   })
                     .then((data) => data.access_token)
                     .catch((error: AxiosError) => {
-                      console.log(error.response);
+                      console.log(error.response.data);
 
                       throw new Error(
                         'Failed to generate long live access token',
