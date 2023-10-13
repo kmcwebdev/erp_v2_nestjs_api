@@ -327,10 +327,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     user_id: propelauth_user_id,
                   })
                     .then((data) => data.access_token)
-                    .catch(() => {
-                      throw new Error(
-                        'Failed to fetch user propel access token',
-                      );
+                    .catch((error: any) => {
+                      throw new Error(error.message);
                     });
 
                 function createHash(data: string) {
