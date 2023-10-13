@@ -91,6 +91,8 @@ export class ReimbursementEmailRejectionService {
       return 'OK';
     });
 
+    console.log('RETURNED OK!!');
+
     return result;
   }
 }
