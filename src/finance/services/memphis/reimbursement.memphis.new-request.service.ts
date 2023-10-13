@@ -337,7 +337,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
 
                 const hash = createHash(newRequest.reimbursement_request_id);
 
-                // TODO: Can be refactor
+                // TODO: Clean this shit
                 const approveLink = `${this.configService.get(
                   'FRONT_END_URL',
                 )}/email-action/approve/${hash}?requestor=${
