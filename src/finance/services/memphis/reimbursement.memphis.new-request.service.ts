@@ -14,6 +14,7 @@ import { ConfirmationEmailType } from 'src/finance/common/zod-schema/confirmatio
 import { HrbpApprovalEmailType } from 'src/finance/common/zod-schema/hrbp-approval-email.schema';
 import { ManagerApprovalEmailType } from 'src/finance/common/zod-schema/manager-approval-email.schema';
 import { GeneratePropelauthLongliveAccessTokenType } from 'src/auth/common/dto/generate-propelauth-longlive-access-token.dto';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class ReimbursementMemphisNewRequestService implements OnModuleInit {
@@ -61,7 +62,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
           },
         )
         .pipe(
-          catchError(() => {
+          catchError((error: AxiosError) => {
+            console.error(error.response);
+
             throw 'Failed to generate long live access token';
           }),
         ),
@@ -327,8 +330,12 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     user_id: propelauth_user_id,
                   })
                     .then((data) => data.access_token)
-                    .catch((error: any) => {
-                      throw new Error(error.message);
+                    .catch((error: AxiosError) => {
+                      console.log(error.response);
+
+                      throw new Error(
+                        'Failed to generate long live access token',
+                      );
                     });
 
                 function createHash(data: string) {
