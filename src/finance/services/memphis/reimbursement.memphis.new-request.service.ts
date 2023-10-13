@@ -344,11 +344,15 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   newRequest.full_name || 'no_name'
                 }&rid=${newRequest.reference_no}`;
 
+                console.log(approveLink);
+
                 const rejectLink = `${this.configService.get(
                   'FRONT_END_URL',
                 )}/email-action/reject/${hash}?requestor=${
                   newRequest.full_name || 'no_name'
                 }&rid=${newRequest.reference_no}`;
+
+                console.log(rejectLink);
 
                 await trx
                   .insertInto('finance_reimbursement_approval_links')
