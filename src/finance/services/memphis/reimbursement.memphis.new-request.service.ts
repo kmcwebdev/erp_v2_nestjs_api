@@ -209,7 +209,9 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     email,
                   );
 
-                if (!propelauthUser) {
+                if (propelauthUser) {
+                  propelauth_user_id = propelauthUser.userId;
+                } else {
                   const newPropelauthUser =
                     await this.usersApiService.createUserInPropelauth(
                       email,
@@ -219,8 +221,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   console.log('newPropelauthUser', newPropelauthUser);
 
                   propelauth_user_id = newPropelauthUser.userId;
-                } else {
-                  propelauth_user_id = propelauthUser.userId;
                 }
 
                 if (!propelauth_user_id) {
