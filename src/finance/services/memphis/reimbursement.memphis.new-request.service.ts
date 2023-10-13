@@ -216,7 +216,7 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                       'External Reimbursement Approver Manager',
                     );
 
-                  console.log('propelauthUser', propelauthUser);
+                  console.log('newPropelauthUser', newPropelauthUser);
 
                   propelauth_user_id = newPropelauthUser.userId;
                 } else {
@@ -319,6 +319,8 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                     'finance_reimbursement_approval_matrix.approval_matrix_id',
                   )
                   .execute();
+
+                console.log('propelauth_user_id', propelauth_user_id);
 
                 const userToken =
                   await this.generatePropelauthLongliveAcessToken({
