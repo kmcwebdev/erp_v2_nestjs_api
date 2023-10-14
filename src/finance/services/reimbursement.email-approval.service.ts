@@ -79,7 +79,6 @@ export class ReimbursementEmailApprovalService {
         .updateTable('finance_reimbursement_approval_links as fral')
         .set({
           link_expired: true,
-          token: null,
         })
         .where('fral.hash', '=', data.hash)
         .execute();
