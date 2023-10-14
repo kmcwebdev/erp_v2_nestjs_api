@@ -63,7 +63,7 @@ export class ReimbursementMemphisEmailManagerApprovalService
             ),
         ).finally(() => message.ack());
 
-        console.log(sendEmail);
+        console.log(sendEmail.data);
       });
 
       this.producer = await this.memphisService.producer({
