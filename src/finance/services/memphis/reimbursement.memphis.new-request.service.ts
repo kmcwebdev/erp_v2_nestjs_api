@@ -411,6 +411,11 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
                   rejectionLink: rejectLink,
                 };
 
+                console.log(
+                  'managerApprovalEmailData',
+                  managerApprovalEmailData,
+                );
+
                 this.eventEmitter.emit(
                   'reimbursement-request-send-email-manager-approval',
                   managerApprovalEmailData,
