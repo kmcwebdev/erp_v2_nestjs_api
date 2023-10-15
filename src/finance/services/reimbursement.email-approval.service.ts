@@ -86,6 +86,8 @@ export class ReimbursementEmailApprovalService {
       return 'OK';
     });
 
+    console.log('ReimbursementEmailApprovalService returned ok!');
+
     return result;
   }
 }

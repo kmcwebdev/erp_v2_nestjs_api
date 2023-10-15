@@ -19,7 +19,7 @@ export class ReimbursementRejectService {
   async reject(user: RequestUser, data: RejectReimbursementRequestType) {
     const finance = user.user_assigned_role === 'finance';
 
-    console.log(data);
+    console.log('rejection payload', data);
 
     if (finance) {
       // TODO: If the view is finance dashboard the UI is still passing
