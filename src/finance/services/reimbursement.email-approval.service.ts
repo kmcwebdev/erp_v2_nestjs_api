@@ -70,20 +70,24 @@ export class ReimbursementEmailApprovalService {
 
       console.log('userFromDb', userFromDb);
 
-      await this.reimbursementApproveService.approve(
-        {
-          original_user_id: userFromDb.user_id,
-          hrbp_approver_email: userFromDb.hrbp_approver_email,
-          user_assigned_role: usersProperty[0].userAssignedRole.toLowerCase(),
-          permissions: usersProperty[0].usersPermission,
-          ...propelauthUser,
-        },
-        {
-          approval_matrix_ids: [approvalToken.approver_matrix_id],
-        },
-      );
+      await this.reimbursementApproveService
+        .approve(
+          {
+            original_user_id: userFromDb.user_id,
+            hrbp_approver_email: userFromDb.hrbp_approver_email,
+            user_assigned_role: usersProperty[0].userAssignedRole.toLowerCase(),
+            permissions: usersProperty[0].usersPermission,
+            ...propelauthUser,
+          },
+          {
+            approval_matrix_ids: [approvalToken.approver_matrix_id],
+          },
+        )
+        .catch((error: any) => {
+          throw new Error(error.message);
+        });
 
-      await this.pgsql
+      await trx
         .updateTable('finance_reimbursement_approval_links as fral')
         .set({
           link_expired: true,
@@ -96,6 +100,6 @@ export class ReimbursementEmailApprovalService {
 
     console.log('ReimbursementEmailApprovalService returned ok!');
 
-    return result;
+    return { message: result };
   }
 }

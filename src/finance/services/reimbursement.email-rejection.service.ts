@@ -93,6 +93,6 @@ export class ReimbursementEmailRejectionService {
 
     console.log('ReimbursementEmailRejectionService returned ok!');
 
-    return result;
+    return { message: result };
   }
 }
