@@ -62,6 +62,12 @@ export class ReimbursementEmailApprovalService {
         .where('users.propelauth_user_id', '=', propelauthUser.userId)
         .executeTakeFirst();
 
+      if (!userFromDb) {
+        throw Error('User not found in database');
+      }
+
+      console.log('userFromDb', userFromDb);
+
       await this.reimbursementApproveService.approve(
         {
           original_user_id: userFromDb.user_id,
