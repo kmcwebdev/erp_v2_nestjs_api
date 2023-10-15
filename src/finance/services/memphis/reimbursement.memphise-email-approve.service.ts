@@ -51,6 +51,8 @@ export class ReimbursementMemphisEmailApproveService implements OnModuleInit {
           message.getData().toString(),
         );
 
+        console.log('ReimbursementMemphisEmailApproveService payload', data);
+
         await firstValueFrom(
           this.httpService
             .post('/api/email/reimbursement-approved', data, {
