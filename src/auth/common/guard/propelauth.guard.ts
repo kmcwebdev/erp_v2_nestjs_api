@@ -56,8 +56,6 @@ export class PropelauthGuard implements CanActivate {
     if (isUrl) {
       const url = this.extractUrlFromHeader(request);
 
-      console.log(url);
-
       return true;
     }
 

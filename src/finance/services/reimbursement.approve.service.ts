@@ -93,8 +93,6 @@ export class ReimbursementApproveService {
           ]);
 
         if (isManager) {
-          console.log(approval_matrix_id);
-
           updateRequestMatrix = updateRequestMatrix.where(
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
             'in',
@@ -230,7 +228,7 @@ export class ReimbursementApproveService {
 
         if (reimbursementRequestApprovalApprover.is_hrbp) {
           await this.pgsql.transaction().execute(async (trx) => {
-            const updateReimbursementRequest = await sql<{
+            const updateReimbursementRequestPayrolDate = await sql<{
               reimbursement_request_id: string;
               requestor_id: string;
               expense_type_id: string;
@@ -267,13 +265,13 @@ export class ReimbursementApproveService {
               RETURNING reimbursement_request_id, requestor_id, expense_type_id, amount, attachment, created_at;
             `.execute(trx);
 
-            const requestor = await trx
+            const reimbursementRequestRequestor = await trx
               .selectFrom('users')
               .select(['users.email', 'users.employee_id', 'users.full_name'])
               .where(
                 'users.user_id',
                 '=',
-                updateReimbursementRequest.rows[0].requestor_id,
+                updateReimbursementRequestPayrolDate.rows[0].requestor_id,
               )
               .executeTakeFirstOrThrow();
 
@@ -283,18 +281,20 @@ export class ReimbursementApproveService {
               .where(
                 'expense_type_id',
                 '=',
-                updateReimbursementRequest.rows[0].expense_type_id,
+                updateReimbursementRequestPayrolDate.rows[0].expense_type_id,
               )
               .executeTakeFirstOrThrow();
 
             const approveRequestEmailData: ApproveRequestEmailType = {
-              to: [requestor.email],
-              fullName: requestor.full_name,
-              employeeId: requestor.employee_id,
+              to: [reimbursementRequestRequestor.email],
+              fullName: reimbursementRequestRequestor.full_name,
+              employeeId: reimbursementRequestRequestor.employee_id,
               expenseType: expenseType.expense_type,
-              expenseDate: updateReimbursementRequest.rows[0].created_at,
-              amount: updateReimbursementRequest.rows[0].amount,
-              receiptsAttached: updateReimbursementRequest.rows[0].attachment,
+              expenseDate:
+                updateReimbursementRequestPayrolDate.rows[0].created_at,
+              amount: updateReimbursementRequestPayrolDate.rows[0].amount,
+              receiptsAttached:
+                updateReimbursementRequestPayrolDate.rows[0].attachment,
             };
 
             this.eventEmitter.emit(
