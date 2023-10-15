@@ -112,7 +112,10 @@ export class ReimbursementApproveService {
         const reimbursementRequestApprovalApprover =
           await updateRequestMatrix.executeTakeFirst();
 
-        console.log(reimbursementRequestApprovalApprover);
+        console.log(
+          'reimbursementRequestApprovalApprover',
+          reimbursementRequestApprovalApprover,
+        );
 
         if (!reimbursementRequestApprovalApprover) {
           return {
@@ -140,7 +143,10 @@ export class ReimbursementApproveService {
           .limit(1)
           .executeTakeFirst();
 
-        console.log(nextReimbursementRequestApprovalApprover);
+        console.log(
+          'nextReimbursementRequestApprovalApprover',
+          nextReimbursementRequestApprovalApprover,
+        );
 
         if (isManager) {
           await this.pgsql.transaction().execute(async (trx) => {
@@ -163,7 +169,13 @@ export class ReimbursementApproveService {
                 'frr.attachment',
                 'frr.created_at',
               ])
-              .executeTakeFirstOrThrow();
+              .executeTakeFirst();
+
+            if (!updateReimbursementRequest) {
+              return {
+                message: 'Update reimbursement request failed record not found',
+              };
+            }
 
             const requestor = await trx
               .selectFrom('users')
