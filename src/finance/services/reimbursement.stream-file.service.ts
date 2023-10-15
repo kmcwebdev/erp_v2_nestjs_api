@@ -100,7 +100,7 @@ export class ReimbursementStreamFileService {
             'finance_reimbursement_requests.remarks',
           ]);
 
-        if (data?.reimbursement_request_ids.length) {
+        if (data?.reimbursement_request_ids.length >= 1) {
           query = query.where(
             'finance_reimbursement_requests.reimbursement_request_id',
             'in',
