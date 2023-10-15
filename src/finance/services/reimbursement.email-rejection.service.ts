@@ -29,7 +29,7 @@ export class ReimbursementEmailRejectionService {
         .where('fral.hash', '=', data.hash)
         .executeTakeFirst();
 
-      console.log(approvalToken);
+      console.log('approvalToken', approvalToken);
 
       if (!approvalToken) {
         throw new HttpException(
@@ -91,7 +91,7 @@ export class ReimbursementEmailRejectionService {
       return 'OK';
     });
 
-    console.log('RETURNED OK!!');
+    console.log('ReimbursementEmailRejectionService returned ok!');
 
     return result;
   }
