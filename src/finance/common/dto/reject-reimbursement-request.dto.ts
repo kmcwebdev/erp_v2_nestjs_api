@@ -4,7 +4,7 @@ import { createZodDto } from 'nestjs-zod';
 // TODO: Add description to zod types
 const RejectReimbursementRequestSchema = z.object({
   approval_matrix_id: z.string().uuid(),
-  rejection_reason: z.string().nonempty(),
+  rejection_reason: z.string().min(1),
 });
 
 export type RejectReimbursementRequestType = z.infer<

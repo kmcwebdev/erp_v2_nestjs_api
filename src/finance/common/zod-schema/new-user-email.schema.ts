@@ -4,8 +4,8 @@ import { z } from 'zod';
 export const NewUserEmailSchema = z.object({
   to: z.array(z.string().email()),
   email: z.string().email(),
-  fullName: z.string().nonempty(),
-  password: z.string().nonempty(),
+  fullName: z.string().min(1),
+  password: z.string().min(1),
 });
 
 export type NewUserEmailType = z.infer<typeof NewUserEmailSchema>;
