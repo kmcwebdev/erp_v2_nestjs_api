@@ -4,14 +4,14 @@ import { z } from 'zod';
 export const ConfirmationEmailSchema = z.object({
   to: z.array(z.string().email()),
   requestType: z.enum(['scheduled', 'unscheduled']),
-  referenceNo: z.string().nonempty(),
-  approverName: z.string().nonempty(),
-  fullName: z.string().nonempty(),
-  employeeId: z.string().nonempty(),
-  expenseType: z.string().nonempty(),
-  expenseDate: z.string().nonempty(),
-  amount: z.string().nonempty(),
-  receiptsAttached: z.string().nonempty(),
+  referenceNo: z.string().min(1),
+  approverName: z.string().min(1),
+  fullName: z.string().min(1),
+  employeeId: z.string().min(1),
+  expenseType: z.string().min(1),
+  expenseDate: z.string().min(1),
+  amount: z.string().min(1),
+  receiptsAttached: z.string().min(1),
 });
 
 export type ConfirmationEmailType = z.infer<typeof ConfirmationEmailSchema>;
