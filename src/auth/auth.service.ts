@@ -48,26 +48,6 @@ export class AuthService {
     return response;
   }
 
-  async getRoles() {
-    return true;
-  }
-
-  async getPermissions() {
-    return true;
-  }
-
-  async createRole() {
-    return true;
-  }
-
-  async createPermission() {
-    return true;
-  }
-
-  async updatePermissionRole() {
-    return true;
-  }
-
   async changeUserRoleAccessInPropelauth(
     user: RequestUser,
     data: UpdatePropelauthUserRoleType,
