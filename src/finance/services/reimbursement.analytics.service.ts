@@ -363,6 +363,11 @@ export class ReimbursementAnalyticsService {
           )
           .select(({ fn }) => fn.countAll().as('count'))
           .where(
+            'finance_reimbursement_requests.request_status_id',
+            '=',
+            APPROVED_REQUEST,
+          )
+          .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
             APPROVED_REQUEST,
@@ -371,6 +376,9 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_requests.finance_request_status_id',
             '=',
             PENDING_REQUEST,
+          )
+          .groupBy(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .executeTakeFirst();
 
@@ -382,6 +390,11 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .select(({ fn }) => fn.countAll().as('count'))
+          .where(
+            'finance_reimbursement_requests.request_status_id',
+            '=',
+            APPROVED_REQUEST,
+          )
           .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
@@ -397,6 +410,9 @@ export class ReimbursementAnalyticsService {
             '=',
             SCHEDULED_REQUEST,
           )
+          .groupBy(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          )
           .executeTakeFirst();
 
         const unscheduled = await trx
@@ -408,6 +424,11 @@ export class ReimbursementAnalyticsService {
           )
           .select(({ fn }) => fn.countAll().as('count'))
           .where(
+            'finance_reimbursement_requests.request_status_id',
+            '=',
+            APPROVED_REQUEST,
+          )
+          .where(
             'finance_reimbursement_requests.hrbp_request_status_id',
             '=',
             APPROVED_REQUEST,
@@ -416,6 +437,9 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_requests.finance_request_status_id',
             '=',
             PENDING_REQUEST,
+          )
+          .groupBy(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
@@ -437,13 +461,16 @@ export class ReimbursementAnalyticsService {
             '=',
             ONHOLD_REQUEST,
           )
+          .groupBy(
+            'finance_reimbursement_approval_matrix.reimbursement_request_id',
+          )
           .executeTakeFirst();
 
         return {
           pendingApproval,
-          scheduled,
-          unscheduled,
-          onhold,
+          scheduled: { count: scheduled ? scheduled.count : 0 },
+          unscheduled: { count: unscheduled ? unscheduled.count : 0 },
+          onhold: { count: onhold ? onhold.count : 0 },
         };
       });
 
