@@ -56,10 +56,17 @@ export class ReimbursementApproveService {
           )
           .executeTakeFirstOrThrow();
 
+        console.log(
+          'getApprovalMatrixReimbursementRequest',
+          getApprovalMatrixReimbursementRequest,
+        );
+
         const reimbursement = await this.reimbursementGetOneService.get({
           reimbursement_request_id:
             getApprovalMatrixReimbursementRequest.reimbursement_request_id,
         });
+
+        console.log('reimbursement', reimbursement);
 
         if (reimbursement.next_approval_matrix_id !== approval_matrix_id) {
           throw Error("It's not yet your turn to approve");
