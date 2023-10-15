@@ -24,7 +24,6 @@
     "update-kysely-types": "kysely-codegen --out-file ./kysely-types.ts --exclude-pattern spatial_ref_sys"
   },
   "dependencies": {
-    "@highlight-run/nest": "^3.2.0",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.2.7",
     "@nestjs/config": "^3.1.1",

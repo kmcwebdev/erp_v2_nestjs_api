@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
+import { propelauth } from 'src/auth/common/lib/propelauth';
 import { ReimbursementApproveService } from './reimbursement.approve.service';
 import { ReimbursementRequestEmailApprovalType } from '../common/dto/email-approval-reimbursement-request.dto';
-import { propelauth } from 'src/auth/common/lib/propelauth';
 
 @Injectable()
 export class ReimbursementEmailApprovalService {
@@ -63,7 +63,9 @@ export class ReimbursementEmailApprovalService {
         .executeTakeFirst();
 
       if (!userFromDb) {
-        throw Error('User not found in database');
+        throw Error(
+          'User not found in database (propelauth user_id possibly is incorrect)',
+        );
       }
 
       console.log('userFromDb', userFromDb);
