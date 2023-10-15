@@ -143,7 +143,7 @@ export class ReimbursementStreamFileService {
             reimbursementRequests.map((rr) => ({
               user_id: user.original_user_id,
               reimbursement_request_id: rr.reimbursement_request_id,
-              description: 'Set request status processing',
+              description: 'Set request status to processing',
             })),
           )
           .execute();
