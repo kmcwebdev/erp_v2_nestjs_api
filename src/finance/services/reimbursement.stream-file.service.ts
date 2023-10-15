@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/common/types';
-import { PROCESSING_REQUEST } from '../common/constant';
+import {
+  APPROVED_REQUEST,
+  PENDING_REQUEST,
+  PROCESSING_REQUEST,
+} from '../common/constant';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
 import { FinanceReimbursementRequestReportType } from '../common/dto/finance-reimbursement-request-report.dto';
 
@@ -72,7 +76,7 @@ export class ReimbursementStreamFileService {
     const transactionForProcessing = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        const reimbursementRequests = await trx
+        let query = trx
           .selectFrom('finance_reimbursement_requests')
           .innerJoin(
             'finance_reimbursement_request_types',
@@ -94,13 +98,31 @@ export class ReimbursementStreamFileService {
             'users.employee_id',
             'finance_reimbursement_requests.amount',
             'finance_reimbursement_requests.remarks',
-          ])
-          .where(
+          ]);
+
+        if (data?.reimbursement_request_ids.length) {
+          query = query.where(
             'finance_reimbursement_requests.reimbursement_request_id',
             'in',
             data.reimbursement_request_ids,
-          )
-          .execute();
+          );
+        }
+
+        if (data?.reimbursement_request_ids.length === 0) {
+          query = query
+            .where(
+              'finance_reimbursement_requests.hrbp_request_status_id',
+              '=',
+              APPROVED_REQUEST,
+            )
+            .where(
+              'finance_reimbursement_requests.finance_request_status_id',
+              '=',
+              PENDING_REQUEST,
+            );
+        }
+
+        const reimbursementRequests = await query.execute();
 
         await trx
           .updateTable('finance_reimbursement_requests')
