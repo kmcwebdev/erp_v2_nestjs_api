@@ -169,13 +169,7 @@ export class ReimbursementApproveService {
                 'frr.attachment',
                 'frr.created_at',
               ])
-              .executeTakeFirst();
-
-            if (!updateReimbursementRequest) {
-              return {
-                message: 'Update reimbursement request failed record not found',
-              };
-            }
+              .executeTakeFirstOrThrow();
 
             const requestor = await trx
               .selectFrom('users')
