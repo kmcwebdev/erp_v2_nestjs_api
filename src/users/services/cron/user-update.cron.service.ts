@@ -30,7 +30,7 @@ export class UserUpdateCronService {
       const NODE_ENV = this.configService.get('NODE_ENV');
 
       outdatedUsers.forEach(async (u) => {
-        if (NODE_ENV === 'development') return;
+        if (['production', 'development'].includes(NODE_ENV)) return;
 
         const userInErpHrV1 =
           await this.usersApiService.fetchUserByEmailInERPHrV1(u.email);
