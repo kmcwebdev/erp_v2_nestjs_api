@@ -46,6 +46,25 @@ export class ReimbursementApproveService {
     const approveReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
+        const getApprovalMatrixReimbursementRequest = await trx
+          .selectFrom('finance_reimbursement_approval_matrix')
+          .select('reimbursement_request_id')
+          .where(
+            'finance_reimbursement_approval_matrix.approval_matrix_id',
+            '=',
+            approval_matrix_id,
+          )
+          .executeTakeFirstOrThrow();
+
+        const reimbursement = await this.reimbursementGetOneService.get({
+          reimbursement_request_id:
+            getApprovalMatrixReimbursementRequest.reimbursement_request_id,
+        });
+
+        if (reimbursement.next_approval_matrix_id !== approval_matrix_id) {
+          throw Error("It's not yet your turn to approve");
+        }
+
         let updateRequestMatrix = trx
           .updateTable('finance_reimbursement_approval_matrix')
           .set({
@@ -284,11 +303,6 @@ export class ReimbursementApproveService {
             );
           });
         }
-
-        const reimbursement = await this.reimbursementGetOneService.get({
-          reimbursement_request_id:
-            reimbursementRequestApprovalApprover.reimbursement_request_id,
-        });
 
         // TODO: Check this please (Valid for unscheduled use only)
         if (nextReimbursementRequestApprovalApprover) {
