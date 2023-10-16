@@ -278,7 +278,7 @@ export class ReimbursementForApprovalService {
       const { from, to } = filter;
 
       query = query.where(
-        sql`DATE(finance_reimbursement_requests.created_at) BETWEEN ${from} AND ${to}`,
+        sql`date(finance_reimbursement_requests.created_at) between ${from} and ${to}`,
       );
     }
 
