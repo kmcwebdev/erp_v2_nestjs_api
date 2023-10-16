@@ -263,11 +263,7 @@ export class ReimbursementApproveService {
             const reimbursementRequestRequestor = await trx
               .selectFrom('users')
               .select(['users.email', 'users.employee_id', 'users.full_name'])
-              .where(
-                'users.user_id',
-                '=',
-                updateReimbursementRequestPayrolDate.rows[0].requestor_id,
-              )
+              .where('users.user_id', '=', reimbursement.requestor_id)
               .executeTakeFirstOrThrow();
 
             const expenseType = await trx
@@ -286,11 +282,9 @@ export class ReimbursementApproveService {
               referenceNo: reimbursement.reference_no,
               employeeId: reimbursementRequestRequestor.employee_id,
               expenseType: expenseType.expense_type,
-              expenseDate:
-                updateReimbursementRequestPayrolDate.rows[0].created_at,
-              amount: updateReimbursementRequestPayrolDate.rows[0].amount,
-              receiptsAttached:
-                updateReimbursementRequestPayrolDate.rows[0].attachment,
+              expenseDate: reimbursement.created_at.toString(),
+              amount: reimbursement.amount,
+              receiptsAttached: reimbursement.attachment,
             };
 
             this.eventEmitter.emit(
