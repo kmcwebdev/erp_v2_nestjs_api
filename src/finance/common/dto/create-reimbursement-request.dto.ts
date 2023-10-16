@@ -50,7 +50,6 @@ const CreateReimbursementReqeustSchema = z
           .email({
             message: 'Approvers must be a valid email',
           }),
-        {},
       )
       .optional(),
     remarks: z

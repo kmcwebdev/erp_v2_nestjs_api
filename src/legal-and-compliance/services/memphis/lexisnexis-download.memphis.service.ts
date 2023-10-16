@@ -51,7 +51,6 @@ export class LacLexisnexisDownloadService implements OnModuleInit {
         stationName: 'erp.lac.lexisnexis-download',
         consumerName: 'erp.lac.lexisnexis-download.consumer-name',
         consumerGroup: 'erp.lac.lexisnexis-download.consumer-group',
-        pullIntervalMs: 5000,
       });
 
       this.consumer.on('message', async (message: Message) => {
