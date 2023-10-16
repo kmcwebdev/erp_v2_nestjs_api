@@ -118,9 +118,6 @@ export class ReimbursementAnalyticsService {
             '=',
             PENDING_REQUEST,
           )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          )
           .executeTakeFirst();
 
         const scheduled = await trx
@@ -145,9 +142,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_requests.reimbursement_request_type_id',
             '=',
             SCHEDULED_REQUEST,
-          )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .executeTakeFirst();
 
@@ -174,9 +168,6 @@ export class ReimbursementAnalyticsService {
             '=',
             UNSCHEDULED_REQUEST,
           )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          )
           .executeTakeFirst();
 
         return {
@@ -184,7 +175,7 @@ export class ReimbursementAnalyticsService {
             count: pendingApproval ? pendingApproval.count : 0,
           },
           scheduled: { count: scheduled ? scheduled.count : 0 },
-          unscheduled: { count: scheduled ? scheduled.count : 0 },
+          unscheduled: { count: unscheduled ? unscheduled.count : 0 },
         };
       });
 
@@ -269,9 +260,6 @@ export class ReimbursementAnalyticsService {
             '=',
             PENDING_REQUEST,
           )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          )
           .executeTakeFirst();
 
         const scheduled = await trx
@@ -296,9 +284,6 @@ export class ReimbursementAnalyticsService {
             '=',
             SCHEDULED_REQUEST,
           )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          )
           .executeTakeFirst();
 
         const unscheduled = await trx
@@ -322,9 +307,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_requests.reimbursement_request_type_id',
             '=',
             UNSCHEDULED_REQUEST,
-          )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .executeTakeFirst();
 
@@ -399,9 +381,6 @@ export class ReimbursementAnalyticsService {
             '=',
             PENDING_REQUEST,
           )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          )
           .executeTakeFirst();
 
         const scheduled = await trx
@@ -432,9 +411,6 @@ export class ReimbursementAnalyticsService {
             '=',
             SCHEDULED_REQUEST,
           )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
-          )
           .executeTakeFirst();
 
         const unscheduled = await trx
@@ -459,9 +435,6 @@ export class ReimbursementAnalyticsService {
             'finance_reimbursement_requests.finance_request_status_id',
             '=',
             PENDING_REQUEST,
-          )
-          .groupBy(
-            'finance_reimbursement_approval_matrix.reimbursement_request_id',
           )
           .where(
             'finance_reimbursement_requests.reimbursement_request_type_id',
