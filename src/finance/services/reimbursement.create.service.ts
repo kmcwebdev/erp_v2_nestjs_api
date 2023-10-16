@@ -22,7 +22,7 @@ export class ReimbursementCreateService {
     const newReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
-        if (data?.approvers.length >= 1) {
+        if (data?.approvers?.length >= 1) {
           const approver = data.approvers[0];
           if (hrbp_approver_email === approver) {
             throw new HttpException(
