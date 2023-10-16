@@ -193,18 +193,6 @@ export class ReimbursementMemphisNewRequestService implements OnModuleInit {
             const approvers = newRequest.dynamic_approvers.split(',');
             approvers.forEach(async (email) => {
               await this.pgsql.transaction().execute(async (trx) => {
-                const approveMyOwnRequestAsMyOwnManager = await trx
-                  .selectFrom('users')
-                  .select('users.email')
-                  .where('users.user_id', '=', newRequest.requestor_id)
-                  .executeTakeFirst();
-
-                if (approveMyOwnRequestAsMyOwnManager) {
-                  if (approveMyOwnRequestAsMyOwnManager.email === email) {
-                    throw new Error('Nope not gonna happen 🤪');
-                  }
-                }
-
                 let propelauth_user_id = '';
 
                 const propelauthUser =

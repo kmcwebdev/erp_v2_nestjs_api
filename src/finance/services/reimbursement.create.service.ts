@@ -17,7 +17,7 @@ export class ReimbursementCreateService {
   ) {}
 
   async create(user: RequestUser, data: CreateReimbursementRequestType) {
-    const { original_user_id, hrbp_approver_email } = user;
+    const { email, original_user_id, hrbp_approver_email } = user;
 
     const newReimbursementRequest = await this.pgsql
       .transaction()
@@ -27,6 +27,13 @@ export class ReimbursementCreateService {
           if (hrbp_approver_email === approver) {
             throw new HttpException(
               "Your hrbp can't be your approver manager",
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+
+          if (approver === email) {
+            throw new HttpException(
+              "You can't be your own manager 😒",
               HttpStatus.BAD_REQUEST,
             );
           }
