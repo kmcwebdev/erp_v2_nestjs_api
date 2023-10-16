@@ -155,6 +155,16 @@ export class ReimbursementRejectService {
           remarks: data.rejection_reason,
         };
 
+        await trx
+          .insertInto('finance_reimbursement_approval_audit_logs')
+          .values({
+            reimbursement_request_id:
+              reimbursementRequest.reimbursement_request_id,
+            user_id: user.original_user_id,
+            description: `${user.email} rejected this reimbursement request`,
+          })
+          .execute();
+
         this.eventEmitter.emit(
           'reimbursement-request-send-email-rejection',
           emailRejectionData,

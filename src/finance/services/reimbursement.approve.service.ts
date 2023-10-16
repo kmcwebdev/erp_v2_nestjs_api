@@ -184,25 +184,13 @@ export class ReimbursementApproveService {
                 '=',
                 reimbursementRequestApprovalApprover.reimbursement_request_id,
               )
-              .returning([
-                'frr.reimbursement_request_id',
-                'frr.reference_no',
-                'frr.requestor_id',
-                'frr.expense_type_id',
-                'frr.amount',
-                'frr.attachment',
-                'frr.created_at',
-              ])
+              .returning('frr.expense_type_id')
               .executeTakeFirstOrThrow();
 
             const requestor = await trx
               .selectFrom('users')
               .select(['users.email', 'users.employee_id', 'users.full_name'])
-              .where(
-                'users.user_id',
-                '=',
-                updateReimbursementRequest.requestor_id,
-              )
+              .where('users.user_id', '=', reimbursement.requestor_id)
               .executeTakeFirstOrThrow();
 
             const expenseType = await trx
@@ -218,12 +206,12 @@ export class ReimbursementApproveService {
             const approveRequestEmailData: ApproveRequestEmailType = {
               to: [requestor.email],
               fullName: requestor.full_name,
-              referenceNo: updateReimbursementRequest.reference_no,
+              referenceNo: reimbursement.reference_no,
               employeeId: requestor.employee_id,
               expenseType: expenseType.expense_type,
-              expenseDate: updateReimbursementRequest.created_at.toString(),
-              amount: updateReimbursementRequest.amount,
-              receiptsAttached: updateReimbursementRequest.attachment,
+              expenseDate: reimbursement.created_at.toString(),
+              amount: reimbursement.amount,
+              receiptsAttached: reimbursement.attachment,
             };
 
             this.eventEmitter.emit(
