@@ -53,7 +53,7 @@ export class ReimbursementMemphisEmailApproveService implements OnModuleInit {
 
         console.log('ReimbursementMemphisEmailApproveService payload', data);
 
-        await firstValueFrom(
+        const sendEmail = await firstValueFrom(
           this.httpService
             .post('/api/email/reimbursement-approved', data, {
               baseURL: this.configService.get('FRONT_END_URL'),
@@ -72,6 +72,8 @@ export class ReimbursementMemphisEmailApproveService implements OnModuleInit {
               }),
             ),
         ).finally(() => message.ack());
+
+        console.log('Send approved email notif', sendEmail);
       });
 
       this.producer = await this.memphisService.producer({
