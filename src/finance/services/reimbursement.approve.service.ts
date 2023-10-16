@@ -316,7 +316,7 @@ export class ReimbursementApproveService {
               fullName: reimbursement?.full_name || 'No name set',
               employeeId: reimbursement?.employee_id || 'No employee id set',
               expenseType: reimbursement.expense_type,
-              expenseDate: reimbursement.created_at,
+              expenseDate: reimbursement.created_at.toString(),
               amount: reimbursement.amount,
               receiptsAttached: reimbursement.attachment,
             };
