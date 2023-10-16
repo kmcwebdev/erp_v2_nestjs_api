@@ -84,6 +84,11 @@ export class ReimbursementStreamFileService {
             'finance_reimbursement_requests.reimbursement_request_type_id',
           )
           .innerJoin(
+            'finance_reimbursement_expense_types',
+            'finance_reimbursement_expense_types.expense_type_id',
+            'finance_reimbursement_requests.expense_type_id',
+          )
+          .innerJoin(
             'users',
             'users.user_id',
             'finance_reimbursement_requests.requestor_id',
@@ -92,6 +97,7 @@ export class ReimbursementStreamFileService {
             'finance_reimbursement_requests.reimbursement_request_id',
             'finance_reimbursement_requests.date_approve',
             'finance_reimbursement_request_types.request_type',
+            'finance_reimbursement_expense_types.expense_type',
             'finance_reimbursement_requests.reference_no',
             'users.client_name',
             'users.full_name as employee_name',
@@ -158,7 +164,7 @@ export class ReimbursementStreamFileService {
       client_name: tfp.client_name,
       employee_id: tfp.employee_id,
       amount: tfp.amount,
-      remarks: tfp.remarks,
+      remarks: tfp.remarks ? tfp.remarks : tfp.expense_type,
     }));
   }
 }

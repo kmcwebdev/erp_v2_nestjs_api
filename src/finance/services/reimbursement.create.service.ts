@@ -26,7 +26,7 @@ export class ReimbursementCreateService {
           const approver = data.approvers[0];
           if (hrbp_approver_email === approver) {
             throw new HttpException(
-              "Your hrbp can't be your approver manager",
+              "Your hrbp can't be your approver manager 😒",
               HttpStatus.BAD_REQUEST,
             );
           }
