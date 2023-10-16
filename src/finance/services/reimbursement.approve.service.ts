@@ -295,6 +295,7 @@ export class ReimbursementApproveService {
             const approveRequestEmailData: ApproveRequestEmailType = {
               to: [reimbursementRequestRequestor.email],
               fullName: reimbursementRequestRequestor.full_name,
+              referenceNo: reimbursement.reference_no,
               employeeId: reimbursementRequestRequestor.employee_id,
               expenseType: expenseType.expense_type,
               expenseDate:
