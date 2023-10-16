@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectKysely } from 'nestjs-kysely';
 import { RequestUser } from 'src/auth/common/interface/propelauthUser.interface';
@@ -17,11 +17,21 @@ export class ReimbursementCreateService {
   ) {}
 
   async create(user: RequestUser, data: CreateReimbursementRequestType) {
-    const { original_user_id } = user;
+    const { original_user_id, hrbp_approver_email } = user;
 
     const newReimbursementRequest = await this.pgsql
       .transaction()
       .execute(async (trx) => {
+        if (data?.approvers.length >= 1) {
+          const approver = data.approvers[0];
+          if (hrbp_approver_email === approver) {
+            throw new HttpException(
+              "Your hrbp can't be your approver manager",
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+        }
+
         const newReferenceNo = await trx
           .insertInto('finance_reimbursement_reference_numbers')
           .values({

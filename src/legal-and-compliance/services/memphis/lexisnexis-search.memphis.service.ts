@@ -41,7 +41,6 @@ export class LacLexisnexisSearchService implements OnModuleInit {
         stationName: 'erp.lac.lexisnexis-search',
         consumerName: 'erp.lac.lexisnexis-search.consumer-name',
         consumerGroup: 'erp.lac.lexisnexis-search.consumer-group',
-        pullIntervalMs: 5000,
       });
 
       this.consumer.on('message', async (message: Message) => {
