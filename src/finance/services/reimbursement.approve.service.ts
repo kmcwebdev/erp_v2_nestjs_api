@@ -260,12 +260,6 @@ export class ReimbursementApproveService {
               RETURNING reimbursement_request_id, requestor_id, expense_type_id, amount, attachment, created_at;
             `.execute(trx);
 
-            const reimbursementRequestRequestor = await trx
-              .selectFrom('users')
-              .select(['users.email', 'users.employee_id', 'users.full_name'])
-              .where('users.user_id', '=', reimbursement.requestor_id)
-              .executeTakeFirstOrThrow();
-
             const expenseType = await trx
               .selectFrom('finance_reimbursement_expense_types')
               .select('expense_type')
@@ -277,10 +271,10 @@ export class ReimbursementApproveService {
               .executeTakeFirstOrThrow();
 
             const approveRequestEmailData: ApproveRequestEmailType = {
-              to: [reimbursementRequestRequestor.email],
-              fullName: reimbursementRequestRequestor.full_name,
+              to: [reimbursement.email],
+              fullName: reimbursement.full_name,
               referenceNo: reimbursement.reference_no,
-              employeeId: reimbursementRequestRequestor.employee_id,
+              employeeId: reimbursement.employee_id,
               expenseType: expenseType.expense_type,
               expenseDate: reimbursement.created_at.toString(),
               amount: reimbursement.amount,
