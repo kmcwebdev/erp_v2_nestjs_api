@@ -161,7 +161,7 @@ export class ReimbursementRejectService {
             reimbursement_request_id:
               reimbursementRequest.reimbursement_request_id,
             user_id: user.original_user_id,
-            description: `${user.email} rejected this reimbursement request`,
+            description: `${data.rejection_reason} - rejected by: ${user.email}`,
           })
           .execute();
 
