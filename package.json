@@ -65,7 +65,7 @@
     "@types/jest": "^29.5.2",
     "@types/mssql": "^9.1.0",
     "@types/multer": "^1.4.8",
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.10.5",
     "@types/pg": "^8.10.2",
     "@types/stream-buffers": "^3.0.5",
     "@types/supertest": "^2.0.12",
